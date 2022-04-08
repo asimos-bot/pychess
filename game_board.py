@@ -17,9 +17,14 @@ class GameBoard():
         self._color = color
         self._given_coords = coords
         self.tiles = self.create_blank_tiles()
-        self.update(dims, coords)
+        self.update_attributes(dims, coords)
 
-    def update(self, dims: (int, int), coords: (int, int)):
+    def update(self, surface):
+        for row in self.tiles:
+            for tile in row:
+                tile.draw(surface)
+
+    def update_attributes(self, dims: (int, int), coords: (int, int)):
         self._calculate_coords(dims, coords)
         self.update_tiles()
 
@@ -30,8 +35,6 @@ class GameBoard():
 
         # get coordinates that fit inside space given
         middle_point = (coords[0] + dims[0]/2, coords[1] + dims[1]/2)
-        print("middle_point:", middle_point)
-        print("coords: ", coords)
 
         self._coords = (
                 middle_point[0] - 4 * self.tile_side,
@@ -63,11 +66,6 @@ class GameBoard():
         tile.coords = (x, y)
         tile.color = current_color
 
-    def draw(self, surface):
-        for row in self.tiles:
-            for tile in row:
-                tile.draw(surface)
-
     @property
     def dims(self):
         return self._dims
@@ -83,14 +81,14 @@ class GameBoard():
     @dims.setter
     def dims(self, d: (int, int)):
         self._dims = d
-        self.update(self._dims, self._given_coords)
+        self.update_attributes(self._dims, self._given_coords)
 
     @coords.setter
     def coords(self, c: (int, int)):
         self._given_coords = c
-        self.update(self.dims, self._given_coords)
+        self.update_attributes(self.dims, self._given_coords)
 
     @color.setter
     def color(self, c: (int, int, int)):
         self._color = c
-        self.update(self.dims, self._given_coords)
+        self.update_attributes(self.dims, self._given_coords)
