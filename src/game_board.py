@@ -30,13 +30,12 @@ class GameBoard():
 
         # fen code attributes
         self.turn = 'w'
-        self.white_castling = '-'
-        self.black_castling = '-'
-        self.white_halfmoves = 0
-        self.black_halfmoves = 0
+        self.castling = '-'
+        self.halfmoves = 0
+        self.fullmoves = 0
 
     def set_initial_fen(self):
-        self.set_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 0")
+        self.set_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - 0 0")
 
     def set_fen(self, fen_code):
         rows = fen_code.split('/')
@@ -60,15 +59,9 @@ class GameBoard():
         # game attributes (turn, castling, en passant)
         attrs = attrs.split(' ')
         self.turn = attrs[0]
-        self.white_castling = attrs[1]
-        self.black_castling = attrs[2]
-        self.white_halfmoves = int(attrs[3])
-        self.black_halfmoves = int(attrs[4])
-
-        print(self.get_fen())
-        print(fen_code)
-        if self.get_fen() == fen_code:
-            print("tudo ok!")
+        self.castling = attrs[1]
+        self.halfmoves = int(attrs[2])
+        self.fullmoves = int(attrs[3])
 
     def get_fen(self):
         fen = ""
@@ -93,10 +86,9 @@ class GameBoard():
         fen = fen[:-1]
 
         fen += " " + self.turn
-        fen += " " + self.white_castling
-        fen += " " + self.black_castling
-        fen += " " + str(self.white_halfmoves)
-        fen += " " + str(self.black_halfmoves)
+        fen += " " + self.castling
+        fen += " " + str(self.halfmoves)
+        fen += " " + str(self.fullmoves)
         return fen
 
     def draw(self, surface):
