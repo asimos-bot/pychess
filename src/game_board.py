@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
+from enum import Enum
+
 from tile import Tile
+from piece import PieceColor, PieceCode
+from piece import piece_class_from_code
+
+
+class GameBoardTurn(Enum):
+    WHITE = 'w'
+    BLACK = 'b'
 
 
 class GameBoard():
@@ -17,14 +26,88 @@ class GameBoard():
         self._color = color
         self._given_coords = coords
         self.tiles = self.create_blank_tiles()
-        self.update_attributes(dims, coords)
+        self.update_graphical_attributes(dims, coords)
 
-    def update(self, surface):
+        # fen code attributes
+        self.turn = 'w'
+        self.white_castling = '-'
+        self.black_castling = '-'
+        self.white_halfmoves = 0
+        self.black_halfmoves = 0
+
+    def set_initial_fen(self):
+        self.set_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 0")
+
+    def set_fen(self, fen_code):
+        rows = fen_code.split('/')
+        # separate last row placement from other attributes
+        rows[-1], attrs = rows[-1].split(' ', 1)
+
+        # piece placement
+        for i, row in enumerate(rows):
+            j = 0
+            for c in row:
+                if c.upper() in 'PNBRQK':
+                    color = PieceColor.BLACK
+                    if c.isupper():
+                        color = PieceColor.WHITE
+                    piece_class = piece_class_from_code(PieceCode(c.upper()))
+                    self.tiles[i][j].piece = piece_class(color)
+                    j += 1
+                else:
+                    j += int(c)
+
+        # game attributes (turn, castling, en passant)
+        attrs = attrs.split(' ')
+        self.turn = attrs[0]
+        self.white_castling = attrs[1]
+        self.black_castling = attrs[2]
+        self.white_halfmoves = int(attrs[3])
+        self.black_halfmoves = int(attrs[4])
+
+        print(self.get_fen())
+        print(fen_code)
+        if self.get_fen() == fen_code:
+            print("tudo ok!")
+
+    def get_fen(self):
+        fen = ""
+        for row in self.tiles:
+            empty = 0
+            for tile in row:
+                if tile.piece is None:
+                    empty += 1
+                else:
+                    if empty != 0:
+                        fen += str(empty)
+                    if tile.piece.color == PieceColor.WHITE:
+                        fen += tile.piece.type.value.upper()
+                    elif tile.piece.color == PieceColor.BLACK:
+                        fen += tile.piece.type.value.lower()
+            if empty != 0:
+                fen += str(empty)
+
+            fen += '/'
+
+        # remove last '/'
+        fen = fen[:-1]
+
+        fen += " " + self.turn
+        fen += " " + self.white_castling
+        fen += " " + self.black_castling
+        fen += " " + str(self.white_halfmoves)
+        fen += " " + str(self.black_halfmoves)
+        return fen
+
+    def draw(self, surface):
         for row in self.tiles:
             for tile in row:
                 tile.draw(surface)
 
-    def update_attributes(self, dims: (int, int), coords: (int, int)):
+    def update_graphical_attributes(
+            self,
+            dims: (int, int),
+            coords: (int, int)):
         self._calculate_coords(dims, coords)
         self.update_tiles()
 
@@ -81,14 +164,14 @@ class GameBoard():
     @dims.setter
     def dims(self, d: (int, int)):
         self._dims = d
-        self.update_attributes(self._dims, self._given_coords)
+        self.update_graphical_attributes(self._dims, self._given_coords)
 
     @coords.setter
     def coords(self, c: (int, int)):
         self._given_coords = c
-        self.update_attributes(self.dims, self._given_coords)
+        self.update_graphical_attributes(self.dims, self._given_coords)
 
     @color.setter
     def color(self, c: (int, int, int)):
         self._color = c
-        self.update_attributes(self.dims, self._given_coords)
+        self.update_graphical_attributes(self.dims, self._given_coords)

@@ -8,9 +8,6 @@ from game_board import GameBoard
 from main_menu import MainMenu
 from pause_menu import PauseMenu
 
-from piece import Pawn
-from piece import PieceColor
-
 CLEAR_COLOR = (22, 22, 22)
 
 
@@ -27,11 +24,11 @@ class PyChess():
         # get surface where we will draw stuff to
         self.surface = pygame.display.set_mode((400, 400), pygame.RESIZABLE)
         self.x, self.y = self.surface.get_size()
-        self.resize_update()
+        self.resize()
 
         self.set_state_main_menu()
 
-    def resize_update(self):
+    def resize(self):
         # get current window dimensions
         self.x, self.y = self.surface.get_size()
         if hasattr(self, "board"):
@@ -48,7 +45,7 @@ class PyChess():
             return True
         # resize
         elif event.type == pygame.locals.VIDEORESIZE:
-            self.resize_update()
+            self.resize()
             return True
         elif event.type == pygame.locals.KEYDOWN:
             if event.key == pygame.locals.K_BACKSPACE:
@@ -67,7 +64,7 @@ class PyChess():
             dims=(self.x, self.y),
             coords=(0, 0),
             color=(24, 240, 128))
-        self.board.tiles[0][0].piece = Pawn(PieceColor.WHITE)
+        self.board.set_initial_fen()
 
     def set_state_main_menu(self):
         if hasattr(self, "board"):
@@ -109,7 +106,7 @@ class PyChess():
             if self.state == GameState.MAIN_MENU:
                 self.main_menu.update(self.surface, events)
             elif self.state == GameState.PLAY:
-                self.board.update(self.surface)
+                self.board.draw(self.surface)
             elif self.state == GameState.PAUSE:
                 self.board.update(self.surface)
                 self.pause_menu.update(self.surface, events)

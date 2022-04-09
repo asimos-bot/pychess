@@ -6,20 +6,24 @@ from enum import Enum
 
 
 class PieceColor(Enum):
-    WHITE = 1,
-    BLACK = 2
+    WHITE = 'w'
+    BLACK = 'b'
 
 
 class PieceCode(Enum):
-    KING = 1,
-    QUEEN = 2,
-    KNIGHT = 3,
-    BISHOP = 4,
-    PAWN = 5
-    TOWER = 6
+    KING = 'K'
+    QUEEN = 'Q'
+    KNIGHT = 'N'
+    BISHOP = 'B'
+    PAWN = 'P'
+    ROOK = 'R'
 
 
 class Piece(ABC):
+
+    def __init__(self, color: PieceColor):
+        self.color = color
+        self.load_image()
 
     def draw(self, surface):
         surface.blit(self.image, (0, 0))
@@ -49,10 +53,56 @@ class Piece(ABC):
 
 class Pawn(Piece):
 
-    def __init__(self, color: PieceColor):
-        self.color = color
-        self.load_image()
-
     @property
     def type(self):
         return PieceCode.PAWN
+
+
+class Knight(Piece):
+
+    @property
+    def type(self):
+        return PieceCode.KNIGHT
+
+
+class Queen(Piece):
+
+    @property
+    def type(self):
+        return PieceCode.QUEEN
+
+
+class King(Piece):
+
+    @property
+    def type(self):
+        return PieceCode.KING
+
+
+class Rook(Piece):
+
+    @property
+    def type(self):
+        return PieceCode.ROOK
+
+
+class Bishop(Piece):
+
+    @property
+    def type(self):
+        return PieceCode.BISHOP
+
+
+def piece_class_from_code(code: PieceCode):
+    if code == PieceCode.QUEEN:
+        return Queen
+    elif code == PieceCode.KING:
+        return King
+    elif code == PieceCode.KNIGHT:
+        return Knight
+    elif code == PieceCode.ROOK:
+        return Rook
+    elif code == PieceCode.BISHOP:
+        return Bishop
+    elif code == PieceCode.PAWN:
+        return Pawn
