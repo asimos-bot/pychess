@@ -3,6 +3,7 @@ import pygame
 from abc import ABC
 from abc import abstractmethod
 from enum import Enum
+from pathlib import Path
 
 
 class PieceColor(Enum):
@@ -29,16 +30,18 @@ class Piece(ABC):
         surface.blit(self.image, (0, 0))
 
     def load_image(self):
-        self.filename = "../imgs/"
-        self.filename += self.color.name.lower()
-        self.filename += "_"
-        self.filename += self.type.name.lower()
-        self.filename += ".png"
+        self.filepath = Path(__file__).parent.parent
+        self.filepath = self.filepath.joinpath("imgs")
+        filename = self.color.name.lower()
+        filename += "_"
+        filename += self.type.name.lower()
+        filename += ".png"
+        self.filepath = self.filepath.joinpath(filename)
 
-        self._image = pygame.image.load(self.filename).convert_alpha()
+        self._image = pygame.image.load(self.filepath).convert_alpha()
 
     def resize(self, dims):
-        self._image = pygame.image.load(self.filename).convert_alpha()
+        self._image = pygame.image.load(self.filepath).convert_alpha()
         self._image = pygame.transform.scale(self._image, dims)
 
     @property

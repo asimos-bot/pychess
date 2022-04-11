@@ -108,7 +108,7 @@ class PyChess():
             elif self.state == GameState.PLAY:
                 self.board.draw(self.surface)
             elif self.state == GameState.PAUSE:
-                self.board.update(self.surface)
+                self.board.draw(self.surface)
                 self.pause_menu.update(self.surface, events)
 
             pygame.display.update()
