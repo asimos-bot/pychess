@@ -20,33 +20,46 @@ class PieceCode(Enum):
     ROOK = 'R'
 
 
+class PieceDrawer():
+
+    @classmethod
+    def load_images(cls):
+        img_folder = Path(__file__).parent.parent.joinpath("imgs")
+        imgs = dict()
+        for color in PieceColor:
+            imgs[color] = dict()
+            for piece_code in PieceCode:
+                filename = color.name.lower()
+                filename += "_"
+                filename += piece_code.name.lower()
+                filename += ".png"
+                filepath = img_folder.joinpath(filename)
+                img = pygame.image.load(filepath).convert_alpha()
+                imgs[color][piece_code] = {
+                        'filepath': filepath,
+                        'img': img
+                    }
+        cls.imgs = imgs
+
+    @classmethod
+    def resize(cls, dims):
+        cls.load_images()
+        for color in PieceColor:
+            for piece_code in PieceCode:
+                img_info = cls.imgs[color][piece_code]
+                filepath = img_info['filepath']
+                img_info['img'] = pygame.image.load(filepath).convert_alpha()
+                img_info['img'] = pygame.transform.scale(img_info['img'], dims)
+
+    @classmethod
+    def draw(cls, surface, piece_code: PieceCode, color: PieceColor):
+        surface.blit(cls.imgs[color][piece_code]['img'], (0, 0))
+
+
 class Piece(ABC):
 
     def __init__(self, color: PieceColor):
         self.color = color
-        self.load_image()
-
-    def draw(self, surface):
-        surface.blit(self.image, (0, 0))
-
-    def load_image(self):
-        self.filepath = Path(__file__).parent.parent
-        self.filepath = self.filepath.joinpath("imgs")
-        filename = self.color.name.lower()
-        filename += "_"
-        filename += self.type.name.lower()
-        filename += ".png"
-        self.filepath = self.filepath.joinpath(filename)
-
-        self._image = pygame.image.load(self.filepath).convert_alpha()
-
-    def resize(self, dims):
-        self._image = pygame.image.load(self.filepath).convert_alpha()
-        self._image = pygame.transform.scale(self._image, dims)
-
-    @property
-    def image(self):
-        return self._image
 
     @property
     @abstractmethod

@@ -12,21 +12,15 @@ class Tile(pygame.sprite.Sprite):
         self._dims = dims
         self.coords = coords
         self._color = color
-        self._piece = None
 
         self.resize()
 
     def draw(self, surface):
         surface.blit(self.surf, self.coords)
-        if self._piece is not None:
-            self._piece.draw(self.surf)
 
     def resize(self):
         self.surf = pygame.Surface(self._dims)
         self.surf.fill(self._color)
-
-        if self._piece is not None:
-            self._piece.resize(self.surf.get_size())
 
     @property
     def dims(self):
@@ -45,12 +39,3 @@ class Tile(pygame.sprite.Sprite):
     def color(self, c: (int, int, int)):
         self._color = c
         self.surf.fill(self._color)
-
-    @property
-    def piece(self):
-        return self._piece
-
-    @piece.setter
-    def piece(self, p):
-        self._piece = p
-        self.resize()

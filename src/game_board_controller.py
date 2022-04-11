@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+import pygame
+from enum import Enum
+
+from piece import PieceColor, PieceCode
+from piece import piece_class_from_code
+
+
+class GameBoardTurn(Enum):
+    WHITE = 'w'
+    BLACK = 'b'
+
+
+class GameBoardController():
+    def __init__(self):
+        # fen code attributes
+        self.turn = GameBoardTurn.WHITE
+        self.castling = 'kQKq'
+        self.halfmoves = 0
+        self.fullmoves = 0
+        self.pieces = []
+        for i in range(8):
+            self.pieces.append([])
+            for j in range(8):
+                self.pieces[i].append(None)
+        self.set_initial_fen()
+
+    def piece_info(self, i, j):
+        piece = self.pieces[i][j]
+        if piece is not None:
+            return piece.type, piece.color
+        else:
+            return None
+
+    def set_initial_fen(self):
+        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - 0 0"
+
+    @property
+    def fen(self):
+        fen = ""
+        for row in self.pieces:
+            empty = 0
+            for piece in row:
+                if piece is None:
+                    empty += 1
+                else:
+                    if empty != 0:
+                        fen += str(empty)
+                    if piece.color == PieceColor.WHITE:
+                        fen += piece.type.value.upper()
+                    elif piece.color == PieceColor.BLACK:
+                        fen += piece.type.value.lower()
+            if empty != 0:
+                fen += str(empty)
+
+            fen += '/'
+
+        # remove last '/'
+        fen = fen[:-1]
+
+        fen += " " + self.turn.value
+        fen += " " + self.castling
+        fen += " " + str(self.halfmoves)
+        fen += " " + str(self.fullmoves)
+        return fen
+
+    @fen.setter
+    def fen(self, fen_code):
+        rows = fen_code.split('/')
+        # separate last row placement from other attributes
+        rows[-1], attrs = rows[-1].split(' ', 1)
+
+        # piece placement
+        for i, row in enumerate(rows):
+            j = 0
+            for c in row:
+                if c.upper() in 'PNBRQK':
+                    color = PieceColor.BLACK
+                    if c.isupper():
+                        color = PieceColor.WHITE
+                    piece_class = piece_class_from_code(PieceCode(c.upper()))
+                    self.pieces[i][j] = piece_class(color)
+                    j += 1
+                else:
+                    j += int(c)
+
+        # game attributes (turn, castling, en passant)
+        attrs = attrs.split(' ')
+        self.turn = GameBoardTurn(attrs[0])
+        self.castling = attrs[1]
+        self.halfmoves = int(attrs[2])
+        self.fullmoves = int(attrs[3])

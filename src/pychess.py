@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import pygame
 import pygame.locals
 from enum import Enum
@@ -7,6 +6,7 @@ from enum import Enum
 from game_board import GameBoard
 from main_menu import MainMenu
 from pause_menu import PauseMenu
+from piece import PieceDrawer
 
 CLEAR_COLOR = (22, 22, 22)
 
@@ -23,6 +23,10 @@ class PyChess():
         pygame.init()
         # get surface where we will draw stuff to
         self.surface = pygame.display.set_mode((400, 400), pygame.RESIZABLE)
+
+        # load piece images
+        PieceDrawer.load_images()
+
         self.x, self.y = self.surface.get_size()
         self.resize()
 
@@ -64,7 +68,6 @@ class PyChess():
             dims=(self.x, self.y),
             coords=(0, 0),
             color=(24, 240, 128))
-        self.board.set_initial_fen()
 
     def set_state_main_menu(self):
         if hasattr(self, "board"):
