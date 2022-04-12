@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import pygame
 
 
@@ -17,6 +16,7 @@ class Tile(pygame.sprite.Sprite):
 
     def draw(self, surface):
         surface.blit(self.surf, self.coords)
+        self.surf.fill(self._color)
 
     def resize(self):
         self.surf = pygame.Surface(self._dims)
@@ -26,14 +26,14 @@ class Tile(pygame.sprite.Sprite):
     def dims(self):
         return self._dims
 
-    @property
-    def color(self):
-        return self._color
-
     @dims.setter
     def dims(self, d: (int, int)):
         self._dims = d
         self.resize()
+
+    @property
+    def color(self):
+        return self._color
 
     @color.setter
     def color(self, c: (int, int, int)):

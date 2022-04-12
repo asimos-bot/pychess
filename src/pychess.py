@@ -6,9 +6,10 @@ from enum import Enum
 from game_board import GameBoard
 from main_menu import MainMenu
 from pause_menu import PauseMenu
-from piece import PieceDrawer
+from piece import PieceDrawer, PieceColor
+from player import Human
 
-CLEAR_COLOR = (22, 22, 22)
+CLEAR_COLOR = (128, 128, 128)
 
 
 class GameState(Enum):
@@ -36,7 +37,7 @@ class PyChess():
         # get current window dimensions
         self.x, self.y = self.surface.get_size()
         if hasattr(self, "board"):
-            self.board.dims = (self.x, self.y)
+            self.board.graphical.dims = (self.x, self.y)
         if hasattr(self, "main_menu"):
             self.main_menu.resize(self.x, self.y)
         if hasattr(self, "pause_menu"):
@@ -67,7 +68,9 @@ class PyChess():
         self.board = GameBoard(
             dims=(self.x, self.y),
             coords=(0, 0),
-            color=(24, 240, 128))
+            color=(24, 240, 128),
+            player_black=Human(PieceColor.BLACK),
+            player_white=Human(PieceColor.WHITE))
 
     def set_state_main_menu(self):
         if hasattr(self, "board"):
@@ -90,6 +93,8 @@ class PyChess():
         if event.type == pygame.locals.KEYDOWN:
             if event.key == pygame.locals.K_p:
                 self.set_state_pause()
+
+        self.board.event_capture(event)
 
     def game_loop(self):
 
@@ -115,6 +120,7 @@ class PyChess():
                 self.pause_menu.update(self.surface, events)
 
             pygame.display.update()
+            pygame.time.Clock().tick(60)
 
 
 if __name__ == "__main__":

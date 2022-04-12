@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
 import pygame
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
 
@@ -52,8 +50,13 @@ class PieceDrawer():
                 img_info['img'] = pygame.transform.scale(img_info['img'], dims)
 
     @classmethod
-    def draw(cls, surface, piece_code: PieceCode, color: PieceColor):
-        surface.blit(cls.imgs[color][piece_code]['img'], (0, 0))
+    def draw(
+            cls,
+            surface,
+            piece_code: PieceCode,
+            color: PieceColor,
+            coords=(0, 0)):
+        surface.blit(cls.imgs[color][piece_code]['img'], coords)
 
 
 class Piece(ABC):
