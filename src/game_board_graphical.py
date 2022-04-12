@@ -23,7 +23,7 @@ class GameBoardGraphical():
         for i, row in enumerate(self.tiles):
             for j, tile in enumerate(row):
                 tile.draw(surface)
-                piece_info = piece_info_func(i, j)
+                piece_info = piece_info_func((i, j))
                 if piece_info is not None:
                     piece_code, piece_color = piece_info
                     PieceDrawer.draw(tile.surf, piece_code, piece_color)

@@ -67,16 +67,17 @@ class Human(Player):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 idxs = self._get_tile_pos_from_mouse(event.pos, tile_info_func)
                 if idxs is not None:
-                    i, j = idxs
-                    piece_info = piece_info_func(i, j)
+                    piece_info = piece_info_func(idxs)
                     if piece_info is None or piece_info[1] != self.color:
                         return
-                    self._from = (i, j)
+                    self._from = idxs
                     return
         else:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 idxs = self._get_tile_pos_from_mouse(event.pos, tile_info_func)
                 if idxs is not None:
-                    i, j = idxs
-                    self._to = (i, j)
+                    if idxs == self._from:
+                        self._from = None
+                    else:
+                        self._to = idxs
                     return

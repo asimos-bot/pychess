@@ -44,8 +44,8 @@ class GameBoardController():
             self._turn = GameBoardPlayer.WHITE
         self._turn_lock.release()
 
-    def piece_info(self, i, j):
-        piece = self.pieces[i][j]
+    def piece_info(self, idxs: Tuple[int, int]):
+        piece = self.pieces[idxs[0]][idxs[1]]
         if piece is not None:
             return piece.type, piece.color
         else:
