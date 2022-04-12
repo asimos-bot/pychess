@@ -1,108 +1,65 @@
-#!/usr/bin/env python3
-from tile import Tile
-from game_board_controller import GameBoardController
-from piece import PieceDrawer
+import threading
+
+from game_board_controller import GameBoardController, GameBoardPlayer
+from game_board_graphical import GameBoardGraphical
+from player import Player
 
 
+# makes a bridge between the graphical and logical part of the game board
+# while processing inputs
 class GameBoard():
     def __init__(
             self,
             dims: (int, int),
             coords: (int, int),
-            color: (int, int, int)):
-        '''
-        game board will take the dimensions and coordinates given and calculate
-        appropriate ones to maintain the aspect ratio. Because of this, we have
-        'self._given_coords' and 'self._coords', where the coordinates given as
-        input and the ones calculated are stored, respectively
-        '''
-        self._color = color
-        self._given_coords = coords
-        self.tiles = self.create_blank_tiles()
-        self.update_graphical_attributes(dims, coords)
-        self.controller = GameBoardController()
+            color: (int, int, int),
+            player_black: Player,
+            player_white: Player):
+        self.controller: GameBoardController = GameBoardController()
+        self.graphical: GameBoardGraphical = GameBoardGraphical(
+                dims,
+                coords,
+                color)
+        self.players = {
+                GameBoardPlayer.WHITE: player_white,
+                GameBoardPlayer.BLACK: player_black
+                }
+        self.piece_info_func = self.controller.piece_info
+        self.tile_info_func = self.graphical.tile_info
+        self._start_game()
 
     def draw(self, surface):
-        for i, row in enumerate(self.tiles):
-            for j, tile in enumerate(row):
-                tile.draw(surface)
+        self.graphical.draw(
+                surface,
+                self.controller.piece_info)
+        # draw player control feedback
+        self.player.draw(
+                surface,
+                self.controller.piece_info,
+                self.graphical.tile_info)
 
-        for i, row in enumerate(self.tiles):
-            for j, tile in enumerate(row):
-                piece_info = self.controller.piece_info(i, j)
-                if piece_info is not None:
-                    piece_code, piece_color = piece_info
-                    PieceDrawer.draw(tile.surf, piece_code, piece_color)
+    def _make_moves_async(self):
 
-    def update_graphical_attributes(
-            self,
-            dims: (int, int),
-            coords: (int, int)):
-        self._calculate_coords(dims, coords)
-        self.update_tiles()
-        PieceDrawer.resize((self.tile_side, self.tile_side))
+        while self.controller.winner is None:
+            valid = False
+            old_pos = None
+            new_pos = None
+            while not valid:
+                old_pos, new_pos = self.player.make_move(self.piece_info_func)
+                valid = self.controller.validate(old_pos, new_pos)
 
-    def _calculate_coords(self, dims, coords):
-        # get lowest dimension to define sizes
-        self.tile_side = min(dims[0], dims[1])/8
-        self._dims = dims
+            self.controller.move_piece(old_pos, new_pos)
+            self.controller.finish_turn()
 
-        # get coordinates that fit inside space given
-        middle_point = (coords[0] + dims[0]/2, coords[1] + dims[1]/2)
+    def event_capture(self, event):
+        self.player.event_capture(
+                event,
+                self.piece_info_func,
+                self.tile_info_func)
 
-        self._coords = (
-                middle_point[0] - 4 * self.tile_side,
-                middle_point[1] - 4 * self.tile_side)
-
-    def create_blank_tiles(self):
-        tiles = []
-        for i in range(8):
-            tiles.append([])
-            for j in range(8):
-                tile = Tile(dims=(1, 1), coords=(0, 0), color=(0, 0, 0))
-                tiles[i].append(tile)
-        return tiles
-
-    def update_tiles(self):
-        for i in range(len(self.tiles)):
-            for j in range(len(self.tiles[0])):
-                self.update_tile(self.tiles[i][j], i, j)
-
-    def update_tile(self, tile, row_idx, column_idx):
-        y = self.coords[1] + row_idx * self.tile_side
-        x = self.coords[0] + column_idx * self.tile_side
-        color_factor = 0.5 if (row_idx+column_idx) % 2 == 0 else 1
-        current_color = (
-                self.color[0] * color_factor,
-                self.color[1] * color_factor,
-                self.color[2] * color_factor)
-        tile.dims = (self.tile_side, self.tile_side)
-        tile.coords = (x, y)
-        tile.color = current_color
+    def _start_game(self):
+        threading.Thread(target=self._make_moves_async).start()
 
     @property
-    def dims(self):
-        return self._dims
-
-    @property
-    def coords(self):
-        return self._coords
-
-    @property
-    def color(self):
-        return self._color
-
-    @dims.setter
-    def dims(self, d: (int, int)):
-        self._dims = d
-        self.update_graphical_attributes(self._dims, self._given_coords)
-
-    @coords.setter
-    def coords(self, c: (int, int)):
-        self._given_coords = c
-        self.update_graphical_attributes(self.dims, self._given_coords)
-
-    @color.setter
-    def color(self, c: (int, int, int)):
-        self._color = c
-        self.update_graphical_attributes(self.dims, self._given_coords)
+    def player(self):
+        return self.players[self.controller.turn]

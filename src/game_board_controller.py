@@ -1,29 +1,48 @@
 #!/usr/bin/env python3
-import pygame
+import threading
 from enum import Enum
+from typing import Tuple
 
 from piece import PieceColor, PieceCode
 from piece import piece_class_from_code
 
 
-class GameBoardTurn(Enum):
+class GameBoardPlayer(Enum):
     WHITE = 'w'
     BLACK = 'b'
 
 
+# controls the logic and board state using the FEN code
 class GameBoardController():
     def __init__(self):
         # fen code attributes
-        self.turn = GameBoardTurn.WHITE
+        self._turn = GameBoardPlayer.WHITE
+        self._turn_lock = threading.Lock()
         self.castling = 'kQKq'
         self.halfmoves = 0
         self.fullmoves = 0
+        self.winner = None
         self.pieces = []
         for i in range(8):
             self.pieces.append([])
             for j in range(8):
                 self.pieces[i].append(None)
         self.set_initial_fen()
+
+    def move_piece(self, old: Tuple[int, int], new: Tuple[int, int]):
+        self.pieces[new[0]][new[1]] = self.pieces[old[0]][old[1]]
+        self.pieces[old[0]][old[1]] = None
+
+    def validate(self, old_pos, new_pos):
+        return True
+
+    def finish_turn(self):
+        self._turn_lock.acquire()
+        if self._turn == GameBoardPlayer.WHITE:
+            self._turn = GameBoardPlayer.BLACK
+        else:
+            self._turn = GameBoardPlayer.WHITE
+        self._turn_lock.release()
 
     def piece_info(self, i, j):
         piece = self.pieces[i][j]
@@ -33,7 +52,17 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - 0 0"
+        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kQKq 0 0"
+
+    @property
+    def turn(self):
+        with self._turn_lock:
+            return self._turn
+
+    @turn.setter
+    def turn(self, t: GameBoardPlayer):
+        with self._turn_lock:
+            self._turn = t
 
     @property
     def fen(self):
@@ -86,7 +115,7 @@ class GameBoardController():
 
         # game attributes (turn, castling, en passant)
         attrs = attrs.split(' ')
-        self.turn = GameBoardTurn(attrs[0])
+        self.turn = GameBoardPlayer(attrs[0])
         self.castling = attrs[1]
         self.halfmoves = int(attrs[2])
         self.fullmoves = int(attrs[3])
