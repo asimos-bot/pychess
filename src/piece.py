@@ -80,6 +80,9 @@ class Pawn(Piece):
     def type(self):
         return PieceCode.PAWN
 
+    def get_valid_moves(self, pos, pieces):
+        return []
+
 
 class Knight(Piece):
 
@@ -87,12 +90,18 @@ class Knight(Piece):
     def type(self):
         return PieceCode.KNIGHT
 
+    def get_valid_moves(self, pos, pieces):
+        return []
+
 
 class Queen(Piece):
 
     @property
     def type(self):
         return PieceCode.QUEEN
+    
+    def get_valid_moves(self, pos, pieces):
+        return []
 
 
 class King(Piece):
@@ -101,6 +110,9 @@ class King(Piece):
     def type(self):
         return PieceCode.KING
 
+    def get_valid_moves(self, pos, pieces):
+        return []
+
 
 class Rook(Piece):
 
@@ -108,12 +120,31 @@ class Rook(Piece):
     def type(self):
         return PieceCode.ROOK
 
+    def get_valid_moves(self, pos, pieces):
+        return []
+
 
 class Bishop(Piece):
-
+    
     @property
     def type(self):
         return PieceCode.BISHOP
+
+    def get_valid_moves(self, pos, pieces):
+        move_list = [(1,1),(-1,-1),(-1,1),(1,-1)]
+        possible_moves = [] 
+        for move_index in move_list:
+            index_counter_x = move_index[0]
+            index_counter_y = move_index[1]
+            while (pos[0] + index_counter_x <= 7 and pos[1] + index_counter_y <= 7) and (pos[0] + index_counter_x >= 0 and pos[1] + index_counter_y >= 0): 
+                if pieces[pos[0] + index_counter_x][pos[1] + index_counter_y] is None: 
+                    possible_moves.append((pos[0]+index_counter_x,pos[1]+index_counter_y))
+                    index_counter_x += move_index[0]
+                    index_counter_y += move_index[1]
+                else:
+                    break
+
+        return possible_moves
 
 
 def piece_class_from_code(code: PieceCode):
