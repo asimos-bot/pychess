@@ -70,7 +70,7 @@ class Piece(ABC):
         pass
 
     @abstractmethod
-    def validate(self, old_pos, new_pos, tiles) -> bool:
+    def get_valid_moves(self, pos, pieces):
         pass
 
 
