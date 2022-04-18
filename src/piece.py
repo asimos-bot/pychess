@@ -90,8 +90,16 @@ class Knight(Piece):
     def type(self):
         return PieceCode.KNIGHT
 
+    
     def get_valid_moves(self, pos, pieces):
-        return []
+        move_list = [(2,1),(2,-1),(-2,-1),(-2,1),(1,2),(-1,2),(1,-2),(-1,-2)]
+        possible_moves = [] 
+        for move_index in move_list:
+            if(pos[0] + move_index[0] <= 7 and pos[1] + move_index[1] <= 7) and (pos[0] + move_index[0] >= 0 and pos[1] + move_index[1] >= 0): 
+                if pieces[pos[0] + move_index[0]][pos[1] + move_index[1]] is None: 
+                    possible_moves.append((pos[0]+move_index[0],pos[1]+move_index[1]))
+        
+        return possible_moves
 
 
 class Queen(Piece):
