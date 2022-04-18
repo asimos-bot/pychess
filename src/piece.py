@@ -111,7 +111,21 @@ class King(Piece):
         return PieceCode.KING
 
     def get_valid_moves(self, pos, pieces):
-        return []
+        valid_moves = []
+        directions = [(-1, 0), (0, 1), (1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+        for direction in directions:
+            row = pos[0] + direction[0]
+            column = pos[1] + direction[1]
+            if not (0 <= row <= 7 and 0 <= column <= 7):
+                continue
+            elif pieces[row][column] is not None:
+                if pieces[row][column].color != self.color:
+                    valid_moves.append((row, column))
+            else:
+                valid_moves.append((row, column))
+        print(valid_moves)
+
+        return valid_moves
 
 
 class Rook(Piece):
@@ -137,7 +151,6 @@ class Rook(Piece):
                 else:
                     valid_moves.append((row, column))
             distance += 1
-        print(valid_moves)
         return valid_moves
 
 
