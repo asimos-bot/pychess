@@ -69,6 +69,10 @@ class Piece(ABC):
     def type(self) -> PieceCode:
         pass
 
+    @abstractmethod
+    def validate(self, old_pos, new_pos, tiles) -> bool:
+        pass
+
 
 class Pawn(Piece):
 
