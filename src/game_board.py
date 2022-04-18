@@ -46,7 +46,7 @@ class GameBoard():
             new_pos = None
             while not valid:
                 old_pos, new_pos = self.player.make_move(self.piece_info_func)
-                valid_moves = self.controller.validate(old_pos)
+                valid_moves = self.controller.get_valid_moves(old_pos)
                 if new_pos in valid_moves:
                     valid = True
 
