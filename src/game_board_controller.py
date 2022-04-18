@@ -34,7 +34,9 @@ class GameBoardController():
         self.pieces[old[0]][old[1]] = None
 
     def validate(self, old_pos, new_pos):
-        return True
+        piece = self.pieces[old_pos[0]][old_pos[1]]
+        if piece is not None:
+            return piece.validate(old_pos, new_pos, self.pieces)
 
     def finish_turn(self):
         self._turn_lock.acquire()
