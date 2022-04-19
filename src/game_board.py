@@ -28,6 +28,12 @@ class GameBoard():
         self.tile_info_func = self.graphical.tile_info
         self._start_game()
 
+    def close(self):
+        for player in self.players.values():
+            player.stop_threads()
+            if hasattr(self, "_async_thread"):
+                self._async_thread.join()
+
     def draw(self, surface):
         self.graphical.draw(
                 surface,
@@ -45,10 +51,14 @@ class GameBoard():
             old_pos = None
             new_pos = None
             while not valid:
-                old_pos, new_pos = self.player.make_move(self.piece_info_func)
-                valid_moves = self.controller.get_valid_moves(old_pos)
-                if new_pos in valid_moves:
-                    valid = True
+                move = self.player.make_move(self.piece_info_func)
+                if move is not None:
+                    old_pos, new_pos = move
+                    valid_moves = self.controller.get_valid_moves(old_pos)
+                    if new_pos in valid_moves:
+                        valid = True
+                else:
+                    return
 
             self.controller.move_piece(old_pos, new_pos)
             self.controller.finish_turn()
@@ -60,7 +70,8 @@ class GameBoard():
                 self.tile_info_func)
 
     def _start_game(self):
-        threading.Thread(target=self._make_moves_async).start()
+        self._async_thread = threading.Thread(target=self._make_moves_async)
+        self._async_thread.start()
 
     @property
     def player(self):

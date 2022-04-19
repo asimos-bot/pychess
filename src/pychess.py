@@ -45,7 +45,7 @@ class PyChess():
     def window_event_capture(self, event):
         # quit
         if event.type == pygame.locals.QUIT:
-            self.state = GameState.QUIT
+            self.set_state_quit()
             return True
         # resize
         elif event.type == pygame.locals.VIDEORESIZE:
@@ -53,10 +53,20 @@ class PyChess():
             return True
         elif event.type == pygame.locals.KEYDOWN:
             if event.key == pygame.locals.K_BACKSPACE:
-                self.state = GameState.QUIT
+                self.set_state_quit()
             return True
         else:
             return False
+
+    def set_state_quit(self):
+        if hasattr(self, "board"):
+            self.board.close()
+            del self.board
+        if hasattr(self, "main_menu"):
+            del self.main_menu
+        if hasattr(self, "pause_menu"):
+            del self.pause_menu
+        self.state = GameState.QUIT
 
     def set_state_play(self):
         if hasattr(self, "main_menu"):
@@ -73,6 +83,7 @@ class PyChess():
 
     def set_state_main_menu(self):
         if hasattr(self, "board"):
+            self.board.close()
             del self.board
         if hasattr(self, "pause_menu"):
             del self.pause_menu

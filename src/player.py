@@ -24,17 +24,28 @@ class Player(ABC):
     def event_capture(self, event, piece_info_func, tile_info_func):
         pass
 
+    @abstractmethod
+    def stop_threads(self):
+        pass
+
 
 class Human(Player):
     def __init__(self, color: PieceColor):
         super(Human, self).__init__(color)
         self._from = None
         self._to = None
+        self.playing = True
+
+    def stop_threads(self):
+        self.playing = False
 
     def make_move(self, piece_info_func):
         # wait until the move is done
-        while self._to is None:
+        while self._to is None and self.playing:
             time.sleep(0.1)
+
+        if not self.playing:
+            return None
 
         origin = self._from
         to = self._to
