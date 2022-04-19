@@ -76,12 +76,52 @@ class Piece(ABC):
 
 class Pawn(Piece):
 
+    def __init__(self, color: PieceColor):
+        super(Pawn, self).__init__(color)
+        # will get its value on the first move
+        self.direction = None
+
     @property
     def type(self):
         return PieceCode.PAWN
 
     def get_valid_moves(self, pos, pieces):
-        return []
+        first_move = False
+        # get direction on the first move
+        if self.direction is None:
+            first_move = True
+            self.direction = [1, -1][pos[0] > 3]
+
+        valid_moves = []
+
+        def add_if_valid(_list, pos):
+            i, j = pos
+            piece = pieces[i][j]
+            piece_can_be_replaced = piece is None or piece.color != self.color
+            if 0 <= i <= 7 and 0 <= j <= 7 and piece_can_be_replaced:
+                _list.append((i, j))
+
+        # en passant check
+        if first_move:
+            add_if_valid(valid_moves, (pos[0] + 2 * self.direction, pos[1]))
+
+        # forward
+        forward = pos[0] + self.direction
+        add_if_valid(valid_moves, (forward, pos[1]))
+
+        # eat diagonals
+        diagonal_1 = (pos[0] + self.direction, pos[1] + 1)
+        diagonal_2 = (pos[0] + self.direction, pos[1] - 1)
+        diagonals = (diagonal_1, diagonal_2)
+
+        # check if pieces from the other color are present here
+        for diagonal in diagonals:
+            if 0 <= diagonal[0] <= 7 and 0 <= diagonal[1] <= 7:
+                piece = pieces[diagonal[0]][diagonal[1]]
+                if piece is not None and piece.color != self.color:
+                    valid_moves.append(diagonal)
+
+        return valid_moves
 
 
 class Knight(Piece):
@@ -90,9 +130,16 @@ class Knight(Piece):
     def type(self):
         return PieceCode.KNIGHT
 
-    
     def get_valid_moves(self, pos, pieces):
-        move_list = [(2,1),(2,-1),(-2,-1),(-2,1),(1,2),(-1,2),(1,-2),(-1,-2)]
+        move_list = [
+                (2, 1),
+                (2, -1),
+                (-2, -1),
+                (-2, 1),
+                (1, 2),
+                (-1, 2),
+                (1, -2),
+                (-1, -2)]
         possible_moves = []
         piece_color = pieces[pos[0]][pos[1]].color
         for move_index in move_list:
@@ -108,9 +155,36 @@ class Queen(Piece):
     @property
     def type(self):
         return PieceCode.QUEEN
-    
+
     def get_valid_moves(self, pos, pieces):
         return []
+
+    def get_valid_moves(self, pos, pieces):
+        valid_moves = []
+        directions = [
+                (-1, 0),
+                (0, 1),
+                (1, 0),
+                (0, -1),
+                (1, 1),
+                (1, -1),
+                (-1, 1),
+                (-1, -1)]
+        distance = 1
+        while len(directions) > 0:
+            for direction in directions.copy():
+                row = pos[0] + direction[0] * distance
+                column = pos[1] + direction[1] * distance
+                if not (0 <= row <= 7 and 0 <= column <= 7):
+                    directions.remove(direction)
+                elif pieces[row][column] is not None:
+                    directions.remove(direction)
+                    if pieces[row][column].color != self.color:
+                        valid_moves.append((row, column))
+                else:
+                    valid_moves.append((row, column))
+            distance += 1
+        return valid_moves
 
 
 class King(Piece):
@@ -120,7 +194,28 @@ class King(Piece):
         return PieceCode.KING
 
     def get_valid_moves(self, pos, pieces):
-        return []
+        valid_moves = []
+        directions = [
+                (-1, 0),
+                (0, 1),
+                (1, 0),
+                (0, -1),
+                (1, 1),
+                (1, -1),
+                (-1, 1),
+                (-1, -1)]
+        for direction in directions:
+            row = pos[0] + direction[0]
+            column = pos[1] + direction[1]
+            if not (0 <= row <= 7 and 0 <= column <= 7):
+                continue
+            elif pieces[row][column] is not None:
+                if pieces[row][column].color != self.color:
+                    valid_moves.append((row, column))
+            else:
+                valid_moves.append((row, column))
+
+        return valid_moves
 
 
 class Rook(Piece):
@@ -130,7 +225,23 @@ class Rook(Piece):
         return PieceCode.ROOK
 
     def get_valid_moves(self, pos, pieces):
-        return []
+        valid_moves = []
+        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        distance = 1
+        while len(directions) > 0:
+            for direction in directions.copy():
+                row = pos[0] + direction[0] * distance
+                column = pos[1] + direction[1] * distance
+                if not (0 <= row <= 7 and 0 <= column <= 7):
+                    directions.remove(direction)
+                elif pieces[row][column] is not None:
+                    directions.remove(direction)
+                    if pieces[row][column].color != self.color:
+                        valid_moves.append((row, column))
+                else:
+                    valid_moves.append((row, column))
+            distance += 1
+        return valid_moves
 
 
 class Bishop(Piece):
@@ -140,7 +251,7 @@ class Bishop(Piece):
         return PieceCode.BISHOP
 
     def get_valid_moves(self, pos, pieces):
-        move_list = [(1,1),(-1,-1),(-1,1),(1,-1)]
+        move_list = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
         possible_moves = [] 
         piece_color = pieces[pos[0]][pos[1]].color
         for move_index in move_list:
