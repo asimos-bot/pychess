@@ -93,10 +93,11 @@ class Knight(Piece):
     
     def get_valid_moves(self, pos, pieces):
         move_list = [(2,1),(2,-1),(-2,-1),(-2,1),(1,2),(-1,2),(1,-2),(-1,-2)]
-        possible_moves = [] 
+        possible_moves = []
+        piece_color = pieces[pos[0]][pos[1]].color
         for move_index in move_list:
             if(pos[0] + move_index[0] <= 7 and pos[1] + move_index[1] <= 7) and (pos[0] + move_index[0] >= 0 and pos[1] + move_index[1] >= 0): 
-                if pieces[pos[0] + move_index[0]][pos[1] + move_index[1]] is None: 
+                if (pieces[pos[0] + move_index[0]][pos[1] + move_index[1]] is None) or (piece_color != pieces[pos[0] + move_index[0]][pos[1] + move_index[1]].color): 
                     possible_moves.append((pos[0]+move_index[0],pos[1]+move_index[1]))
         
         return possible_moves
@@ -141,11 +142,12 @@ class Bishop(Piece):
     def get_valid_moves(self, pos, pieces):
         move_list = [(1,1),(-1,-1),(-1,1),(1,-1)]
         possible_moves = [] 
+        piece_color = pieces[pos[0]][pos[1]].color
         for move_index in move_list:
             index_counter_x = move_index[0]
             index_counter_y = move_index[1]
             while (pos[0] + index_counter_x <= 7 and pos[1] + index_counter_y <= 7) and (pos[0] + index_counter_x >= 0 and pos[1] + index_counter_y >= 0): 
-                if pieces[pos[0] + index_counter_x][pos[1] + index_counter_y] is None: 
+                if (pieces[pos[0] + index_counter_x][pos[1] + index_counter_y] is None) or (piece_color != pieces[pos[0] + move_index[0]][pos[1] + move_index[1]].color): 
                     possible_moves.append((pos[0]+index_counter_x,pos[1]+index_counter_y))
                     index_counter_x += move_index[0]
                     index_counter_y += move_index[1]
