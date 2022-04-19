@@ -3,13 +3,12 @@ import pygame
 import pygame.locals
 from enum import Enum
 
+import colors
 from game_board import GameBoard
 from main_menu import MainMenu
 from pause_menu import PauseMenu
 from piece import PieceDrawer, PieceColor
 from player import Human
-
-CLEAR_COLOR = (128, 128, 128)
 
 
 class GameState(Enum):
@@ -68,7 +67,7 @@ class PyChess():
         self.board = GameBoard(
             dims=(self.x, self.y),
             coords=(0, 0),
-            color=(24, 240, 128),
+            color=colors.GAME_BOARD,
             player_black=Human(PieceColor.BLACK),
             player_white=Human(PieceColor.WHITE))
 
@@ -99,7 +98,7 @@ class PyChess():
     def game_loop(self):
 
         while self.state != GameState.QUIT:
-            self.surface.fill(CLEAR_COLOR)
+            self.surface.fill(colors.CLEAR_SCREEN)
 
             # event capture
             events = pygame.event.get()

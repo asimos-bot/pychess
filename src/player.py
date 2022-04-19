@@ -2,9 +2,9 @@ import pygame
 import time
 from abc import ABC, abstractmethod
 
+import colors
 from piece import PieceColor
 
-SELECTED_COLOR = (250, 12, 12)
 BORDER_THICKNESS = 5
 
 
@@ -50,7 +50,7 @@ class Human(Player):
                     self._from[1])
             pygame.draw.rect(
                     from_tile_surf,
-                    SELECTED_COLOR,
+                    colors.PIECE_SELECTION,
                     (0, 0, tile_rect.w, tile_rect.w),
                     BORDER_THICKNESS,
                     border_radius=10)
