@@ -96,7 +96,7 @@ class Knight(Piece):
         possible_moves = []
         piece_color = pieces[pos[0]][pos[1]].color
         for move_index in move_list:
-            if(pos[0] + move_index[0] <= 7 and pos[1] + move_index[1] <= 7) and (pos[0] + move_index[0] >= 0 and pos[1] + move_index[1] >= 0): 
+            if(0 <= pos[0] + move_index[0] <= 7 and 0 <= pos[1] + move_index[1] <= 7): 
                 if (pieces[pos[0] + move_index[0]][pos[1] + move_index[1]] is None) or (piece_color != pieces[pos[0] + move_index[0]][pos[1] + move_index[1]].color): 
                     possible_moves.append((pos[0]+move_index[0],pos[1]+move_index[1]))
         
@@ -146,7 +146,7 @@ class Bishop(Piece):
         for move_index in move_list:
             index_counter_x = move_index[0]
             index_counter_y = move_index[1]
-            while (pos[0] + index_counter_x <= 7 and pos[1] + index_counter_y <= 7) and (pos[0] + index_counter_x >= 0 and pos[1] + index_counter_y >= 0): 
+            while (0 <= pos[0] + index_counter_x <= 7 and 0 <= pos[1] + index_counter_y <= 7): 
                 if (pieces[pos[0] + index_counter_x][pos[1] + index_counter_y] is None) or (piece_color != pieces[pos[0] + move_index[0]][pos[1] + move_index[1]].color): 
                     possible_moves.append((pos[0]+index_counter_x,pos[1]+index_counter_y))
                     index_counter_x += move_index[0]
