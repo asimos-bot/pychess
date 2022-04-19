@@ -131,7 +131,23 @@ class Knight(Piece):
         return PieceCode.KNIGHT
 
     def get_valid_moves(self, pos, pieces):
-        return []
+        move_list = [
+                (2, 1),
+                (2, -1),
+                (-2, -1),
+                (-2, 1),
+                (1, 2),
+                (-1, 2),
+                (1, -2),
+                (-1, -2)]
+        possible_moves = []
+        piece_color = pieces[pos[0]][pos[1]].color
+        for move_index in move_list:
+            if(0 <= pos[0] + move_index[0] <= 7 and 0 <= pos[1] + move_index[1] <= 7): 
+                if (pieces[pos[0] + move_index[0]][pos[1] + move_index[1]] is None) or (piece_color != pieces[pos[0] + move_index[0]][pos[1] + move_index[1]].color): 
+                    possible_moves.append((pos[0]+move_index[0],pos[1]+move_index[1]))
+        
+        return possible_moves
 
 
 class Queen(Piece):
@@ -139,6 +155,9 @@ class Queen(Piece):
     @property
     def type(self):
         return PieceCode.QUEEN
+
+    def get_valid_moves(self, pos, pieces):
+        return []
 
     def get_valid_moves(self, pos, pieces):
         valid_moves = []
@@ -195,7 +214,6 @@ class King(Piece):
                     valid_moves.append((row, column))
             else:
                 valid_moves.append((row, column))
-        print(valid_moves)
 
         return valid_moves
 
@@ -227,13 +245,27 @@ class Rook(Piece):
 
 
 class Bishop(Piece):
-
+    
     @property
     def type(self):
         return PieceCode.BISHOP
 
     def get_valid_moves(self, pos, pieces):
-        return []
+        move_list = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
+        possible_moves = [] 
+        piece_color = pieces[pos[0]][pos[1]].color
+        for move_index in move_list:
+            index_counter_x = move_index[0]
+            index_counter_y = move_index[1]
+            while (0 <= pos[0] + index_counter_x <= 7 and 0 <= pos[1] + index_counter_y <= 7): 
+                if (pieces[pos[0] + index_counter_x][pos[1] + index_counter_y] is None) or (piece_color != pieces[pos[0] + move_index[0]][pos[1] + move_index[1]].color): 
+                    possible_moves.append((pos[0]+index_counter_x,pos[1]+index_counter_y))
+                    index_counter_x += move_index[0]
+                    index_counter_y += move_index[1]
+                else:
+                    break
+
+        return possible_moves
 
 
 def piece_class_from_code(code: PieceCode):
