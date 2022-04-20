@@ -106,11 +106,14 @@ class Pawn(Piece):
 
         # en passant check
         if self.first_move:
-            add_if_valid(valid_moves, (pos[0] + 2 * self.direction, pos[1]))
+            forward = pos[0] + 2 * self.direction
+            if 0 <= forward <= 7 and pieces[forward][pos[1]] is None:
+                add_if_valid(valid_moves, (forward, pos[1]))
 
         # forward
         forward = pos[0] + self.direction
-        add_if_valid(valid_moves, (forward, pos[1]))
+        if 0 <= forward <= 7 and pieces[forward][pos[1]] is None:
+            add_if_valid(valid_moves, (forward, pos[1]))
 
         # eat diagonals
         diagonal_1 = (pos[0] + self.direction, pos[1] + 1)
@@ -134,7 +137,8 @@ class Knight(Piece):
         return PieceCode.KNIGHT
 
     def get_valid_moves(self, pos: (int, int), pieces):
-        move_list = [
+        valid_moves = []
+        directions = [
                 (2, 1),
                 (2, -1),
                 (-2, -1),
@@ -143,14 +147,17 @@ class Knight(Piece):
                 (-1, 2),
                 (1, -2),
                 (-1, -2)]
-        possible_moves = []
-        piece_color = pieces[pos[0]][pos[1]].color
-        for move_index in move_list:
-            if(0 <= pos[0] + move_index[0] <= 7 and 0 <= pos[1] + move_index[1] <= 7): 
-                if (pieces[pos[0] + move_index[0]][pos[1] + move_index[1]] is None) or (piece_color != pieces[pos[0] + move_index[0]][pos[1] + move_index[1]].color): 
-                    possible_moves.append((pos[0]+move_index[0],pos[1]+move_index[1]))
-        
-        return possible_moves
+        for direction in directions:
+            row = pos[0] + direction[0]
+            column = pos[1] + direction[1]
+            if not (0 <= row <= 7 and 0 <= column <= 7):
+                continue
+            elif pieces[row][column] is not None:
+                if pieces[row][column].color != self.color:
+                    valid_moves.append((row, column))
+            else:
+                valid_moves.append((row, column))
+        return valid_moves
 
 
 class Queen(Piece):
@@ -251,21 +258,23 @@ class Bishop(Piece):
         return PieceCode.BISHOP
 
     def get_valid_moves(self, pos: (int, int), pieces):
-        move_list = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
-        possible_moves = []
-        piece_color = pieces[pos[0]][pos[1]].color
-        for move_index in move_list:
-            index_counter_x = move_index[0]
-            index_counter_y = move_index[1]
-            while (0 <= pos[0] + index_counter_x <= 7 and 0 <= pos[1] + index_counter_y <= 7):
-                if (pieces[pos[0] + index_counter_x][pos[1] + index_counter_y] is None) or (piece_color != pieces[pos[0] + move_index[0]][pos[1] + move_index[1]].color): 
-                    possible_moves.append((pos[0]+index_counter_x,pos[1]+index_counter_y))
-                    index_counter_x += move_index[0]
-                    index_counter_y += move_index[1]
+        valid_moves = []
+        directions = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
+        distance = 1
+        while len(directions) > 0:
+            for direction in directions.copy():
+                row = pos[0] + direction[0] * distance
+                column = pos[1] + direction[1] * distance
+                if not (0 <= row <= 7 and 0 <= column <= 7):
+                    directions.remove(direction)
+                elif pieces[row][column] is not None:
+                    directions.remove(direction)
+                    if pieces[row][column].color != self.color:
+                        valid_moves.append((row, column))
                 else:
-                    break
-
-        return possible_moves
+                    valid_moves.append((row, column))
+            distance += 1
+        return valid_moves
 
 
 def piece_class_from_code(code: PieceCode):

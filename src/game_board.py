@@ -24,8 +24,6 @@ class GameBoard():
                 GameBoardPlayer.WHITE: player_white,
                 GameBoardPlayer.BLACK: player_black
                 }
-        self.piece_info_func = self.controller.piece_info
-        self.tile_info_func = self.graphical.tile_info
         self._start_game()
 
     def pause(self):
@@ -48,7 +46,8 @@ class GameBoard():
         self.player.draw(
                 surface,
                 self.controller.piece_info,
-                self.graphical.tile_info)
+                self.graphical.tile_info,
+                self.controller.get_valid_moves)
 
     def _make_moves_async(self):
 
@@ -57,7 +56,9 @@ class GameBoard():
             old_pos = None
             new_pos = None
             while not valid:
-                move = self.player.make_move(self.piece_info_func)
+                move = self.player.make_move(
+                        self.controller.piece_info,
+                        self.controller.get_valid_moves)
                 if move is not None:
                     old_pos, new_pos = move
                     valid_moves = self.controller.get_valid_moves(old_pos)
@@ -72,8 +73,8 @@ class GameBoard():
     def event_capture(self, event):
         self.player.event_capture(
                 event,
-                self.piece_info_func,
-                self.tile_info_func)
+                self.controller.piece_info,
+                self.graphical.tile_info)
 
     def _start_game(self):
         self._async_thread = threading.Thread(target=self._make_moves_async)

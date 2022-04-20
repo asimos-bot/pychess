@@ -14,11 +14,16 @@ class Player(ABC):
         self.color = color
 
     @abstractmethod
-    def make_move(self, piece_info_func):
+    def make_move(self, piece_info_func, get_valid_moves_func):
         pass
 
     @abstractmethod
-    def draw(self, surface):
+    def draw(
+            self,
+            surface,
+            piece_info_func,
+            tile_info_func,
+            get_valid_moves_func):
         pass
 
     @abstractmethod
@@ -58,7 +63,7 @@ class Human(Player):
     def unpause(self):
         self.playing = True
 
-    def make_move(self, piece_info_func):
+    def make_move(self, piece_info_func, get_valid_moves_func):
         # wait until the move is done
         while self._to is None and self.playing:
             time.sleep(0.1)
@@ -72,7 +77,12 @@ class Human(Player):
         self._to = None
         return origin, to
 
-    def draw(self, surface, piece_info_func, tile_info_func):
+    def draw(
+            self,
+            surface,
+            piece_info_func,
+            tile_info_func,
+            get_valid_moves_func):
         if self._from is not None:
             # highlight selected tile
             tile_rect, from_tile_surf = tile_info_func(self._from)
@@ -82,6 +92,16 @@ class Human(Player):
                     (0, 0, tile_rect.w, tile_rect.w),
                     BORDER_THICKNESS,
                     border_radius=10)
+
+            for valid_move in get_valid_moves_func(self._from):
+                tile_rect, from_tile_surf = tile_info_func(valid_move)
+                pygame.draw.rect(
+                        from_tile_surf,
+                        colors.VALID_MOVE,
+                        (0, 0, tile_rect.w, tile_rect.w),
+                        BORDER_THICKNESS,
+                        border_radius=10
+                        )
 
     def _get_tile_pos_from_mouse(self, pos, tile_info_func):
         for i in range(8):
