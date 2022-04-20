@@ -31,6 +31,7 @@ class GameBoardController():
     def move_piece(self, old: (int, int), new: (int, int)):
         self.pieces[new[0]][new[1]] = self.pieces[old[0]][old[1]]
         self.pieces[old[0]][old[1]] = None
+        self.pieces[new[0]][new[1]].notify_move(new)
 
     def get_valid_moves(self, pos: (int, int)):
         piece = self.pieces[pos[0]][pos[1]]
@@ -109,7 +110,7 @@ class GameBoardController():
                     if c.isupper():
                         color = PieceColor.WHITE
                     piece_class = piece_class_from_code(PieceCode(c.upper()))
-                    self.pieces[i][j] = piece_class(color)
+                    self.pieces[i][j] = piece_class(color, (i, j))
                     j += 1
                 else:
                     j += int(c)

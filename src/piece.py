@@ -61,8 +61,9 @@ class PieceDrawer():
 
 class Piece(ABC):
 
-    def __init__(self, color: PieceColor):
+    def __init__(self, color: PieceColor, pos: (int, int)):
         self.color = color
+        self.pos = pos
 
     @property
     @abstractmethod
@@ -73,25 +74,27 @@ class Piece(ABC):
     def get_valid_moves(self, pos: (int, int), pieces):
         pass
 
+    def notify_move(self, pos: (int, int)):
+        self.pos = pos
+
 
 class Pawn(Piece):
 
-    def __init__(self, color: PieceColor):
-        super(Pawn, self).__init__(color)
+    def __init__(self, color: PieceColor, pos: (int, int)):
+        super(Pawn, self).__init__(color, pos)
         # will get its value on the first move
-        self.direction = None
+        self.direction = [1, -1][pos[0] > 3]
+        self.first_move = True
 
     @property
     def type(self):
         return PieceCode.PAWN
 
-    def get_valid_moves(self, pos: (int, int), pieces):
-        first_move = False
-        # get direction on the first move
-        if self.direction is None:
-            first_move = True
-            self.direction = [1, -1][pos[0] > 3]
+    def notify_move(self, pos: (int, int)):
+        super(Pawn, self).notify_move(pos)
+        self.first_move = False
 
+    def get_valid_moves(self, pos: (int, int), pieces):
         valid_moves = []
 
         def add_if_valid(_list, pos):
@@ -102,7 +105,7 @@ class Pawn(Piece):
                 _list.append((i, j))
 
         # en passant check
-        if first_move:
+        if self.first_move:
             add_if_valid(valid_moves, (pos[0] + 2 * self.direction, pos[1]))
 
         # forward
