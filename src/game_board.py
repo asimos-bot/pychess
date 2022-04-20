@@ -28,11 +28,17 @@ class GameBoard():
         self.tile_info_func = self.graphical.tile_info
         self._start_game()
 
-    def close(self):
+    def pause(self):
         for player in self.players.values():
-            player.stop_threads()
-            if hasattr(self, "_async_thread"):
-                self._async_thread.join()
+            player.pause()
+        self._async_thread.join()
+
+    def unpause(self):
+        for player in self.players.values():
+            player.unpause()
+        self._async_thread = threading.Thread(
+                target=self._make_moves_async)
+        self._async_thread.start()
 
     def draw(self, surface):
         self.graphical.draw(

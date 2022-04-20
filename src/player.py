@@ -1,5 +1,6 @@
 import pygame
 import time
+import threading
 from abc import ABC, abstractmethod
 
 import colors
@@ -25,7 +26,11 @@ class Player(ABC):
         pass
 
     @abstractmethod
-    def stop_threads(self):
+    def pause(self):
+        pass
+
+    @abstractmethod
+    def unpause(self):
         pass
 
 
@@ -34,10 +39,24 @@ class Human(Player):
         super(Human, self).__init__(color)
         self._from = None
         self._to = None
-        self.playing = True
+        self._playing = True
+        self._playing_lock = threading.Lock()
 
-    def stop_threads(self):
+    @property
+    def playing(self):
+        with self._playing_lock:
+            return self._playing
+
+    @playing.setter
+    def playing(self, value: bool):
+        with self._playing_lock:
+            self._playing = value
+
+    def pause(self):
         self.playing = False
+
+    def unpause(self):
+        self.playing = True
 
     def make_move(self, piece_info_func):
         # wait until the move is done

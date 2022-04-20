@@ -60,7 +60,7 @@ class PyChess():
 
     def set_state_quit(self):
         if hasattr(self, "board"):
-            self.board.close()
+            self.board.pause()
             del self.board
         if hasattr(self, "main_menu"):
             del self.main_menu
@@ -73,17 +73,21 @@ class PyChess():
             del self.main_menu
         if hasattr(self, "pause_menu"):
             del self.pause_menu
+        if self.state == GameState.PAUSE:
+            self.board.unpause()
+        else:
+            self.board = GameBoard(
+                dims=(self.x, self.y),
+                coords=(0, 0),
+                color=colors.GAME_BOARD,
+                player_black=Human(PieceColor.BLACK),
+                player_white=Human(PieceColor.WHITE))
+
         self.state = GameState.PLAY
-        self.board = GameBoard(
-            dims=(self.x, self.y),
-            coords=(0, 0),
-            color=colors.GAME_BOARD,
-            player_black=Human(PieceColor.BLACK),
-            player_white=Human(PieceColor.WHITE))
 
     def set_state_main_menu(self):
         if hasattr(self, "board"):
-            self.board.close()
+            self.board.pause()
             del self.board
         if hasattr(self, "pause_menu"):
             del self.pause_menu
@@ -91,6 +95,7 @@ class PyChess():
         self.main_menu = MainMenu((self.x, self.y), self.set_state_play)
 
     def set_state_pause(self):
+        self.board.pause()
         if hasattr(self, "main_menu"):
             del self.main_menu
         self.pause_menu = PauseMenu(
