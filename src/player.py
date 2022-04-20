@@ -56,9 +56,7 @@ class Human(Player):
     def draw(self, surface, piece_info_func, tile_info_func):
         if self._from is not None:
             # highlight selected tile
-            tile_rect, from_tile_surf = tile_info_func(
-                    self._from[0],
-                    self._from[1])
+            tile_rect, from_tile_surf = tile_info_func(self._from)
             pygame.draw.rect(
                     from_tile_surf,
                     colors.PIECE_SELECTION,
@@ -69,7 +67,7 @@ class Human(Player):
     def _get_tile_pos_from_mouse(self, pos, tile_info_func):
         for i in range(8):
             for j in range(8):
-                tile_rect, _ = tile_info_func(i, j)
+                tile_rect, _ = tile_info_func((i, j))
                 if tile_rect.collidepoint(pos):
                     return i, j
 

@@ -70,7 +70,7 @@ class Piece(ABC):
         pass
 
     @abstractmethod
-    def get_valid_moves(self, pos, pieces):
+    def get_valid_moves(self, pos: (int, int), pieces):
         pass
 
 
@@ -85,7 +85,7 @@ class Pawn(Piece):
     def type(self):
         return PieceCode.PAWN
 
-    def get_valid_moves(self, pos, pieces):
+    def get_valid_moves(self, pos: (int, int), pieces):
         first_move = False
         # get direction on the first move
         if self.direction is None:
@@ -130,7 +130,7 @@ class Knight(Piece):
     def type(self):
         return PieceCode.KNIGHT
 
-    def get_valid_moves(self, pos, pieces):
+    def get_valid_moves(self, pos: (int, int), pieces):
         move_list = [
                 (2, 1),
                 (2, -1),
@@ -156,10 +156,7 @@ class Queen(Piece):
     def type(self):
         return PieceCode.QUEEN
 
-    def get_valid_moves(self, pos, pieces):
-        return []
-
-    def get_valid_moves(self, pos, pieces):
+    def get_valid_moves(self, pos: (int, int), pieces):
         valid_moves = []
         directions = [
                 (-1, 0),
@@ -193,7 +190,7 @@ class King(Piece):
     def type(self):
         return PieceCode.KING
 
-    def get_valid_moves(self, pos, pieces):
+    def get_valid_moves(self, pos: (int, int), pieces):
         valid_moves = []
         directions = [
                 (-1, 0),
@@ -224,7 +221,7 @@ class Rook(Piece):
     def type(self):
         return PieceCode.ROOK
 
-    def get_valid_moves(self, pos, pieces):
+    def get_valid_moves(self, pos: (int, int), pieces):
         valid_moves = []
         directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
         distance = 1
@@ -245,19 +242,19 @@ class Rook(Piece):
 
 
 class Bishop(Piece):
-    
+
     @property
     def type(self):
         return PieceCode.BISHOP
 
-    def get_valid_moves(self, pos, pieces):
+    def get_valid_moves(self, pos: (int, int), pieces):
         move_list = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
-        possible_moves = [] 
+        possible_moves = []
         piece_color = pieces[pos[0]][pos[1]].color
         for move_index in move_list:
             index_counter_x = move_index[0]
             index_counter_y = move_index[1]
-            while (0 <= pos[0] + index_counter_x <= 7 and 0 <= pos[1] + index_counter_y <= 7): 
+            while (0 <= pos[0] + index_counter_x <= 7 and 0 <= pos[1] + index_counter_y <= 7):
                 if (pieces[pos[0] + index_counter_x][pos[1] + index_counter_y] is None) or (piece_color != pieces[pos[0] + move_index[0]][pos[1] + move_index[1]].color): 
                     possible_moves.append((pos[0]+index_counter_x,pos[1]+index_counter_y))
                     index_counter_x += move_index[0]

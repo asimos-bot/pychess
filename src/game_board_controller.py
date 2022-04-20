@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import threading
 from enum import Enum
-from typing import Tuple
 
 from piece import PieceColor, PieceCode
 from piece import piece_class_from_code
@@ -29,11 +28,11 @@ class GameBoardController():
                 self.pieces[i].append(None)
         self.set_initial_fen()
 
-    def move_piece(self, old: Tuple[int, int], new: Tuple[int, int]):
+    def move_piece(self, old: (int, int), new: (int, int)):
         self.pieces[new[0]][new[1]] = self.pieces[old[0]][old[1]]
         self.pieces[old[0]][old[1]] = None
 
-    def get_valid_moves(self, pos):
+    def get_valid_moves(self, pos: (int, int)):
         piece = self.pieces[pos[0]][pos[1]]
         if piece is not None:
             return piece.get_valid_moves(pos, self.pieces)
@@ -46,7 +45,7 @@ class GameBoardController():
             self._turn = GameBoardPlayer.WHITE
         self._turn_lock.release()
 
-    def piece_info(self, idxs: Tuple[int, int]):
+    def piece_info(self, idxs: (int, int)):
         piece = self.pieces[idxs[0]][idxs[1]]
         if piece is not None:
             return piece.type, piece.color

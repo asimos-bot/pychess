@@ -28,7 +28,8 @@ class GameBoardGraphical():
                     piece_code, piece_color = piece_info
                     PieceDrawer.draw(tile.surf, piece_code, piece_color)
 
-    def tile_info(self, i, j):
+    def tile_info(self, idxs: (int, int)):
+        i, j = idxs
         tile = self.tiles[i][j]
         topleft_coords = (
                 self._coords[0] + self.tile_side * j,
@@ -67,9 +68,10 @@ class GameBoardGraphical():
     def update_tiles(self):
         for i in range(len(self.tiles)):
             for j in range(len(self.tiles[0])):
-                self.update_tile(self.tiles[i][j], i, j)
+                self.update_tile(self.tiles[i][j], (i, j))
 
-    def update_tile(self, tile, row_idx, column_idx):
+    def update_tile(self, tile, idxs: (int, int)):
+        row_idx, column_idx = idxs
         y = self.coords[1] + row_idx * self.tile_side
         x = self.coords[0] + column_idx * self.tile_side
         color_factor = 0.5 if (row_idx+column_idx) % 2 == 0 else 1
