@@ -2,7 +2,7 @@
 import threading
 from enum import Enum
 
-from piece import PieceColor, PieceCode
+from piece import PieceColor, PieceCode, SpecialMoveNotification
 from piece import piece_class_from_code
 
 
@@ -17,9 +17,10 @@ class GameBoardController():
         # fen code attributes
         self._turn = GameBoardPlayer.WHITE
         self._turn_lock = threading.Lock()
-        self.castling = 'kQKq'
+        self.castling = 'KQkq'
         self.halfmoves = 0
         self.fullmoves = 0
+        self.en_passant = None
         self.winner = None
         self.pieces = []
         for i in range(8):
@@ -31,12 +32,22 @@ class GameBoardController():
     def move_piece(self, old: (int, int), new: (int, int)):
         self.pieces[new[0]][new[1]] = self.pieces[old[0]][old[1]]
         self.pieces[old[0]][old[1]] = None
-        self.pieces[new[0]][new[1]].notify_move(new)
+        # if there was an en_passant available, now there isn't
+        notification = self.pieces[new[0]][new[1]].notify_move(new)
+
+        # check if an en passant capture just happened
+        if self.en_passant == new:
+            self.pieces[old[0]][new[1]] = None
+
+        self.en_passant = None
+        if notification == SpecialMoveNotification.EN_PASSANT_AVAILABLE:
+            self.en_passant = (int((old[0]+new[0])/2), new[1])
+        print(self.fen)
 
     def get_valid_moves(self, pos: (int, int)):
         piece = self.pieces[pos[0]][pos[1]]
         if piece is not None:
-            return piece.get_valid_moves(pos, self.pieces)
+            return piece.get_valid_moves(pos, self.pieces, self.en_passant)
 
     def finish_turn(self):
         self._turn_lock.acquire()
@@ -54,7 +65,7 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kQKq 0 0"
+        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
 
     @property
     def turn(self):
@@ -65,6 +76,18 @@ class GameBoardController():
     def turn(self, t: GameBoardPlayer):
         with self._turn_lock:
             self._turn = t
+
+    def convert_to_tuple(self, idx: str):
+        if len(idx) != 2:
+            return None
+        row = ord(idx[1].lower()) - ord('a')
+        column = int(idx[0])-1
+        return (row, column)
+
+    def convert_to_idx(self, tupl):
+        if tupl is None:
+            return "-"
+        return chr(tupl[1] + ord('a')) + str(int(tupl[0]+1))
 
     @property
     def fen(self):
@@ -91,6 +114,7 @@ class GameBoardController():
 
         fen += " " + self.turn.value
         fen += " " + self.castling
+        fen += " " + self.convert_to_idx(self.en_passant)
         fen += " " + str(self.halfmoves)
         fen += " " + str(self.fullmoves)
         return fen
@@ -119,5 +143,6 @@ class GameBoardController():
         attrs = attrs.split(' ')
         self.turn = GameBoardPlayer(attrs[0])
         self.castling = attrs[1]
-        self.halfmoves = int(attrs[2])
-        self.fullmoves = int(attrs[3])
+        self.en_passant = self.convert_to_tuple(attrs[2])
+        self.halfmoves = int(attrs[3])
+        self.fullmoves = int(attrs[4])

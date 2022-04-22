@@ -45,12 +45,19 @@ class GameBoardGraphical():
         PieceDrawer.resize((self.tile_side, self.tile_side))
 
     def _calculate_coords(self, dims, coords):
+
+        top_spacing_percentage = 0.2
+        right_spacing_percentage = 0.3
         # get lowest dimension to define sizes
-        self.tile_side = min(dims[0], dims[1])/8
+        self.tile_side = min(
+                dims[0] * (1 - right_spacing_percentage),
+                dims[1] * (1 - top_spacing_percentage))/8
         self._dims = dims
 
         # get coordinates that fit inside space given
-        middle_point = (coords[0] + dims[0]/2, coords[1] + dims[1]/2)
+        middle_point = (
+                coords[0] + (dims[0] * (1-right_spacing_percentage))/2,
+                coords[1] + (dims[1] * (1 + top_spacing_percentage))/2)
 
         self._coords = (
                 middle_point[0] - 4 * self.tile_side,

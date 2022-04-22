@@ -18,6 +18,12 @@ class PieceCode(Enum):
     ROOK = 'R'
 
 
+class SpecialMoveNotification(Enum):
+    NONE = 1
+    EN_PASSANT_AVAILABLE = 2
+    CASTLING = 3
+
+
 class PieceDrawer():
 
     @classmethod
@@ -71,11 +77,12 @@ class Piece(ABC):
         pass
 
     @abstractmethod
-    def get_valid_moves(self, pos: (int, int), pieces):
+    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
         pass
 
-    def notify_move(self, pos: (int, int)):
+    def notify_move(self, pos: (int, int)) -> SpecialMoveNotification:
         self.pos = pos
+        return SpecialMoveNotification.NONE
 
 
 class Pawn(Piece):
@@ -90,11 +97,16 @@ class Pawn(Piece):
     def type(self):
         return PieceCode.PAWN
 
-    def notify_move(self, pos: (int, int)):
+    def notify_move(self, pos: (int, int)) -> SpecialMoveNotification:
+        notify = SpecialMoveNotification.NONE
+        if self.first_move and abs(self.pos[0] - pos[0]) == 2:
+            notify = SpecialMoveNotification.EN_PASSANT_AVAILABLE
+
         super(Pawn, self).notify_move(pos)
         self.first_move = False
+        return notify
 
-    def get_valid_moves(self, pos: (int, int), pieces):
+    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
         valid_moves = []
 
         def add_if_valid(_list, pos):
@@ -104,16 +116,24 @@ class Pawn(Piece):
             if 0 <= i <= 7 and 0 <= j <= 7 and piece_can_be_replaced:
                 _list.append((i, j))
 
-        # en passant check
+        # double start check
         if self.first_move:
             forward = pos[0] + 2 * self.direction
             if 0 <= forward <= 7 and pieces[forward][pos[1]] is None:
-                add_if_valid(valid_moves, (forward, pos[1]))
+                valid_moves.append((forward, pos[1]))
 
         # forward
         forward = pos[0] + self.direction
         if 0 <= forward <= 7 and pieces[forward][pos[1]] is None:
             add_if_valid(valid_moves, (forward, pos[1]))
+
+        # there is an en passant
+        if en_passant is not None:
+            # row position tells it is possible
+            if en_passant[0] == self.pos[0] + self.direction:
+                # column position confirms it is possible
+                if abs(en_passant[1] - self.pos[1]) == 1:
+                    valid_moves.append(en_passant)
 
         # eat diagonals
         diagonal_1 = (pos[0] + self.direction, pos[1] + 1)
@@ -136,7 +156,7 @@ class Knight(Piece):
     def type(self):
         return PieceCode.KNIGHT
 
-    def get_valid_moves(self, pos: (int, int), pieces):
+    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
         valid_moves = []
         directions = [
                 (2, 1),
@@ -166,7 +186,7 @@ class Queen(Piece):
     def type(self):
         return PieceCode.QUEEN
 
-    def get_valid_moves(self, pos: (int, int), pieces):
+    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
         valid_moves = []
         directions = [
                 (-1, 0),
@@ -200,7 +220,7 @@ class King(Piece):
     def type(self):
         return PieceCode.KING
 
-    def get_valid_moves(self, pos: (int, int), pieces):
+    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
         valid_moves = []
         directions = [
                 (-1, 0),
@@ -231,7 +251,7 @@ class Rook(Piece):
     def type(self):
         return PieceCode.ROOK
 
-    def get_valid_moves(self, pos: (int, int), pieces):
+    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
         valid_moves = []
         directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
         distance = 1
@@ -257,7 +277,7 @@ class Bishop(Piece):
     def type(self):
         return PieceCode.BISHOP
 
-    def get_valid_moves(self, pos: (int, int), pieces):
+    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
         valid_moves = []
         directions = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
         distance = 1
