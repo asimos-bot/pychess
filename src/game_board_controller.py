@@ -2,7 +2,7 @@
 import threading
 from enum import Enum
 
-from piece import PieceColor, PieceCode, SpecialMoveNotification
+from piece import PieceColor, PieceCode, MoveNotification
 from piece import piece_class_from_code
 
 
@@ -30,24 +30,58 @@ class GameBoardController():
         self.set_initial_fen()
 
     def move_piece(self, old: (int, int), new: (int, int)):
-        self.pieces[new[0]][new[1]] = self.pieces[old[0]][old[1]]
-        self.pieces[old[0]][old[1]] = None
-        # if there was an en_passant available, now there isn't
-        notification = self.pieces[new[0]][new[1]].notify_move(new)
 
-        # check if an en passant capture just happened
-        if self.en_passant == new:
-            self.pieces[old[0]][new[1]] = None
+        # notify piece of the move, so it can update its internal state
+        # and return additional information
+        piece = self.pieces[old[0]][old[1]]
+        notification, data = piece.notify_move(
+                new,
+                self.piece_info,
+                self.en_passant,
+                self.get_color_castlings(piece.color))
+
+        # move piece
+        self.pieces[new[0]][new[1]] = piece
+        self.pieces[old[0]][old[1]] = None
 
         self.en_passant = None
-        if notification == SpecialMoveNotification.EN_PASSANT_AVAILABLE:
-            self.en_passant = (int((old[0]+new[0])/2), new[1])
+
+        if notification == MoveNotification.DOUBLE_START:
+            # update en passant tile
+            self.en_passant = data
+        elif notification == MoveNotification.EN_PASSANT_DONE:
+            # consume captured piece
+            print(data)
+            self.pieces[data[0]][data[1]] = None
+        elif notification in [
+                MoveNotification.BREAK_KING_CASTLING,
+                MoveNotification.BREAK_QUEEN_CASTLING,
+                MoveNotification.BREAK_CASTLING]:
+            # remove king castling
+            key = notification.value
+            if piece.color == PieceColor.BLACK:
+                key = key.lower()
+            self.castling = self.castling.replace(key, '')
+            if self.castling == "":
+                self.castling = "-"
+        elif notification in [
+                MoveNotification.QUEEN_CASTLING,
+                MoveNotification.KING_CASTLING]:
+            # revoke castling rights
+            old_rook = data['old']
+            new_rook = data['new']
+            self.move_piece(old_rook, new_rook)
+
         print(self.fen)
 
     def get_valid_moves(self, pos: (int, int)):
         piece = self.pieces[pos[0]][pos[1]]
         if piece is not None:
-            return piece.get_valid_moves(pos, self.pieces, self.en_passant)
+            return piece.get_valid_moves(
+                    pos,
+                    self.piece_info,
+                    self.en_passant,
+                    self.get_color_castlings(piece.color))
 
     def finish_turn(self):
         self._turn_lock.acquire()
@@ -77,6 +111,14 @@ class GameBoardController():
         with self._turn_lock:
             self._turn = t
 
+    def get_color_castlings(self, color: PieceColor) -> str:
+        if self.castling == "-":
+            return ""
+        filter_func = (lambda c: c.islower())
+        if color == PieceColor.WHITE:
+            filter_func = (lambda c: c.isupper())
+        return "".join(filter(filter_func, self.castling)).lower()
+
     def convert_to_tuple(self, idx: str):
         if len(idx) != 2:
             return None
@@ -100,6 +142,7 @@ class GameBoardController():
                 else:
                     if empty != 0:
                         fen += str(empty)
+                        empty = 0
                     if piece.color == PieceColor.WHITE:
                         fen += piece.type.value.upper()
                     elif piece.color == PieceColor.BLACK:

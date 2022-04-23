@@ -18,10 +18,16 @@ class PieceCode(Enum):
     ROOK = 'R'
 
 
-class SpecialMoveNotification(Enum):
-    NONE = 1
-    EN_PASSANT_AVAILABLE = 2
-    CASTLING = 3
+class MoveNotification(Enum):
+    SIMPLE_MOVE = 1
+    SIMPLE_CAPTURE = 2
+    DOUBLE_START = 3
+    EN_PASSANT_DONE = 4
+    QUEEN_CASTLING = 'q'
+    KING_CASTLING = 'k'
+    BREAK_QUEEN_CASTLING = 'Q'
+    BREAK_KING_CASTLING = 'K'
+    BREAK_CASTLING = 'KQ'
 
 
 class PieceDrawer():
@@ -77,55 +83,95 @@ class Piece(ABC):
         pass
 
     @abstractmethod
-    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
+    def get_valid_moves(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling):
         pass
 
-    def notify_move(self, pos: (int, int)) -> SpecialMoveNotification:
+    # called before the move actually happens
+    # used to update internal piece state and
+    # return additional information about this move
+    def notify_move(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling) -> (MoveNotification, any):
         self.pos = pos
-        return SpecialMoveNotification.NONE
+        piece = piece_info_func(self.pos)
+        if piece is not None:
+            return (MoveNotification.SIMPLE_CAPTURE, piece)
+        else:
+            return (MoveNotification.SIMPLE_MOVE, pos)
 
 
 class Pawn(Piece):
 
     def __init__(self, color: PieceColor, pos: (int, int)):
         super(Pawn, self).__init__(color, pos)
-        # will get its value on the first move
         self.direction = [1, -1][pos[0] > 3]
-        self.first_move = True
+        self.first_move = pos[0] < 3 or pos[0] > 4
 
     @property
     def type(self):
         return PieceCode.PAWN
 
-    def notify_move(self, pos: (int, int)) -> SpecialMoveNotification:
-        notify = SpecialMoveNotification.NONE
-        if self.first_move and abs(self.pos[0] - pos[0]) == 2:
-            notify = SpecialMoveNotification.EN_PASSANT_AVAILABLE
+    def notify_move(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling) -> (MoveNotification, any):
+        # this can be a simple_move, a double start or an en passant
+        old_pos = self.pos
+        # simple move
+        notify = super(Pawn, self).notify_move(
+                pos,
+                piece_info_func,
+                en_passant,
+                castling)
+        # double start
+        if self.first_move and abs(old_pos[0] - pos[0]) == 2:
+            en_passant = (old_pos[0] + self.direction, self.pos[1])
+            notify = (MoveNotification.DOUBLE_START, en_passant)
+        # en passant
+        elif notify[0] == MoveNotification.SIMPLE_MOVE:
+            if pos == en_passant:
+                captured = (old_pos[0], pos[1])
+                notify = (MoveNotification.EN_PASSANT_DONE, captured)
 
-        super(Pawn, self).notify_move(pos)
         self.first_move = False
         return notify
 
-    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
+    def get_valid_moves(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling):
         valid_moves = []
 
         def add_if_valid(_list, pos):
             i, j = pos
-            piece = pieces[i][j]
-            piece_can_be_replaced = piece is None or piece.color != self.color
-            if 0 <= i <= 7 and 0 <= j <= 7 and piece_can_be_replaced:
-                _list.append((i, j))
+            if 0 <= i <= 7 and 0 <= j <= 7:
+                piece = piece_info_func
+                piece_can_be_replaced = piece is None or piece[1] != self.color
+                if 0 <= i <= 7 and 0 <= j <= 7 and piece_can_be_replaced:
+                    _list.append(pos)
 
         # double start check
         if self.first_move:
-            forward = pos[0] + 2 * self.direction
-            if 0 <= forward <= 7 and pieces[forward][pos[1]] is None:
-                valid_moves.append((forward, pos[1]))
+            forward = (pos[0] + 2 * self.direction, pos[1])
+            if 0 <= forward[0] <= 7 and piece_info_func(forward) is None:
+                valid_moves.append(forward)
 
         # forward
-        forward = pos[0] + self.direction
-        if 0 <= forward <= 7 and pieces[forward][pos[1]] is None:
-            add_if_valid(valid_moves, (forward, pos[1]))
+        forward = (pos[0] + self.direction, pos[1])
+        if 0 <= forward[0] <= 7 and piece_info_func(forward) is None:
+            valid_moves.append(forward)
 
         # there is an en passant
         if en_passant is not None:
@@ -140,11 +186,12 @@ class Pawn(Piece):
         diagonal_2 = (pos[0] + self.direction, pos[1] - 1)
         diagonals = (diagonal_1, diagonal_2)
 
-        # check if pieces from the other color are present here
+        # check if pieces from the other color are in a frontal
+        # diagonal, ready to be captured
         for diagonal in diagonals:
             if 0 <= diagonal[0] <= 7 and 0 <= diagonal[1] <= 7:
-                piece = pieces[diagonal[0]][diagonal[1]]
-                if piece is not None and piece.color != self.color:
+                piece = piece_info_func(diagonal)
+                if piece is not None and piece[1] != self.color:
                     valid_moves.append(diagonal)
 
         return valid_moves
@@ -156,7 +203,12 @@ class Knight(Piece):
     def type(self):
         return PieceCode.KNIGHT
 
-    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
+    def get_valid_moves(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling):
         valid_moves = []
         directions = [
                 (2, 1),
@@ -172,8 +224,10 @@ class Knight(Piece):
             column = pos[1] + direction[1]
             if not (0 <= row <= 7 and 0 <= column <= 7):
                 continue
-            elif pieces[row][column] is not None:
-                if pieces[row][column].color != self.color:
+
+            piece = piece_info_func((row, column))
+            if piece is not None:
+                if piece[1] != self.color:
                     valid_moves.append((row, column))
             else:
                 valid_moves.append((row, column))
@@ -186,7 +240,12 @@ class Queen(Piece):
     def type(self):
         return PieceCode.QUEEN
 
-    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
+    def get_valid_moves(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling):
         valid_moves = []
         directions = [
                 (-1, 0),
@@ -204,9 +263,11 @@ class Queen(Piece):
                 column = pos[1] + direction[1] * distance
                 if not (0 <= row <= 7 and 0 <= column <= 7):
                     directions.remove(direction)
-                elif pieces[row][column] is not None:
+                    continue
+                piece = piece_info_func((row, column))
+                if piece is not None:
                     directions.remove(direction)
-                    if pieces[row][column].color != self.color:
+                    if piece[1] != self.color:
                         valid_moves.append((row, column))
                 else:
                     valid_moves.append((row, column))
@@ -216,11 +277,54 @@ class Queen(Piece):
 
 class King(Piece):
 
+    def __init__(self, color: PieceColor, pos: (int, int)):
+        super(King, self).__init__(color, pos)
+        self.first_move = True
+
+    def notify_move(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling) -> (MoveNotification, any):
+
+        old_pos = self.pos
+        notify = super(King, self).notify_move(
+                pos,
+                piece_info_func,
+                en_passant,
+                castling)
+
+        # castling performed
+        if self.first_move:
+            if abs(old_pos[1] - pos[1]) == 2:
+                castling_type = ['q', 'k'][pos[1] > 3]
+                castling_type = MoveNotification(castling_type)
+                old_rook_idx = (old_pos[0], [0, 7][castling_type.value == 'k'])
+                new_rook_idx = (old_pos[0], int((old_pos[1] + pos[1])/2))
+                notify = (
+                        castling_type,
+                        {
+                            'old': old_rook_idx,
+                            'new': new_rook_idx,
+                        })
+            # revoke castling rights
+            else:
+                notify = (MoveNotification.BREAK_CASTLING, notify[1])
+
+        self.first_move = False
+        return notify
+
     @property
     def type(self):
         return PieceCode.KING
 
-    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
+    def get_valid_moves(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling):
         valid_moves = []
         directions = [
                 (-1, 0),
@@ -236,22 +340,89 @@ class King(Piece):
             column = pos[1] + direction[1]
             if not (0 <= row <= 7 and 0 <= column <= 7):
                 continue
-            elif pieces[row][column] is not None:
-                if pieces[row][column].color != self.color:
+            piece = piece_info_func((row, column))
+            if piece is not None:
+                if piece[1] != self.color:
                     valid_moves.append((row, column))
             else:
                 valid_moves.append((row, column))
+
+        # check if castling is available
+        if self.first_move:
+            available_castlings = [
+                    MoveNotification(v.lower()) for v in castling]
+            directions = []
+            if MoveNotification.KING_CASTLING in available_castlings:
+                directions.append(1)
+            if MoveNotification.QUEEN_CASTLING in available_castlings:
+                directions.append(-1)
+            for direction in directions:
+                # 1. you can't castle if you moved
+                # 2. you can't castle out of check
+                # 3. you can't castle through check
+                # 4. you can't castle through pieces
+                has_piece_between = False
+                rook_idx = [0, 7][direction == 1]
+                for column in range(pos[1] + direction, rook_idx, direction):
+                    if piece_info_func((pos[0], column)) is not None:
+                        has_piece_between = True
+                        break
+                if not has_piece_between:
+                    valid_moves.append((pos[0], pos[1] + 2 * direction))
 
         return valid_moves
 
 
 class Rook(Piece):
 
+    def __init__(self, color: PieceColor, pos: (int, int)):
+        super(Rook, self).__init__(color, pos)
+        # will get its value on the first move
+        self.first_move = True
+        self.castling_type = MoveNotification(['q', 'k'][pos[1] > 3])
+
+    def notify_move(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling) -> (MoveNotification, any):
+
+        old_pos = self.pos
+        notify = super(Rook, self).notify_move(
+                pos,
+                piece_info_func,
+                en_passant,
+                castling)
+
+        # if there is a king next to us (from the side we
+        # came from), then a castling just happened
+        if self.first_move:
+            if old_pos[0] == pos[0] and self.castling_type.value in castling:
+                direction = [-1, 1][
+                        self.castling_type == MoveNotification.KING_CASTLING]
+                neighbour_piece = piece_info_func((pos[0], pos[1] + direction))
+                # if its not None we know its the king
+                # since we can't pass through pieces
+                if neighbour_piece is not None:
+                    notify = (MoveNotification.BREAK_CASTLING, notify[1])
+            # castling has been broken in this side at least
+            else:
+                notify[0] = MoveNotification(self.castling_type.value.upper())
+
+        self.first_move = False
+        return notify
+
     @property
     def type(self):
         return PieceCode.ROOK
 
-    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
+    def get_valid_moves(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling):
         valid_moves = []
         directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
         distance = 1
@@ -261,9 +432,10 @@ class Rook(Piece):
                 column = pos[1] + direction[1] * distance
                 if not (0 <= row <= 7 and 0 <= column <= 7):
                     directions.remove(direction)
-                elif pieces[row][column] is not None:
+                piece = piece_info_func((row, column))
+                if piece is not None:
                     directions.remove(direction)
-                    if pieces[row][column].color != self.color:
+                    if piece[1] != self.color:
                         valid_moves.append((row, column))
                 else:
                     valid_moves.append((row, column))
@@ -277,7 +449,12 @@ class Bishop(Piece):
     def type(self):
         return PieceCode.BISHOP
 
-    def get_valid_moves(self, pos: (int, int), pieces, en_passant):
+    def get_valid_moves(
+            self,
+            pos: (int, int),
+            piece_info_func,
+            en_passant,
+            castling):
         valid_moves = []
         directions = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
         distance = 1
@@ -287,9 +464,11 @@ class Bishop(Piece):
                 column = pos[1] + direction[1] * distance
                 if not (0 <= row <= 7 and 0 <= column <= 7):
                     directions.remove(direction)
-                elif pieces[row][column] is not None:
+                    continue
+                piece = piece_info_func((row, column))
+                if piece is not None:
                     directions.remove(direction)
-                    if pieces[row][column].color != self.color:
+                    if piece[1] != self.color:
                         valid_moves.append((row, column))
                 else:
                     valid_moves.append((row, column))
