@@ -2,7 +2,12 @@ import pygame_menu
 
 
 class PauseMenu():
-    def __init__(self, dims: (int, int), play_func, quit_func):
+    def __init__(
+            self,
+            dims: (int, int),
+            play_func,
+            quit_func,
+            orientation_func):
         self.menu = pygame_menu.Menu(
                 title='PyChess',
                 width=dims[0]/2,
@@ -10,8 +15,10 @@ class PauseMenu():
                 theme=pygame_menu.themes.THEME_BLUE)
         self.menu.add.button('Play', self.play)
         self.menu.add.button('Quit', self.quit)
+        self.menu.add.button('Spin Board', self.orientation)
         self.quit_func = quit_func
         self.play_func = play_func
+        self.orientation_func = orientation_func
 
     def play(self):
         self.menu.close()
@@ -20,6 +27,9 @@ class PauseMenu():
     def quit(self):
         self.menu.close()
         self.quit_func()
+
+    def orientation(self):
+        self.orientation_func()
 
     def resize(self, new_width, new_height):
         self.menu.resize(new_width, new_height)

@@ -101,7 +101,8 @@ class PyChess():
         self.pause_menu = PauseMenu(
                 (self.x, self.y),
                 play_func=self.set_state_play,
-                quit_func=self.set_state_main_menu)
+                quit_func=self.set_state_main_menu,
+                orientation_func=self.board.spin)
         self.state = GameState.PAUSE
 
     def play_event_capture(self, event):

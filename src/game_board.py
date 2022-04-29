@@ -41,6 +41,12 @@ class GameBoard():
                 target=self._make_moves_async)
         self._async_thread.start()
 
+    def spin(self):
+        if self.graphical.bottom_color == PieceColor.WHITE:
+            self.graphical.bottom_color = PieceColor.BLACK
+        else:
+            self.graphical.bottom_color = PieceColor.WHITE
+
     def draw(self, surface):
         self.graphical.draw(
                 surface,
