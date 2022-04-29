@@ -3,6 +3,7 @@ import threading
 from game_board_controller import GameBoardController, GameBoardPlayer
 from game_board_graphical import GameBoardGraphical
 from player import Player
+from piece import PieceColor
 
 
 # makes a bridge between the graphical and logical part of the game board
@@ -14,12 +15,14 @@ class GameBoard():
             coords: (int, int),
             color: (int, int, int),
             player_black: Player,
-            player_white: Player):
+            player_white: Player,
+            bottom_color: PieceColor = PieceColor.BLACK):
         self.controller: GameBoardController = GameBoardController()
         self.graphical: GameBoardGraphical = GameBoardGraphical(
                 dims,
                 coords,
-                color)
+                color,
+                bottom_color)
         self.players = {
                 GameBoardPlayer.WHITE: player_white,
                 GameBoardPlayer.BLACK: player_black
@@ -47,6 +50,7 @@ class GameBoard():
                 surface,
                 self.controller.piece_info,
                 self.graphical.tile_info,
+                self.graphical.adjust_idxs,
                 self.controller.get_valid_moves)
 
     def _make_moves_async(self):
@@ -58,6 +62,7 @@ class GameBoard():
             while not valid:
                 move = self.player.make_move(
                         self.controller.piece_info,
+                        self.graphical.adjust_idxs,
                         self.controller.get_valid_moves)
                 if move is not None:
                     old_pos, new_pos = move
@@ -74,7 +79,8 @@ class GameBoard():
         self.player.event_capture(
                 event,
                 self.controller.piece_info,
-                self.graphical.tile_info)
+                self.graphical.tile_info,
+                self.graphical.adjust_idxs)
 
     def _start_game(self):
         self._async_thread = threading.Thread(target=self._make_moves_async)
