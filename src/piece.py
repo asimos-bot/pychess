@@ -408,7 +408,9 @@ class Rook(Piece):
                     notify = (MoveNotification.BREAK_CASTLING, notify[1])
             # castling has been broken in this side at least
             else:
-                notify[0] = MoveNotification(self.castling_type.value.upper())
+                notify = (
+                        MoveNotification(self.castling_type.value.upper()),
+                        notify[1])
 
         self.first_move = False
         return notify
@@ -432,6 +434,7 @@ class Rook(Piece):
                 column = pos[1] + direction[1] * distance
                 if not (0 <= row <= 7 and 0 <= column <= 7):
                     directions.remove(direction)
+                    continue
                 piece = piece_info_func((row, column))
                 if piece is not None:
                     directions.remove(direction)
