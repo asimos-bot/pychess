@@ -15,7 +15,11 @@ class Player(ABC):
         self.color = color
 
     @abstractmethod
-    def make_move(self, piece_info_func, get_valid_moves_func):
+    def make_move(
+            self,
+            piece_info_func,
+            adjust_idxs_func,
+            get_valid_moves_func):
         pass
 
     @abstractmethod
@@ -24,11 +28,17 @@ class Player(ABC):
             surface,
             piece_info_func,
             tile_info_func,
+            adjust_idxs_func,
             get_valid_moves_func):
         pass
 
     @abstractmethod
-    def event_capture(self, event, piece_info_func, tile_info_func):
+    def event_capture(
+            self,
+            event,
+            piece_info_func,
+            tile_info_func,
+            adjust_idxs_func):
         pass
 
     @abstractmethod
@@ -41,8 +51,11 @@ class Player(ABC):
 
 
 class RandomAI(Player):
-
-    def make_move(self, piece_info_func, get_valid_moves_func):
+    def make_move(
+            self,
+            piece_info_func,
+            adjust_idxs_func,
+            get_valid_moves_func):
         valid_moves = set()
         for i in range(8):
             for j in range(8):
@@ -58,10 +71,16 @@ class RandomAI(Player):
             surface,
             piece_info_func,
             tile_info_func,
+            adjust_idxs_func,
             get_valid_moves_func):
         pass
 
-    def event_capture(self, event, piece_info_func, tile_info_func):
+    def event_capture(
+            self,
+            event,
+            piece_info_func,
+            tile_info_func,
+            adjust_idxs_func):
         pass
 
     def pause(self):
@@ -95,7 +114,11 @@ class Human(Player):
     def unpause(self):
         self.playing = True
 
-    def make_move(self, piece_info_func, get_valid_moves_func):
+    def make_move(
+            self,
+            piece_info_func,
+            adjust_idxs_func,
+            get_valid_moves_func):
         # wait until the move is done
         while self._to is None and self.playing:
             time.sleep(0.1)
@@ -103,8 +126,8 @@ class Human(Player):
         if not self.playing:
             return None
 
-        origin = self._from
-        to = self._to
+        origin = adjust_idxs_func(self._from)
+        to = adjust_idxs_func(self._to)
         self._from = None
         self._to = None
         return origin, to
@@ -114,10 +137,12 @@ class Human(Player):
             surface,
             piece_info_func,
             tile_info_func,
+            adjust_idxs_func,
             get_valid_moves_func):
         if self._from is not None:
             # highlight selected tile
-            tile_rect, from_tile_surf = tile_info_func(self._from)
+            tile_idxs = self._from
+            tile_rect, from_tile_surf = tile_info_func(tile_idxs)
             pygame.draw.rect(
                     from_tile_surf,
                     colors.PIECE_SELECTION,
@@ -125,8 +150,11 @@ class Human(Player):
                     BORDER_THICKNESS,
                     border_radius=10)
 
-            for valid_move in get_valid_moves_func(self._from):
-                tile_rect, from_tile_surf = tile_info_func(valid_move)
+            control_idxs = adjust_idxs_func(self._from)
+            for valid_move in get_valid_moves_func(control_idxs):
+                tile_of_valid_move = adjust_idxs_func(valid_move)
+                tile_rect, from_tile_surf = tile_info_func(tile_of_valid_move)
+                from_tile_surf = from_tile_surf
                 pygame.draw.rect(
                         from_tile_surf,
                         colors.VALID_MOVE,
@@ -142,12 +170,18 @@ class Human(Player):
                 if tile_rect.collidepoint(pos):
                     return i, j
 
-    def event_capture(self, event, piece_info_func, tile_info_func):
+    def event_capture(
+            self,
+            event,
+            piece_info_func,
+            tile_info_func,
+            adjust_idxs_func):
         if self._from is None:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 idxs = self._get_tile_pos_from_mouse(event.pos, tile_info_func)
                 if idxs is not None:
-                    piece_info = piece_info_func(idxs)
+                    control_idxs = adjust_idxs_func(idxs)
+                    piece_info = piece_info_func(control_idxs)
                     if piece_info is None or piece_info[1] != self.color:
                         return
                     self._from = idxs

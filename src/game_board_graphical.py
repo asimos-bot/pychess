@@ -1,5 +1,5 @@
 from tile import Tile
-from piece import PieceDrawer
+from piece import PieceDrawer, PieceColor
 
 
 class GameBoardGraphical():
@@ -7,20 +7,34 @@ class GameBoardGraphical():
             self,
             dims: (int, int),
             coords: (int, int),
-            color: (int, int, int)):
+            color: (int, int, int),
+            bottom_color: PieceColor = PieceColor.WHITE):
         '''
         game board will take the dimensions and coordinates given and calculate
         appropriate ones to maintain the aspect ratio. Because of this, we have
         'self._given_coords' and 'self._coords', where the coordinates given as
         input and the ones calculated are stored, respectively
         '''
+        self.bottom_color = bottom_color
         self._color = color
         self._given_coords = coords
         self.tiles = self.create_blank_tiles()
         self.update_graphical_attributes(dims, coords)
 
+    def adjust_orientation(self):
+        tiles = self.tiles
+        if self.bottom_color == PieceColor.BLACK:
+            tiles = self.tiles[::-1]
+        return tiles
+
+    def adjust_idxs(self, idxs: (int, int)):
+        if self.bottom_color == PieceColor.BLACK:
+            idxs = (7 - idxs[0], idxs[1])
+        return idxs
+
     def draw(self, surface, piece_info_func):
-        for i, row in enumerate(self.tiles):
+        tiles = self.adjust_orientation()
+        for i, row in enumerate(tiles):
             for j, tile in enumerate(row):
                 tile.draw(surface)
                 piece_info = piece_info_func((i, j))
