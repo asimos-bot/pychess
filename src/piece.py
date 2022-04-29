@@ -112,8 +112,10 @@ class Pawn(Piece):
 
     def __init__(self, color: PieceColor, pos: (int, int)):
         super(Pawn, self).__init__(color, pos)
-        self.direction = [1, -1][pos[0] > 3]
-        self.first_move = pos[0] < 3 or pos[0] > 4
+        self.direction = [1, -1][self.color == PieceColor.WHITE]
+        white_first_move = PieceColor.WHITE == self.color and pos[0] == 6
+        black_first_move = PieceColor.BLACK == self.color and pos[0] == 1
+        self.first_move = white_first_move or black_first_move
 
     @property
     def type(self):
