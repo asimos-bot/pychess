@@ -88,8 +88,10 @@ class GameBoardController():
         if self._turn == GameBoardPlayer.WHITE:
             self._turn = GameBoardPlayer.BLACK
         else:
+            self.fullmoves += 1
             self._turn = GameBoardPlayer.WHITE
         self._turn_lock.release()
+        self.halfmoves += 1
 
     def piece_info(self, idxs: (int, int)):
         piece = self.pieces[idxs[0]][idxs[1]]

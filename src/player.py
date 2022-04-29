@@ -1,6 +1,7 @@
 import pygame
 import time
 import threading
+import random
 from abc import ABC, abstractmethod
 
 import colors
@@ -35,6 +36,37 @@ class Player(ABC):
         pass
 
     @abstractmethod
+    def unpause(self):
+        pass
+
+
+class RandomAI(Player):
+
+    def make_move(self, piece_info_func, get_valid_moves_func):
+        valid_moves = set()
+        for i in range(8):
+            for j in range(8):
+                piece_info = piece_info_func((i, j))
+                if piece_info is not None and piece_info[1] == self.color:
+                    for move in get_valid_moves_func((i, j)):
+                        valid_moves.add(((i, j), move))
+        choosen_move = random.sample(valid_moves, 1)[0]
+        return choosen_move
+
+    def draw(
+            self,
+            surface,
+            piece_info_func,
+            tile_info_func,
+            get_valid_moves_func):
+        pass
+
+    def event_capture(self, event, piece_info_func, tile_info_func):
+        pass
+
+    def pause(self):
+        pass
+
     def unpause(self):
         pass
 

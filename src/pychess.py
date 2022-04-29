@@ -8,7 +8,7 @@ from game_board import GameBoard
 from main_menu import MainMenu
 from pause_menu import PauseMenu
 from piece import PieceDrawer, PieceColor
-from player import Human
+from player import Human, RandomAI
 
 
 class GameState(Enum):
@@ -80,7 +80,7 @@ class PyChess():
                 dims=(self.x, self.y),
                 coords=(0, 0),
                 color=colors.GAME_BOARD,
-                player_black=Human(PieceColor.BLACK),
+                player_black=RandomAI(PieceColor.BLACK),
                 player_white=Human(PieceColor.WHITE))
 
         self.state = GameState.PLAY
