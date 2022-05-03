@@ -4,6 +4,9 @@ from game_board_controller import GameBoardController, GameBoardPlayer
 from game_board_graphical import GameBoardGraphical
 from player import Player
 from piece import PieceColor
+from pygame import mixer
+from pathlib import Path
+from time import sleep
 
 
 # makes a bridge between the graphical and logical part of the game board
@@ -16,7 +19,15 @@ class GameBoard():
             color: (int, int, int),
             player_black: Player,
             player_white: Player,
-            bottom_color: PieceColor = PieceColor.BLACK):
+            bottom_color: PieceColor = PieceColor.WHITE):
+
+        # load sound effects
+        piece_down_sound = Path(__file__).parent.parent.joinpath("assets")
+        piece_down_sound = piece_down_sound.joinpath("piece_down.wav")
+        mixer.init()
+        mixer.music.load(piece_down_sound)
+        mixer.music.set_volume(0.7)
+
         self.controller: GameBoardController = GameBoardController()
         self.graphical: GameBoardGraphical = GameBoardGraphical(
                 dims,
@@ -79,6 +90,10 @@ class GameBoard():
                     return
 
             self.controller.move_piece(old_pos, new_pos)
+
+            mixer.music.stop()
+            mixer.music.play()
+            sleep(0.1)
             self.controller.finish_turn()
 
     def event_capture(self, event):

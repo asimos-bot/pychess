@@ -34,7 +34,7 @@ class PieceDrawer():
 
     @classmethod
     def load_images(cls):
-        img_folder = Path(__file__).parent.parent.joinpath("imgs")
+        assets_folder = Path(__file__).parent.parent.joinpath("assets")
         imgs = dict()
         for color in PieceColor:
             imgs[color] = dict()
@@ -43,7 +43,7 @@ class PieceDrawer():
                 filename += "_"
                 filename += piece_code.name.lower()
                 filename += ".png"
-                filepath = img_folder.joinpath(filename)
+                filepath = assets_folder.joinpath(filename)
                 img = pygame.image.load(filepath).convert_alpha()
                 imgs[color][piece_code] = {
                         'filepath': filepath,

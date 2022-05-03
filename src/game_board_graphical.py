@@ -8,7 +8,7 @@ class GameBoardGraphical():
             dims: (int, int),
             coords: (int, int),
             color: (int, int, int),
-            bottom_color: PieceColor = PieceColor.WHITE):
+            bottom_color: PieceColor):
         '''
         game board will take the dimensions and coordinates given and calculate
         appropriate ones to maintain the aspect ratio. Because of this, we have
