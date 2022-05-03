@@ -25,8 +25,8 @@ class GameBoardGraphical():
         tiles = self.tiles
         if self.bottom_color == PieceColor.BLACK:
             tiles = self.tiles[::-1]
-            for i, row in enumerate(tiles):
-                tiles[i] = row[::-1]
+            for row in tiles:
+                row = row[::-1]
         return tiles
 
     def adjust_idxs(self, idxs: (int, int)):
