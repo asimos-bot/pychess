@@ -154,26 +154,26 @@ class Pawn(Piece):
             piece_info_func,
             en_passant,
             castling):
-        valid_moves = []
+        valid_moves = set()
 
-        def add_if_valid(_list, pos):
+        def add_if_valid(_set, pos):
             i, j = pos
             if 0 <= i <= 7 and 0 <= j <= 7:
                 piece = piece_info_func
                 piece_can_be_replaced = piece is None or piece[1] != self.color
                 if 0 <= i <= 7 and 0 <= j <= 7 and piece_can_be_replaced:
-                    _list.append(pos)
+                    _set.add(pos)
 
         # double start check
         if self.first_move:
             forward = (pos[0] + 2 * self.direction, pos[1])
             if 0 <= forward[0] <= 7 and piece_info_func(forward) is None:
-                valid_moves.append(forward)
+                valid_moves.add(forward)
 
         # forward
         forward = (pos[0] + self.direction, pos[1])
         if 0 <= forward[0] <= 7 and piece_info_func(forward) is None:
-            valid_moves.append(forward)
+            valid_moves.add(forward)
 
         # there is an en passant
         if en_passant is not None:
@@ -181,7 +181,7 @@ class Pawn(Piece):
             if en_passant[0] == self.pos[0] + self.direction:
                 # column position confirms it is possible
                 if abs(en_passant[1] - self.pos[1]) == 1:
-                    valid_moves.append(en_passant)
+                    valid_moves.add(en_passant)
 
         # eat diagonals
         diagonal_1 = (pos[0] + self.direction, pos[1] + 1)
@@ -194,7 +194,7 @@ class Pawn(Piece):
             if 0 <= diagonal[0] <= 7 and 0 <= diagonal[1] <= 7:
                 piece = piece_info_func(diagonal)
                 if piece is not None and piece[1] != self.color:
-                    valid_moves.append(diagonal)
+                    valid_moves.add(diagonal)
 
         return valid_moves
 
@@ -211,7 +211,7 @@ class Knight(Piece):
             piece_info_func,
             en_passant,
             castling):
-        valid_moves = []
+        valid_moves = set()
         directions = [
                 (2, 1),
                 (2, -1),
@@ -230,9 +230,9 @@ class Knight(Piece):
             piece = piece_info_func((row, column))
             if piece is not None:
                 if piece[1] != self.color:
-                    valid_moves.append((row, column))
+                    valid_moves.add((row, column))
             else:
-                valid_moves.append((row, column))
+                valid_moves.add((row, column))
         return valid_moves
 
 
@@ -248,7 +248,7 @@ class Queen(Piece):
             piece_info_func,
             en_passant,
             castling):
-        valid_moves = []
+        valid_moves = set()
         directions = [
                 (-1, 0),
                 (0, 1),
@@ -270,9 +270,9 @@ class Queen(Piece):
                 if piece is not None:
                     directions.remove(direction)
                     if piece[1] != self.color:
-                        valid_moves.append((row, column))
+                        valid_moves.add((row, column))
                 else:
-                    valid_moves.append((row, column))
+                    valid_moves.add((row, column))
             distance += 1
         return valid_moves
 
@@ -327,7 +327,7 @@ class King(Piece):
             piece_info_func,
             en_passant,
             castling):
-        valid_moves = []
+        valid_moves = set()
         directions = [
                 (-1, 0),
                 (0, 1),
@@ -345,9 +345,9 @@ class King(Piece):
             piece = piece_info_func((row, column))
             if piece is not None:
                 if piece[1] != self.color:
-                    valid_moves.append((row, column))
+                    valid_moves.add((row, column))
             else:
-                valid_moves.append((row, column))
+                valid_moves.add((row, column))
 
         # check if castling is available
         if self.first_move:
@@ -370,7 +370,7 @@ class King(Piece):
                         has_piece_between = True
                         break
                 if not has_piece_between:
-                    valid_moves.append((pos[0], pos[1] + 2 * direction))
+                    valid_moves.add((pos[0], pos[1] + 2 * direction))
 
         return valid_moves
 
@@ -427,7 +427,7 @@ class Rook(Piece):
             piece_info_func,
             en_passant,
             castling):
-        valid_moves = []
+        valid_moves = set()
         directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
         distance = 1
         while len(directions) > 0:
@@ -441,9 +441,9 @@ class Rook(Piece):
                 if piece is not None:
                     directions.remove(direction)
                     if piece[1] != self.color:
-                        valid_moves.append((row, column))
+                        valid_moves.add((row, column))
                 else:
-                    valid_moves.append((row, column))
+                    valid_moves.add((row, column))
             distance += 1
         return valid_moves
 
@@ -460,7 +460,7 @@ class Bishop(Piece):
             piece_info_func,
             en_passant,
             castling):
-        valid_moves = []
+        valid_moves = set()
         directions = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
         distance = 1
         while len(directions) > 0:
@@ -474,9 +474,9 @@ class Bishop(Piece):
                 if piece is not None:
                     directions.remove(direction)
                     if piece[1] != self.color:
-                        valid_moves.append((row, column))
+                        valid_moves.add((row, column))
                 else:
-                    valid_moves.append((row, column))
+                    valid_moves.add((row, column))
             distance += 1
         return valid_moves
 
