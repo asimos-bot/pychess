@@ -22,7 +22,7 @@ class PyChess():
     def __init__(self):
         pygame.init()
         # get surface where we will draw stuff to
-        self.surface = pygame.display.set_mode((400, 400), pygame.RESIZABLE)
+        self.surface = pygame.display.set_mode((600, 400), pygame.RESIZABLE)
 
         # load piece images
         PieceDrawer.load_images()

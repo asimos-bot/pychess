@@ -54,6 +54,7 @@ class PieceDrawer():
     @classmethod
     def resize(cls, dims):
         cls.load_images()
+        dims = (int(dims[0]), int(dims[1]))
         for color in PieceColor:
             for piece_code in PieceCode:
                 img_info = cls.imgs[color][piece_code]
