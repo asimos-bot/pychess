@@ -1,5 +1,6 @@
-from matplotlib.pyplot import margins
 import pygame_menu
+
+from pathlib import Path
 
 
 class MainMenu():
@@ -8,7 +9,11 @@ class MainMenu():
         main_menu_theme.set_background_color_opacity(0.5)  # 50% opacity
         theme_bg_image = main_menu_theme.copy()
         theme_bg_image.background_color = pygame_menu.BaseImage(
-            image_path="../assets/bg.png"
+            image_path=Path(__file__)
+            .parent
+            .parent
+            .joinpath("assets")
+            .joinpath("bg.png")
         )
         self.menu = pygame_menu.Menu(
                 title='',
@@ -16,8 +21,16 @@ class MainMenu():
                 height=dims[1],
                 theme=theme_bg_image)
         self.menu.get_menubar().hide()
-        self.menu.add.button('Play', self.play, align=pygame_menu.locals.ALIGN_RIGHT, margin = (10,0))
-        self.menu.add.button('Quit', pygame_menu.events.EXIT, align=pygame_menu.locals.ALIGN_RIGHT, margin = (10,0))
+        self.menu.add.button(
+                'Play',
+                self.play,
+                align=pygame_menu.locals.ALIGN_RIGHT,
+                margin=(10, 0))
+        self.menu.add.button(
+                'Quit',
+                pygame_menu.events.EXIT,
+                align=pygame_menu.locals.ALIGN_RIGHT,
+                margin=(10, 0))
         self.play_func = play_func
 
     def play(self):
