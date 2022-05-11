@@ -170,6 +170,9 @@ class GameBoardController():
         # separate last row placement from other attributes
         rows[-1], attrs = rows[-1].split(' ', 1)
 
+        if len(rows) != 8:
+            raise Exception("Invalid number of rows for FEN string:", fen_code)
+
         # piece placement
         for i, row in enumerate(rows):
             j = 0
@@ -183,9 +186,19 @@ class GameBoardController():
                     j += 1
                 else:
                     j += int(c)
+            if j != 8:
+                raise Exception(
+                        "Invalid number of pieces for row",
+                        i,
+                        ":",
+                        row)
 
         # game attributes (turn, castling, en passant)
         attrs = attrs.split(' ')
+
+        if len(attrs) != 5:
+            raise Exception("Invalid number of attributes:", attrs)
+
         self.turn = GameBoardPlayer(attrs[0])
         self.castling = attrs[1]
         self.en_passant = self.convert_to_tuple(attrs[2])

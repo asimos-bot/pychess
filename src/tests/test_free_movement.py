@@ -96,5 +96,6 @@ class PieceFreeMovementTest(unittest.TestCase):
             ]
         self.movement_dict_check(moves)
 
+
 if __name__ == "__main__":
     unittest.main()
