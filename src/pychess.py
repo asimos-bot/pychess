@@ -80,7 +80,7 @@ class PyChess():
                 dims=(self.x, self.y),
                 coords=(0, 0),
                 color=colors.GAME_BOARD,
-                player_black=RandomAI(PieceColor.BLACK),
+                player_black=Human(PieceColor.BLACK),
                 player_white=Human(PieceColor.WHITE))
 
         self.state = GameState.PLAY

@@ -44,8 +44,13 @@ class GameBoardController():
         self.pieces[new[0]][new[1]] = piece
         self.pieces[old[0]][old[1]] = None
 
-        self.en_passant = None
+        self.process_move_notification(piece, notification, data, new)
 
+        print(self.fen)
+
+    def process_move_notification(self, piece, notification, data, new_pos):
+
+        self.en_passant = None
         if notification == MoveNotification.DOUBLE_START:
             # update en passant tile
             self.en_passant = data
@@ -71,8 +76,19 @@ class GameBoardController():
             old_rook = data['old']
             new_rook = data['new']
             self.move_piece(old_rook, new_rook)
-
-        print(self.fen)
+        elif notification == MoveNotification.SIMPLE_CAPTURE:
+            piece_type, piece_color = data
+            # check if we are breaking some castling
+            eating_in_corner = new_pos in {(0, 0), (0, 7), (7, 0), (7, 7)}
+            if piece_type == PieceCode.ROOK and eating_in_corner:
+                key = "q"
+                if new_pos[1] == 7:
+                    key = "k"
+                if piece_color == PieceColor.WHITE:
+                    key = key.upper()
+                self.castling = self.castling.replace(key, '')
+                if self.castling == "":
+                    self.castling = "-"
 
     def get_valid_moves(self, pos: (int, int)):
         piece = self.pieces[pos[0]][pos[1]]
