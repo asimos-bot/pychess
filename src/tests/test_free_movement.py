@@ -69,65 +69,125 @@ class PieceFreeMovementTest(unittest.TestCase):
                         valid_moves
                         )
 
-    def test_white_pawn(self):
+    def test_pawn_middle_forward(self):
         moves = [
-            # pawn in the middle of the board
-            {
-                "label": "pawn in the middle of the board",
-                "pos": (3, 3),
-                "type": PieceCode.PAWN,
-                "color": PieceColor.WHITE,
-                "moves": {(2, 3)},
-                "fens": {
-                    # pawn alone in the middle
-                    "8/8/8/3P4/8/8/8/8 w KQkq - 0 0",
-                    # same color piece in both front diagonals
-                    "8/8/2R1R3/3P4/8/8/8/8 w KQkq - 0 0",
-                    # different color piece both back diagonals
-                    "8/8/8/3P4/2r1r3/8/8/8 w KQkq - 0 0",
-                    }
-            },
-            # pawn in the middle of the board, path obstructed
-            {
-                "label": "pawn in the middle of the board, path obstructed",
-                "pos": (3, 3),
-                "type": PieceCode.PAWN,
-                "color": PieceColor.WHITE,
-                "moves": set(),
-                "fens": {
-                    # same color piece in front
-                    "8/8/3R4/3P4/8/8/8/8 w KQkq - 0 0",
-                    # different color piece in front
-                    "8/8/3r4/3P4/8/8/8/8 w KQkq - 0 0",
-                    # different color piece in front,
-                    # same color piece in front diagonals
-                    "8/8/2BrB3/3P4/8/8/8/8 w KQkq - 0 0",
-                    }
-            },
-            # pawn with initial double start
-            {
-                "label": "pawn with initial double start",
-                "pos": (6, 2),
-                "type": PieceCode.PAWN,
-                "color": PieceColor.WHITE,
-                "moves": {(5, 2), (4, 2)},
-                "fens": {
-                    # pawn alone
-                    "8/8/8/8/8/8/2P5/8 w KQkq - 0 0",
-                    }
-            },
-            # pawn with en passant ready
-            {
-                "label": "pawn with en passant ready",
-                "pos": (3, 4),
-                "type": PieceCode.PAWN,
-                "color": PieceColor.WHITE,
-                "moves": {(2, 3), (2, 4)},
-                "fens": {
-                    # pawn next to black pawn
-                    "8/8/8/3pP3/8/8/8/8 w KQkq d6 0 0",
-                    }
-            },
+                # white pawn in the middle of the board
+                {
+                    "label": "pawn in the middle of the board",
+                    "pos": (3, 3),
+                    "type": PieceCode.PAWN,
+                    "color": PieceColor.WHITE,
+                    "moves": {(2, 3)},
+                    "fens": {
+                        # pawn alone in the middle
+                        "8/8/8/3P4/8/8/8/8 w KQkq - 0 0",
+                        # same color piece in both front diagonals
+                        "8/8/2R1R3/3P4/8/8/8/8 w KQkq - 0 0",
+                        # different color piece both back diagonals
+                        "8/8/8/3P4/2r1r3/8/8/8 w KQkq - 0 0",
+                        }
+                },
+                # black pawn in the middle of the board
+                {
+                    "label": "pawn in the middle of the board",
+                    "pos": (3, 3),
+                    "type": PieceCode.PAWN,
+                    "color": PieceColor.BLACK,
+                    "moves": {(4, 3)},
+                    "fens": {
+                        # pawn alone in the middle
+                        "8/8/8/3p4/8/8/8/8 w KQkq - 0 0",
+                        # same color piece in both front diagonals
+                        "8/8/8/3p4/2r1r3/8/8/8 w KQkq - 0 0",
+                        # different color piece both back diagonals
+                        "8/8/2R1R3/3p4/8/8/8/8 w KQkq - 0 0",
+                        }
+                },
+            ]
+        self.movement_dict_check(moves)
+
+    def test_pawn_double_start(self):
+        moves = [
+                # white pawn with initial double start
+                {
+                    "label": "pawn with initial double start",
+                    "pos": (6, 2),
+                    "type": PieceCode.PAWN,
+                    "color": PieceColor.WHITE,
+                    "moves": {(5, 2), (4, 2)},
+                    "fens": {
+                        # pawn alone
+                        "8/8/8/8/8/8/2P5/8 w KQkq - 0 0",
+                        }
+                },
+                # black pawn with initial double start
+                {
+                    "label": "pawn with initial double start",
+                    "pos": (1, 2),
+                    "type": PieceCode.PAWN,
+                    "color": PieceColor.BLACK,
+                    "moves": {(2, 2), (3, 2)},
+                    "fens": {
+                        # pawn alone
+                        "8/2p5/8/8/8/8/8/8 w KQkq - 0 0",
+                        }
+                },
+            ]
+        self.movement_dict_check(moves)
+
+    def test_pawn_en_passant_ready(self):
+        moves = [
+                # white pawn with en passant ready
+                {
+                    "label": "pawn with en passant ready",
+                    "pos": (3, 4),
+                    "type": PieceCode.PAWN,
+                    "color": PieceColor.WHITE,
+                    "moves": {(2, 3), (2, 4)},
+                    "fens": {
+                        # pawn next to black pawn
+                        "8/8/8/3pP3/8/8/8/8 w KQkq d6 0 0",
+                        }
+                },
+                # black pawn with en passant ready
+                {
+                    "label": "pawn with en passant ready",
+                    "pos": (4, 3),
+                    "type": PieceCode.PAWN,
+                    "color": PieceColor.BLACK,
+                    "moves": {(5, 3), (5, 4)},
+                    "fens": {
+                        # pawn next to white pawn
+                        "8/8/8/8/3pP3/8/8/8 w KQkq e3 0 0",
+                        }
+                },
+            ]
+        self.movement_dict_check(moves)
+
+    def test_pawn_double_forward_obstructed(self):
+        moves = [
+                # white pawn with initial double start
+                {
+                    "label": "pawn with initial double start obstructed",
+                    "pos": (6, 2),
+                    "type": PieceCode.PAWN,
+                    "color": PieceColor.WHITE,
+                    "moves": {(5, 2)},
+                    "fens": {
+                        "8/8/8/8/2r5/8/2P5/8 w KQkq - 0 0",
+                        }
+                },
+                # black pawn with initial double start
+                {
+                    "label": "pawn with initial double start",
+                    "pos": (1, 2),
+                    "type": PieceCode.PAWN,
+                    "color": PieceColor.BLACK,
+                    "moves": {(2, 2)},
+                    "fens": {
+                        "8/2p5/8/2R5/8/8/8/8 w KQkq - 0 0",
+                        }
+                },
             ]
         self.movement_dict_check(moves)
 
