@@ -23,10 +23,6 @@ class GameBoardController():
         self.en_passant = None
         self.winner = None
         self.pieces = []
-        for i in range(8):
-            self.pieces.append([])
-            for j in range(8):
-                self.pieces[i].append(None)
         self.set_initial_fen()
 
     def move_piece(self, old: (int, int), new: (int, int)):
@@ -166,6 +162,13 @@ class GameBoardController():
             return "-"
         return chr(tupl[1] + ord('a')) + str(int(tupl[0]+1))
 
+    def clear_board(self):
+        self.pieces = []
+        for i in range(8):
+            self.pieces.append([])
+            for j in range(8):
+                self.pieces[i].append(None)
+
     @property
     def fen(self):
         fen = ""
@@ -207,6 +210,7 @@ class GameBoardController():
             raise Exception("Invalid number of rows for FEN string:", fen_code)
 
         # piece placement
+        self.clear_board()
         for i, row in enumerate(rows):
             j = 0
             for c in row:

@@ -19,7 +19,8 @@ class GameBoard():
             color: (int, int, int),
             player_black: Player,
             player_white: Player,
-            bottom_color: PieceColor = PieceColor.WHITE):
+            bottom_color: PieceColor = PieceColor.WHITE,
+            headless = False):
 
         # load sound effects
         piece_down_sound = Path(__file__).parent.parent.joinpath("assets")
@@ -28,6 +29,7 @@ class GameBoard():
         mixer.music.load(piece_down_sound)
         mixer.music.set_volume(0.7)
 
+        self.headless = headless
         self.controller: GameBoardController = GameBoardController()
         self.graphical: GameBoardGraphical = GameBoardGraphical(
                 dims,
@@ -59,6 +61,8 @@ class GameBoard():
             self.graphical.bottom_color = PieceColor.WHITE
 
     def draw(self, surface):
+        if self.headless:
+            return
         self.graphical.draw(
                 surface,
                 self.controller.piece_info)
@@ -93,7 +97,6 @@ class GameBoard():
 
             mixer.music.stop()
             mixer.music.play()
-            sleep(0.1)
             self.controller.finish_turn()
 
     def event_capture(self, event):

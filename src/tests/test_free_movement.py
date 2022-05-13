@@ -9,6 +9,7 @@ class PieceFreeMovementTest(unittest.TestCase):
 
     def movement_check(
             self,
+            label,
             pos,
             expected_type: PieceCode,
             expected_color: PieceColor,
@@ -18,18 +19,21 @@ class PieceFreeMovementTest(unittest.TestCase):
         if piece_info is None:
             self.assertFalse(
                 piece_info is None,
+                "\n{}:\n\t".format(label) +
                 "invalid piece position given to be checked: None encountered")
 
         piece_type, piece_color = self.controller.piece_info(pos)
         self.assertEqual(
                 piece_type,
                 expected_type,
+                "\n{}:\n\t".format(label) +
                 "expected {}, got {}".format(
                     expected_type.name.lower(),
                     piece_type.name.lower()))
         self.assertEqual(
                 piece_color,
                 expected_color,
+                "\n{}:\n\t".format(label) +
                 "expected {} {}, but this one is {}".format(
                     expected_color.name.lower(),
                     expected_type.name.lower(),
@@ -38,14 +42,18 @@ class PieceFreeMovementTest(unittest.TestCase):
         self.assertEqual(
                 valid_moves,
                 expected_moves,
-                "illegal movement set for {} {} at {}"
-                .format(
+                "\n{}:\n\t".format(label) +
+                "illegal movement set for {} {} at {}:\n".format(
                     piece_color.name.lower(),
                     piece_type.name.lower(),
-                    pos))
+                    pos) +
+                "\t\texpected: {}\n".format(expected_moves) +
+                "\t\treceived: {}\n".format(valid_moves)
+               )
 
     def movement_dict_check(self, moves):
         for move in moves:
+            label = move["label"]
             pos = move["pos"]
             piece_type = move["type"]
             piece_color = move["color"]
@@ -54,6 +62,7 @@ class PieceFreeMovementTest(unittest.TestCase):
             for fen in fens:
                 self.controller.fen = fen
                 self.movement_check(
+                        label,
                         pos,
                         piece_type,
                         piece_color,
@@ -64,6 +73,7 @@ class PieceFreeMovementTest(unittest.TestCase):
         moves = [
             # pawn in the middle of the board
             {
+                "label": "pawn in the middle of the board",
                 "pos": (3, 3),
                 "type": PieceCode.PAWN,
                 "color": PieceColor.WHITE,
@@ -79,6 +89,7 @@ class PieceFreeMovementTest(unittest.TestCase):
             },
             # pawn in the middle of the board, path obstructed
             {
+                "label": "pawn in the middle of the board, path obstructed",
                 "pos": (3, 3),
                 "type": PieceCode.PAWN,
                 "color": PieceColor.WHITE,
@@ -93,6 +104,18 @@ class PieceFreeMovementTest(unittest.TestCase):
                     "8/8/2BrB3/3P4/8/8/8/8 w KQkq - 0 0",
                     }
             },
+            # pawn with initial double start
+            {
+                "label": "pawn with initial double start",
+                "pos": (6, 2),
+                "type": PieceCode.PAWN,
+                "color": PieceColor.WHITE,
+                "moves": {(5, 2), (4, 2)},
+                "fens": {
+                    # pawn alone
+                    "8/8/8/8/8/8/2P5/8 w KQkq - 0 0",
+                    }
+            }
             ]
         self.movement_dict_check(moves)
 
