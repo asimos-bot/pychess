@@ -165,16 +165,20 @@ class Pawn(Piece):
                 if 0 <= i <= 7 and 0 <= j <= 7 and piece_can_be_replaced:
                     _set.add(pos)
 
-        # double start check
-        if self.first_move:
-            forward = (pos[0] + 2 * self.direction, pos[1])
-            if 0 <= forward[0] <= 7 and piece_info_func(forward) is None:
-                valid_moves.add(forward)
-
         # forward
         forward = (pos[0] + self.direction, pos[1])
+        forward_available = False
         if 0 <= forward[0] <= 7 and piece_info_func(forward) is None:
             valid_moves.add(forward)
+            forward_available = True
+
+        # double start check
+        if self.first_move:
+            double_forward = (pos[0] + 2 * self.direction, pos[1])
+            inside_board = 0 <= double_forward[0] <= 7
+            double_forward_available = piece_info_func(double_forward) is None
+            if inside_board and double_forward_available and forward_available:
+                valid_moves.add(double_forward)
 
         # there is an en passant
         if en_passant is not None:
