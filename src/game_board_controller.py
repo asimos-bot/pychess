@@ -56,13 +56,12 @@ class GameBoardController():
             self.en_passant = data
         elif notification == MoveNotification.EN_PASSANT_DONE:
             # consume captured piece
-            print(data)
             self.pieces[data[0]][data[1]] = None
         elif notification in [
                 MoveNotification.BREAK_KING_CASTLING,
                 MoveNotification.BREAK_QUEEN_CASTLING,
                 MoveNotification.BREAK_CASTLING]:
-            # remove king castling
+            # remove partial castling
             key = notification.value
             if piece.color == PieceColor.BLACK:
                 key = key.lower()
@@ -73,22 +72,40 @@ class GameBoardController():
                 MoveNotification.QUEEN_CASTLING,
                 MoveNotification.KING_CASTLING]:
             # revoke castling rights
-            old_rook = data['old']
-            new_rook = data['new']
-            self.move_piece(old_rook, new_rook)
+            rook = self.pieces[data['old'][0]][data['old'][1]]
+            self.pieces[data['new'][0]][data['new'][1]] = rook
+            self.pieces[data['old'][0]][data['old'][1]] = None
+
+            self.break_castling(piece.color)
+
         elif notification == MoveNotification.SIMPLE_CAPTURE:
-            piece_type, piece_color = data
-            # check if we are breaking some castling
-            eating_in_corner = new_pos in {(0, 0), (0, 7), (7, 0), (7, 7)}
-            if piece_type == PieceCode.ROOK and eating_in_corner:
-                key = "q"
-                if new_pos[1] == 7:
-                    key = "k"
-                if piece_color == PieceColor.WHITE:
-                    key = key.upper()
-                self.castling = self.castling.replace(key, '')
-                if self.castling == "":
-                    self.castling = "-"
+            self.break_partial_castling(data, new_pos)
+
+    def break_partial_castling(
+            self,
+            piece_info: (PieceCode, PieceColor),
+            pos: (int, int)):
+
+        piece_type, piece_color = piece_info
+        rook_corners = {(0, 0), (0, 7), (7, 0), (7, 7)}
+        if pos in rook_corners and piece_type == PieceCode.ROOK:
+            key = "q"
+            if pos[1] == 7:
+                key = "k"
+            if piece_color == PieceColor.WHITE:
+                key = key.upper()
+            self.castling = self.castling.replace(key, '')
+            if self.castling == "":
+                self.castling = "-"
+
+    def break_castling(self, color):
+        keys = ["k", "q"]
+        if color == PieceColor.WHITE:
+            keys = map(lambda x: x.upper(), keys)
+        for key in keys:
+            self.castling = self.castling.replace(key, '')
+        if self.castling == "":
+            self.castling = "-"
 
     def get_valid_moves(self, pos: (int, int)):
         piece = self.pieces[pos[0]][pos[1]]
@@ -117,7 +134,8 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        #self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        self.fen = "rnbqkb1r/ppp1p2p/5p2/8/5Pp1/2NPpNPB/PPPBQ2P/R3K2n b Qkq - 19 9"
 
     @property
     def turn(self):

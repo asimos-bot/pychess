@@ -30,7 +30,7 @@ class MoveNotification(Enum):
     BREAK_CASTLING = 'KQ'
 
 
-class PieceDrawer():
+class PieceDrawer:
 
     @classmethod
     def load_images(cls):
@@ -298,8 +298,9 @@ class King(Piece):
                 en_passant,
                 castling)
 
-        # castling performed
         if self.first_move:
+
+            # castling performed
             if abs(old_pos[1] - pos[1]) == 2:
                 castling_type = ['q', 'k'][pos[1] > 3]
                 castling_type = MoveNotification(castling_type)
