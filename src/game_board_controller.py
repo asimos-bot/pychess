@@ -153,14 +153,14 @@ class GameBoardController():
     def convert_to_tuple(self, idx: str):
         if len(idx) != 2:
             return None
-        row = ord(idx[1].lower()) - ord('a')
-        column = int(idx[0])-1
+        column = ord(idx[0].lower()) - ord('a')
+        row = 8-int(idx[1])
         return (row, column)
 
     def convert_to_idx(self, tupl):
         if tupl is None:
             return "-"
-        return chr(tupl[1] + ord('a')) + str(int(tupl[0]+1))
+        return chr(tupl[1] + ord('a')) + str(8-int(tupl[0]))
 
     def clear_board(self):
         self.pieces = []

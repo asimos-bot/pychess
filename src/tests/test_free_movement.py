@@ -115,7 +115,19 @@ class PieceFreeMovementTest(unittest.TestCase):
                     # pawn alone
                     "8/8/8/8/8/8/2P5/8 w KQkq - 0 0",
                     }
-            }
+            },
+            # pawn with en passant ready
+            {
+                "label": "pawn with en passant ready",
+                "pos": (3, 4),
+                "type": PieceCode.PAWN,
+                "color": PieceColor.WHITE,
+                "moves": {(2, 3), (2, 4)},
+                "fens": {
+                    # pawn next to black pawn
+                    "8/8/8/3pP3/8/8/8/8 w KQkq d6 0 0",
+                    }
+            },
             ]
         self.movement_dict_check(moves)
 

@@ -20,14 +20,15 @@ class GameBoard():
             player_black: Player,
             player_white: Player,
             bottom_color: PieceColor = PieceColor.WHITE,
-            headless = False):
+            headless: bool = False):
 
         # load sound effects
         piece_down_sound = Path(__file__).parent.parent.joinpath("assets")
         piece_down_sound = piece_down_sound.joinpath("piece_down.wav")
-        mixer.init()
-        mixer.music.load(piece_down_sound)
-        mixer.music.set_volume(0.7)
+        if not headless:
+            mixer.init()
+            mixer.music.load(piece_down_sound)
+            mixer.music.set_volume(0.7)
 
         self.headless = headless
         self.controller: GameBoardController = GameBoardController()
@@ -95,8 +96,10 @@ class GameBoard():
 
             self.controller.move_piece(old_pos, new_pos)
 
-            mixer.music.stop()
-            mixer.music.play()
+            if not self.headless:
+                mixer.music.stop()
+                mixer.music.play()
+                sleep(0.1)
             self.controller.finish_turn()
 
     def event_capture(self, event):
