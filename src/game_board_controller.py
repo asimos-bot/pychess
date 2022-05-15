@@ -2,6 +2,8 @@
 import threading
 from enum import Enum
 
+from matplotlib.pyplot import pie
+
 from piece import PieceColor, PieceCode, MoveNotification
 from piece import piece_class_from_code
 
@@ -24,6 +26,18 @@ class GameBoardController():
         self.winner = None
         self.pieces = []
         self.set_initial_fen()
+
+    #checking if king is being attacked by an enemy piece
+    def in_check(self, next_moves):
+        for move in next_moves:
+            piece = self.pieces[move[0]][move[1]]
+            print(piece)
+            if piece is not None:
+                if piece.type == PieceCode.KING:
+                    return True
+        return False
+                
+
 
     def move_piece(self, old: (int, int), new: (int, int)):
 

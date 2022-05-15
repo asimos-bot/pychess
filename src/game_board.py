@@ -1,3 +1,4 @@
+from tabnanny import check
 import threading
 
 from game_board_controller import GameBoardController, GameBoardPlayer
@@ -23,6 +24,7 @@ class GameBoard():
             headless: bool = False):
 
         # load sound effects
+        self.check = False
         piece_down_sound = Path(__file__).parent.parent.joinpath("assets")
         piece_down_sound = piece_down_sound.joinpath("piece_down.wav")
         if not headless:
@@ -95,6 +97,9 @@ class GameBoard():
                     return
 
             self.controller.move_piece(old_pos, new_pos)
+            next_moves = self.controller.get_valid_moves(new_pos)
+            self.check = self.controller.in_check(next_moves)
+            print(self.check)
 
             if not self.headless:
                 mixer.music.stop()
