@@ -74,47 +74,45 @@ class GameBoardController():
                     r_piece = self.pieces[old[0]*+direction[0]*counter][old[1]+direction[1]*counter]
                     if r_piece is not None:
                         if r_piece.type == PieceCode.KING and r_piece.color == piece.color:
-                            print("king")
-                            # if r_piece.color == piece.color and r_piece.type == PieceCode.KING:
-                            #     return self.get_valid_moves_if_king_is_in_range(piece,direction,valid_moves,old)
+                            return self.get_valid_moves_if_king_is_in_range(piece,direction,valid_moves,old)
                     counter +=1
                 else:
                     break
         
         return None
 
-    # def get_valid_moves_if_king_is_in_range(self,piece,direction,valid_moves,old):
-    #     enemy_possible_direction = (direction[0]*-1,direction[1]*-1)
-    #     possible_moves = []
-    #     counter = 1
-    #     if(enemy_possible_direction[0] == 0 or enemy_possible_direction[1] == 0):
-    #         while True:
-    #             if (0 <= (old[0]+enemy_possible_direction[0]*counter) <= 7 and 0 <= (old[1]+enemy_possible_direction[1]*counter) <= 7):
-    #                 r_piece = self.pieces[old[0]+enemy_possible_direction[0]*counter][old[1]+enemy_possible_direction[1]*counter]
-    #                 if (r_piece is not None and r_piece.color != piece.color):
-    #                     if(r_piece.type != PieceCode.ROOK or r_piece.type != PieceCode.QUEEN):
-    #                         return None
-    #                     elif((r_piece.type == PieceCode.ROOK or r_piece.type == PieceCode.QUEEN) and (piece.type == PieceCode.ROOK or piece.type == PieceCode.QUEEN)):
-    #                         possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-    #                         return possible_moves        
-    #                 else:
-    #                     if(piece.type == PieceCode.ROOK or piece.type == PieceCode.QUEEN):
-    #                         possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-    #                 counter += 1 
-        # else:
-        #     while True:
-        #         if (0 <= (old[0]+enemy_possible_direction[0]*counter) <= 7 and 0 <= (old[1]+enemy_possible_direction[1]*counter) <= 7):
-        #             r_piece = self.pieces[old[0]+enemy_possible_direction[0]*counter][old[1]+enemy_possible_direction[1]*counter]
-        #             if (r_piece is not None and r_piece.color != piece.color):
-        #                 if(r_piece.type != PieceCode.BISHOP or r_piece.type != PieceCode.QUEEN):
-        #                     return None
-        #                 elif((r_piece.type == PieceCode.BISHOP or r_piece.type == PieceCode.QUEEN) and (piece.type == PieceCode.BISHOP or piece.type == PieceCode.QUEEN)):
-        #                     possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-        #                     return possible_moves  
-        #             else:
-        #                 if(piece.type == PieceCode.BISHOP or piece.type == PieceCode.QUEEN):
-        #                     possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-        #             counter += 1 
+    def get_valid_moves_if_king_is_in_range(self,piece,direction,valid_moves,old):
+        enemy_possible_direction = (direction[0]*-1,direction[1]*-1)
+        possible_moves = []
+        counter = 1
+        if(enemy_possible_direction[0] == 0 or enemy_possible_direction[1] == 0):
+            while True:
+                if (0 <= (old[0]+enemy_possible_direction[0]*counter) <= 7 and 0 <= (old[1]+enemy_possible_direction[1]*counter) <= 7):
+                    r_piece = self.pieces[old[0]+enemy_possible_direction[0]*counter][old[1]+enemy_possible_direction[1]*counter]
+                    if (r_piece is not None and r_piece.color != piece.color):
+                        if(r_piece.type != PieceCode.ROOK or r_piece.type != PieceCode.QUEEN):
+                            return None
+                        elif((r_piece.type == PieceCode.ROOK or r_piece.type == PieceCode.QUEEN) and (piece.type == PieceCode.ROOK or piece.type == PieceCode.QUEEN)):
+                            possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
+                            return possible_moves        
+                    else:
+                        if(piece.type == PieceCode.ROOK or piece.type == PieceCode.QUEEN):
+                            possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
+                    counter += 1 
+        else:
+            while True:
+                if (0 <= (old[0]+enemy_possible_direction[0]*counter) <= 7 and 0 <= (old[1]+enemy_possible_direction[1]*counter) <= 7):
+                    r_piece = self.pieces[old[0]+enemy_possible_direction[0]*counter][old[1]+enemy_possible_direction[1]*counter]
+                    if (r_piece is not None and r_piece.color != piece.color):
+                        if(r_piece.type != PieceCode.BISHOP or r_piece.type != PieceCode.QUEEN):
+                            return None
+                        elif((r_piece.type == PieceCode.BISHOP or r_piece.type == PieceCode.QUEEN) and (piece.type == PieceCode.BISHOP or piece.type == PieceCode.QUEEN)):
+                            possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
+                            return possible_moves  
+                    else:
+                        if(piece.type == PieceCode.BISHOP or piece.type == PieceCode.QUEEN):
+                            possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
+                    counter += 1 
 
 
                     
