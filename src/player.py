@@ -19,7 +19,7 @@ class Player(ABC):
             self,
             piece_info_func,
             adjust_idxs_func,
-            get_valid_moves_func):
+            get_legal_moves_func):
         pass
 
     @abstractmethod
@@ -29,7 +29,7 @@ class Player(ABC):
             piece_info_func,
             tile_info_func,
             adjust_idxs_func,
-            get_valid_moves_func):
+            get_legal_moves_func):
         pass
 
     @abstractmethod
@@ -55,15 +55,15 @@ class RandomAI(Player):
             self,
             piece_info_func,
             adjust_idxs_func,
-            get_valid_moves_func):
-        valid_moves = set()
+            get_legal_moves_func):
+        legal_moves = set()
         for i in range(8):
             for j in range(8):
                 piece_info = piece_info_func((i, j))
                 if piece_info is not None and piece_info[1] == self.color:
-                    for move in get_valid_moves_func((i, j)):
-                        valid_moves.add(((i, j), move))
-        choosen_move = random.sample(valid_moves, 1)[0]
+                    for move in get_legal_moves_func((i, j)):
+                        legal_moves.add(((i, j), move))
+        choosen_move = random.sample(legal_moves, 1)[0]
         return choosen_move
 
     def draw(
@@ -72,7 +72,7 @@ class RandomAI(Player):
             piece_info_func,
             tile_info_func,
             adjust_idxs_func,
-            get_valid_moves_func):
+            get_legal_moves_func):
         pass
 
     def event_capture(
@@ -118,7 +118,7 @@ class Human(Player):
             self,
             piece_info_func,
             adjust_idxs_func,
-            get_valid_moves_func):
+            get_legal_moves_func):
         # wait until the move is done
         while self._to is None and self.playing:
             time.sleep(0.1)
@@ -138,7 +138,7 @@ class Human(Player):
             piece_info_func,
             tile_info_func,
             adjust_idxs_func,
-            get_valid_moves_func):
+            get_legal_moves_func):
         if self._from is not None:
             # highlight selected tile
             tile_idxs = self._from
@@ -151,9 +151,9 @@ class Human(Player):
                     border_radius=10)
 
             control_idxs = adjust_idxs_func(self._from)
-            for valid_move in get_valid_moves_func(control_idxs):
-                tile_of_valid_move = adjust_idxs_func(valid_move)
-                tile_rect, from_tile_surf = tile_info_func(tile_of_valid_move)
+            for legal_move in get_legal_moves_func(control_idxs):
+                tile_of_legal_move = adjust_idxs_func(legal_move)
+                tile_rect, from_tile_surf = tile_info_func(tile_of_legal_move)
                 from_tile_surf = from_tile_surf
                 pygame.draw.rect(
                         from_tile_surf,

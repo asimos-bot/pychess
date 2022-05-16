@@ -73,24 +73,24 @@ class GameBoard():
                 self.controller.piece_info,
                 self.graphical.tile_info,
                 self.graphical.adjust_idxs,
-                self.controller.get_valid_moves)
+                self.controller.get_legal_moves)
 
     def _make_moves_async(self):
 
         while self.controller.winner is None:
-            valid = False
+            valid_move = False
             old_pos = None
             new_pos = None
-            while not valid:
+            while not valid_move:
                 move = self.player.make_move(
                         self.controller.piece_info,
                         self.graphical.adjust_idxs,
-                        self.controller.get_valid_moves)
+                        self.controller.get_legal_moves)
                 if move is not None:
                     old_pos, new_pos = move
-                    valid_moves = self.controller.get_valid_moves(old_pos)
+                    valid_moves = self.controller.get_legal_moves(old_pos)
                     if new_pos in valid_moves:
-                        valid = True
+                        valid_move = True
                 else:
                     return
 

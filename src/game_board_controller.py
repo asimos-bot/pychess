@@ -25,6 +25,11 @@ class GameBoardController():
         self.pieces = []
         self.set_initial_fen()
 
+    def copy(self):
+        controller = GameBoardController()
+        controller.fen = self.fen
+        return controller
+
     def move_piece(self, old: (int, int), new: (int, int)):
 
         # notify piece of the move, so it can update its internal state
@@ -42,7 +47,18 @@ class GameBoardController():
 
         self.process_move_notification(piece, notification, data, new)
 
-        print(self.fen)
+        self.update_pseudo_legal_moves()
+
+    def update_pseudo_legal_moves(self):
+
+        for i, row in enumerate(self.pieces):
+            for j, piece in enumerate(row):
+                if piece is not None:
+                    piece.update_pseudo_legal_moves(
+                        (i, j),
+                        self.piece_info,
+                        self.en_passant,
+                        self.get_color_castlings(piece.color))
 
     def process_move_notification(self, piece, notification, data, new_pos):
 
@@ -103,14 +119,13 @@ class GameBoardController():
         if self.castling == "":
             self.castling = "-"
 
-    def get_valid_moves(self, pos: (int, int)):
+    def get_legal_moves(self, pos: (int, int)):
+        return self.get_pseudo_legal_moves(pos)
+
+    def get_pseudo_legal_moves(self, pos: (int, int)):
         piece = self.pieces[pos[0]][pos[1]]
         if piece is not None:
-            return piece.get_valid_moves(
-                    pos,
-                    self.piece_info,
-                    self.en_passant,
-                    self.get_color_castlings(piece.color))
+            return piece.get_pseudo_legal_moves()
 
     def finish_turn(self):
         self._turn_lock.acquire()
@@ -241,3 +256,5 @@ class GameBoardController():
         self.en_passant = self.convert_to_tuple(attrs[2])
         self.halfmoves = int(attrs[3])
         self.fullmoves = int(attrs[4])
+
+        self.update_pseudo_legal_moves()
