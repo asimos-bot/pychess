@@ -31,7 +31,6 @@ class GameBoardController():
     def in_check(self, next_moves):
         for move in next_moves:
             piece = self.pieces[move[0]][move[1]]
-            print(piece)
             if piece is not None:
                 if piece.type == PieceCode.KING:
                     return True
@@ -43,23 +42,81 @@ class GameBoardController():
         valid_moves_for_no_check = []
         if piece.type != PieceCode.KING:
             return valid_moves
+            # king_in_range_valid_moves = self.get_king_index_and_return_valid_moves(piece,valid_moves,old)
+            # if king_in_range_valid_moves is None:
+            #     return valid_moves
+            # else:
+            #     return king_in_range_valid_moves
         for board_x in self.pieces:
             for enemy_piece in board_x:
                 if enemy_piece is not None:
-                    if piece.color != enemy_piece.color and piece.type == PieceCode.KING:
-                        moves = self.get_valid_moves(enemy_piece.pos, is_king=1)
-                        for move in moves:
-                            if move not in enemy_moves:
-                                enemy_moves.append(move)    
-        
+                    if piece.color != enemy_piece.color:
+                        if piece.type == PieceCode.KING:
+                            moves = self.get_valid_moves(enemy_piece.pos, is_king=1)
+                            for move in moves:
+                                if move not in enemy_moves:
+                                    enemy_moves.append(move)    
+                            
         for move in valid_moves:
             if move not in enemy_moves:
                 valid_moves_for_no_check.append(move)
-        
-        print(valid_moves_for_no_check)
 
         return valid_moves_for_no_check
         
+    def get_king_index_and_return_valid_moves(self,piece,valid_moves,old):
+        directions = [(0,1),(1,0),(0,-1),(-1,0),(1,1),(-1,-1),(-1,1),(1,-1)]
+        for direction in directions:
+            counter = 1
+            while True:
+                if (0 <= (old[0]*+direction[0]*counter) <= 7 and 0 <= (old[1]+direction[1]*counter) <= 7):
+                    coord = (old[0]*+direction[0]*counter,old[1]+direction[1]*counter)
+                    print(coord)
+                    r_piece = self.pieces[old[0]*+direction[0]*counter][old[1]+direction[1]*counter]
+                    if r_piece is not None:
+                        if r_piece.type == PieceCode.KING and r_piece.color == piece.color:
+                            print("king")
+                            # if r_piece.color == piece.color and r_piece.type == PieceCode.KING:
+                            #     return self.get_valid_moves_if_king_is_in_range(piece,direction,valid_moves,old)
+                    counter +=1
+                else:
+                    break
+        
+        return None
+
+    # def get_valid_moves_if_king_is_in_range(self,piece,direction,valid_moves,old):
+    #     enemy_possible_direction = (direction[0]*-1,direction[1]*-1)
+    #     possible_moves = []
+    #     counter = 1
+    #     if(enemy_possible_direction[0] == 0 or enemy_possible_direction[1] == 0):
+    #         while True:
+    #             if (0 <= (old[0]+enemy_possible_direction[0]*counter) <= 7 and 0 <= (old[1]+enemy_possible_direction[1]*counter) <= 7):
+    #                 r_piece = self.pieces[old[0]+enemy_possible_direction[0]*counter][old[1]+enemy_possible_direction[1]*counter]
+    #                 if (r_piece is not None and r_piece.color != piece.color):
+    #                     if(r_piece.type != PieceCode.ROOK or r_piece.type != PieceCode.QUEEN):
+    #                         return None
+    #                     elif((r_piece.type == PieceCode.ROOK or r_piece.type == PieceCode.QUEEN) and (piece.type == PieceCode.ROOK or piece.type == PieceCode.QUEEN)):
+    #                         possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
+    #                         return possible_moves        
+    #                 else:
+    #                     if(piece.type == PieceCode.ROOK or piece.type == PieceCode.QUEEN):
+    #                         possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
+    #                 counter += 1 
+        # else:
+        #     while True:
+        #         if (0 <= (old[0]+enemy_possible_direction[0]*counter) <= 7 and 0 <= (old[1]+enemy_possible_direction[1]*counter) <= 7):
+        #             r_piece = self.pieces[old[0]+enemy_possible_direction[0]*counter][old[1]+enemy_possible_direction[1]*counter]
+        #             if (r_piece is not None and r_piece.color != piece.color):
+        #                 if(r_piece.type != PieceCode.BISHOP or r_piece.type != PieceCode.QUEEN):
+        #                     return None
+        #                 elif((r_piece.type == PieceCode.BISHOP or r_piece.type == PieceCode.QUEEN) and (piece.type == PieceCode.BISHOP or piece.type == PieceCode.QUEEN)):
+        #                     possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
+        #                     return possible_moves  
+        #             else:
+        #                 if(piece.type == PieceCode.BISHOP or piece.type == PieceCode.QUEEN):
+        #                     possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
+        #             counter += 1 
+
+
                     
         
 
@@ -170,7 +227,7 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        self.fen = "rnbqkbnr/8/8/8/8/8/8/RNBQKBNR w KQkq - 0 0"
 
     @property
     def turn(self):

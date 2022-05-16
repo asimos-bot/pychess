@@ -199,7 +199,6 @@ class Pawn(Piece):
         for diagonal in diagonals:
             if 0 <= diagonal[0] <= 7 and 0 <= diagonal[1] <= 7:
                 piece = piece_info_func(diagonal)
-                print(piece)
                 if (piece is not None and piece[1] != self.color) or (is_king == 1 and piece is None):
                     valid_moves.add(diagonal)
 
