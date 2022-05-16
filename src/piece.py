@@ -77,6 +77,7 @@ class Piece(ABC):
     def __init__(self, color: PieceColor, pos: (int, int)):
         self.color = color
         self.pos = pos
+        self.pseudo_legal_moves = set()
 
     @property
     @abstractmethod
@@ -84,13 +85,16 @@ class Piece(ABC):
         pass
 
     @abstractmethod
-    def get_valid_moves(
+    def update_pseudo_legal_moves(
             self,
             pos: (int, int),
             piece_info_func,
             en_passant,
             castling):
         pass
+
+    def get_pseudo_legal_moves(self):
+        return self.pseudo_legal_moves
 
     # called before the move actually happens
     # used to update internal piece state and
@@ -149,16 +153,15 @@ class Pawn(Piece):
         self.first_move = False
         return notify
 
-    def get_valid_moves(
+    def update_pseudo_legal_moves(
             self,
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling
-            ,is_king=0):
-        valid_moves = set()
+            castling):
+        pseudo_legal_moves = set()
 
-        def add_if_valid(_set, pos):
+        def add_if_pseudo_legal(_set, pos):
             i, j = pos
             if 0 <= i <= 7 and 0 <= j <= 7:
                 piece = piece_info_func
@@ -170,7 +173,7 @@ class Pawn(Piece):
         forward = (pos[0] + self.direction, pos[1])
         forward_available = False
         if 0 <= forward[0] <= 7 and piece_info_func(forward) is None:
-            valid_moves.add(forward)
+            pseudo_legal_moves.add(forward)
             forward_available = True
 
         # double start check
@@ -179,7 +182,7 @@ class Pawn(Piece):
             inside_board = 0 <= double_forward[0] <= 7
             double_forward_available = piece_info_func(double_forward) is None
             if inside_board and double_forward_available and forward_available:
-                valid_moves.add(double_forward)
+                pseudo_legal_moves.add(double_forward)
 
         # there is an en passant
         if en_passant is not None:
@@ -187,7 +190,7 @@ class Pawn(Piece):
             if en_passant[0] == self.pos[0] + self.direction:
                 # column position confirms it is possible
                 if abs(en_passant[1] - self.pos[1]) == 1:
-                    valid_moves.add(en_passant)
+                    pseudo_legal_moves.add(en_passant)
 
         # eat diagonals
         diagonal_1 = (pos[0] + self.direction, pos[1] + 1)
@@ -199,10 +202,10 @@ class Pawn(Piece):
         for diagonal in diagonals:
             if 0 <= diagonal[0] <= 7 and 0 <= diagonal[1] <= 7:
                 piece = piece_info_func(diagonal)
-                if (piece is not None and piece[1] != self.color) or (is_king == 1 and piece is None):
-                    valid_moves.add(diagonal)
+                if piece is not None and piece[1] != self.color:
+                    pseudo_legal_moves.add(diagonal)
 
-        return valid_moves
+        self.pseudo_legal_moves = pseudo_legal_moves
 
 
 class Knight(Piece):
@@ -211,14 +214,13 @@ class Knight(Piece):
     def type(self):
         return PieceCode.KNIGHT
 
-    def get_valid_moves(
+    def update_pseudo_legal_moves(
             self,
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling
-            ,is_king=0):
-        valid_moves = set()
+            castling):
+        pseudo_legal_moves = set()
         directions = [
                 (2, 1),
                 (2, -1),
@@ -237,10 +239,10 @@ class Knight(Piece):
             piece = piece_info_func((row, column))
             if piece is not None:
                 if piece[1] != self.color:
-                    valid_moves.add((row, column))
+                    pseudo_legal_moves.add((row, column))
             else:
-                valid_moves.add((row, column))
-        return valid_moves
+                pseudo_legal_moves.add((row, column))
+        self.pseudo_legal_moves = pseudo_legal_moves
 
 
 class Queen(Piece):
@@ -249,14 +251,13 @@ class Queen(Piece):
     def type(self):
         return PieceCode.QUEEN
 
-    def get_valid_moves(
+    def update_pseudo_legal_moves(
             self,
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling
-            ,is_king=0):
-        valid_moves = set()
+            castling):
+        pseudo_legal_moves = set()
         directions = [
                 (-1, 0),
                 (0, 1),
@@ -278,11 +279,11 @@ class Queen(Piece):
                 if piece is not None:
                     directions.remove(direction)
                     if piece[1] != self.color:
-                        valid_moves.add((row, column))
+                        pseudo_legal_moves.add((row, column))
                 else:
-                    valid_moves.add((row, column))
+                    pseudo_legal_moves.add((row, column))
             distance += 1
-        return valid_moves
+        self.pseudo_legal_moves = pseudo_legal_moves
 
 
 class King(Piece):
@@ -330,14 +331,13 @@ class King(Piece):
     def type(self):
         return PieceCode.KING
 
-    def get_valid_moves(
+    def update_pseudo_legal_moves(
             self,
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling
-            ,is_king=0):
-        valid_moves = set()
+            castling):
+        pseudo_legal_moves = set()
         directions = [
                 (-1, 0),
                 (0, 1),
@@ -355,9 +355,9 @@ class King(Piece):
             piece = piece_info_func((row, column))
             if piece is not None:
                 if piece[1] != self.color:
-                    valid_moves.add((row, column))
+                    pseudo_legal_moves.add((row, column))
             else:
-                valid_moves.add((row, column))
+                pseudo_legal_moves.add((row, column))
 
         # check if castling is available
         if self.first_move:
@@ -380,9 +380,9 @@ class King(Piece):
                         has_piece_between = True
                         break
                 if not has_piece_between:
-                    valid_moves.add((pos[0], pos[1] + 2 * direction))
+                    pseudo_legal_moves.add((pos[0], pos[1] + 2 * direction))
 
-        return valid_moves
+        self.pseudo_legal_moves = pseudo_legal_moves
 
 
 class Rook(Piece):
@@ -431,14 +431,13 @@ class Rook(Piece):
     def type(self):
         return PieceCode.ROOK
 
-    def get_valid_moves(
+    def update_pseudo_legal_moves(
             self,
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling
-            ,is_king=0):
-        valid_moves = set()
+            castling):
+        pseudo_legal_moves = set()
         directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
         distance = 1
         while len(directions) > 0:
@@ -452,11 +451,11 @@ class Rook(Piece):
                 if piece is not None:
                     directions.remove(direction)
                     if piece[1] != self.color:
-                        valid_moves.add((row, column))
+                        pseudo_legal_moves.add((row, column))
                 else:
-                    valid_moves.add((row, column))
+                    pseudo_legal_moves.add((row, column))
             distance += 1
-        return valid_moves
+        self.pseudo_legal_moves = pseudo_legal_moves
 
 
 class Bishop(Piece):
@@ -465,14 +464,13 @@ class Bishop(Piece):
     def type(self):
         return PieceCode.BISHOP
 
-    def get_valid_moves(
+    def update_pseudo_legal_moves(
             self,
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling
-            ,is_king=0):
-        valid_moves = set()
+            castling):
+        pseudo_legal_moves = set()
         directions = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
         distance = 1
         while len(directions) > 0:
@@ -486,11 +484,11 @@ class Bishop(Piece):
                 if piece is not None:
                     directions.remove(direction)
                     if piece[1] != self.color:
-                        valid_moves.add((row, column))
+                        pseudo_legal_moves.add((row, column))
                 else:
-                    valid_moves.add((row, column))
+                    pseudo_legal_moves.add((row, column))
             distance += 1
-        return valid_moves
+        self.pseudo_legal_moves = pseudo_legal_moves
 
 
 def piece_class_from_code(code: PieceCode):

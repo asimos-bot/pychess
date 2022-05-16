@@ -2,8 +2,6 @@
 import threading
 from enum import Enum
 
-from matplotlib.pyplot import pie
-
 from piece import PieceColor, PieceCode, MoveNotification
 from piece import piece_class_from_code
 
@@ -35,34 +33,35 @@ class GameBoardController():
                 if piece.type == PieceCode.KING:
                     return True
         return False
-    
-    def get_non_check_moves(self,old,valid_moves):
-        piece = self.pieces[old[0]][old[1]]
+
+    def get_non_check_moves(self, pos):
+        pseudo_legal_moves = self.get_pseudo_legal_moves(pos)
+        piece = self.pieces[pos[0]][pos[1]]
         enemy_moves = []
         valid_moves_for_no_check = []
         if piece.type != PieceCode.KING:
-            return valid_moves
-            # king_in_range_valid_moves = self.get_king_index_and_return_valid_moves(piece,valid_moves,old)
-            # if king_in_range_valid_moves is None:
-            #     return valid_moves
-            # else:
-            #     return king_in_range_valid_moves
-        for board_x in self.pieces:
-            for enemy_piece in board_x:
+            return pseudo_legal_moves
+            king_in_range_valid_moves = self.get_king_index_and_return_valid_moves(piece, pseudo_legal_moves, pos)
+            if king_in_range_valid_moves is None:
+                return pseudo_legal_moves
+            else:
+                return king_in_range_valid_moves
+        for board_row in self.pieces:
+            for enemy_piece in board_row:
                 if enemy_piece is not None:
                     if piece.color != enemy_piece.color:
                         if piece.type == PieceCode.KING:
-                            moves = self.get_valid_moves(enemy_piece.pos, is_king=1)
+                            moves = self.get_pseudo_legal_moves(enemy_piece.pos)
                             for move in moves:
                                 if move not in enemy_moves:
-                                    enemy_moves.append(move)    
+                                    enemy_moves.append(move)
                             
-        for move in valid_moves:
+        for move in pseudo_legal_moves:
             if move not in enemy_moves:
                 valid_moves_for_no_check.append(move)
 
         return valid_moves_for_no_check
-        
+
     def get_king_index_and_return_valid_moves(self,piece,valid_moves,old):
         directions = [(0,1),(1,0),(0,-1),(-1,0),(1,1),(-1,-1),(-1,1),(1,-1)]
         for direction in directions:
@@ -78,7 +77,7 @@ class GameBoardController():
                     counter +=1
                 else:
                     break
-        
+
         return None
 
     def get_valid_moves_if_king_is_in_range(self,piece,direction,valid_moves,old):
@@ -94,11 +93,11 @@ class GameBoardController():
                             return None
                         elif((r_piece.type == PieceCode.ROOK or r_piece.type == PieceCode.QUEEN) and (piece.type == PieceCode.ROOK or piece.type == PieceCode.QUEEN)):
                             possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-                            return possible_moves        
+                            return possible_moves
                     else:
                         if(piece.type == PieceCode.ROOK or piece.type == PieceCode.QUEEN):
                             possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-                    counter += 1 
+                    counter += 1
         else:
             while True:
                 if (0 <= (old[0]+enemy_possible_direction[0]*counter) <= 7 and 0 <= (old[1]+enemy_possible_direction[1]*counter) <= 7):
@@ -108,16 +107,16 @@ class GameBoardController():
                             return None
                         elif((r_piece.type == PieceCode.BISHOP or r_piece.type == PieceCode.QUEEN) and (piece.type == PieceCode.BISHOP or piece.type == PieceCode.QUEEN)):
                             possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-                            return possible_moves  
+                            return possible_moves
                     else:
                         if(piece.type == PieceCode.BISHOP or piece.type == PieceCode.QUEEN):
                             possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-                    counter += 1 
+                    counter += 1
 
-
-                    
-        
-
+    def copy(self):
+        controller = GameBoardController()
+        controller.fen = self.fen
+        return controller
 
     def move_piece(self, old: (int, int), new: (int, int)):
 
@@ -136,7 +135,18 @@ class GameBoardController():
 
         self.process_move_notification(piece, notification, data, new)
 
-        print(self.fen)
+        self.update_pseudo_legal_moves()
+
+    def update_pseudo_legal_moves(self):
+
+        for i, row in enumerate(self.pieces):
+            for j, piece in enumerate(row):
+                if piece is not None:
+                    piece.update_pseudo_legal_moves(
+                        (i, j),
+                        self.piece_info,
+                        self.en_passant,
+                        self.get_color_castlings(piece.color))
 
     def process_move_notification(self, piece, notification, data, new_pos):
 
@@ -197,15 +207,14 @@ class GameBoardController():
         if self.castling == "":
             self.castling = "-"
 
-    def get_valid_moves(self, pos: (int, int), is_king=0):
+    def get_legal_moves(self, pos: (int, int)):
+        # return self.get_pseudo_legal_moves(pos)
+        return self.get_non_check_moves(pos)
+
+    def get_pseudo_legal_moves(self, pos: (int, int)):
         piece = self.pieces[pos[0]][pos[1]]
         if piece is not None:
-            return piece.get_valid_moves(
-                    pos,
-                    self.piece_info,
-                    self.en_passant,
-                    self.get_color_castlings(piece.color)
-                    ,is_king)
+            return piece.get_pseudo_legal_moves()
 
     def finish_turn(self):
         self._turn_lock.acquire()
@@ -336,3 +345,5 @@ class GameBoardController():
         self.en_passant = self.convert_to_tuple(attrs[2])
         self.halfmoves = int(attrs[3])
         self.fullmoves = int(attrs[4])
+
+        self.update_pseudo_legal_moves()

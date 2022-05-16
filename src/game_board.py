@@ -1,4 +1,3 @@
-from tabnanny import check
 import threading
 
 from game_board_controller import GameBoardController, GameBoardPlayer
@@ -24,7 +23,6 @@ class GameBoard():
             headless: bool = False):
 
         # load sound effects
-        self.check = False
         piece_down_sound = Path(__file__).parent.parent.joinpath("assets")
         piece_down_sound = piece_down_sound.joinpath("piece_down.wav")
         if not headless:
@@ -75,34 +73,28 @@ class GameBoard():
                 self.controller.piece_info,
                 self.graphical.tile_info,
                 self.graphical.adjust_idxs,
-                self.controller.get_valid_moves,
-                self.controller.get_non_check_moves)
+                self.controller.get_legal_moves)
 
     def _make_moves_async(self):
 
         while self.controller.winner is None:
-            valid = False
+            valid_move = False
             old_pos = None
             new_pos = None
-
-            while not valid:
+            while not valid_move:
                 move = self.player.make_move(
                         self.controller.piece_info,
                         self.graphical.adjust_idxs,
-                        self.controller.get_valid_moves,
-                        self.controller.get_non_check_moves)
+                        self.controller.get_legal_moves)
                 if move is not None:
                     old_pos, new_pos = move
-                    valid_moves = self.controller.get_valid_moves(old_pos)
-                    non_check_moves = self.controller.get_non_check_moves(old_pos, valid_moves)
-                    if new_pos in non_check_moves:
-                        valid = True
+                    valid_moves = self.controller.get_legal_moves(old_pos)
+                    if new_pos in valid_moves:
+                        valid_move = True
                 else:
                     return
 
             self.controller.move_piece(old_pos, new_pos)
-            next_moves = self.controller.get_valid_moves(new_pos)
-            self.check = self.controller.in_check(next_moves)
 
             if not self.headless:
                 mixer.music.stop()
