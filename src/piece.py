@@ -154,7 +154,8 @@ class Pawn(Piece):
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling):
+            castling
+            ,is_king=0):
         valid_moves = set()
 
         def add_if_valid(_set, pos):
@@ -198,7 +199,8 @@ class Pawn(Piece):
         for diagonal in diagonals:
             if 0 <= diagonal[0] <= 7 and 0 <= diagonal[1] <= 7:
                 piece = piece_info_func(diagonal)
-                if piece is not None and piece[1] != self.color:
+                print(piece)
+                if (piece is not None and piece[1] != self.color) or (is_king == 1 and piece is None):
                     valid_moves.add(diagonal)
 
         return valid_moves
@@ -215,7 +217,8 @@ class Knight(Piece):
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling):
+            castling
+            ,is_king=0):
         valid_moves = set()
         directions = [
                 (2, 1),
@@ -252,7 +255,8 @@ class Queen(Piece):
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling):
+            castling
+            ,is_king=0):
         valid_moves = set()
         directions = [
                 (-1, 0),
@@ -332,7 +336,8 @@ class King(Piece):
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling):
+            castling
+            ,is_king=0):
         valid_moves = set()
         directions = [
                 (-1, 0),
@@ -432,7 +437,8 @@ class Rook(Piece):
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling):
+            castling
+            ,is_king=0):
         valid_moves = set()
         directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
         distance = 1
@@ -465,7 +471,8 @@ class Bishop(Piece):
             pos: (int, int),
             piece_info_func,
             en_passant,
-            castling):
+            castling
+            ,is_king=0):
         valid_moves = set()
         directions = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
         distance = 1

@@ -36,7 +36,32 @@ class GameBoardController():
                 if piece.type == PieceCode.KING:
                     return True
         return False
-                
+    
+    def get_non_check_moves(self,old,valid_moves):
+        piece = self.pieces[old[0]][old[1]]
+        enemy_moves = []
+        valid_moves_for_no_check = []
+        if piece.type != PieceCode.KING:
+            return valid_moves
+        for board_x in self.pieces:
+            for enemy_piece in board_x:
+                if enemy_piece is not None:
+                    if piece.color != enemy_piece.color and piece.type == PieceCode.KING:
+                        moves = self.get_valid_moves(enemy_piece.pos, is_king=1)
+                        for move in moves:
+                            if move not in enemy_moves:
+                                enemy_moves.append(move)    
+        
+        for move in valid_moves:
+            if move not in enemy_moves:
+                valid_moves_for_no_check.append(move)
+        
+        print(valid_moves_for_no_check)
+
+        return valid_moves_for_no_check
+        
+                    
+        
 
 
     def move_piece(self, old: (int, int), new: (int, int)):
@@ -117,14 +142,15 @@ class GameBoardController():
         if self.castling == "":
             self.castling = "-"
 
-    def get_valid_moves(self, pos: (int, int)):
+    def get_valid_moves(self, pos: (int, int), is_king=0):
         piece = self.pieces[pos[0]][pos[1]]
         if piece is not None:
             return piece.get_valid_moves(
                     pos,
                     self.piece_info,
                     self.en_passant,
-                    self.get_color_castlings(piece.color))
+                    self.get_color_castlings(piece.color)
+                    ,is_king)
 
     def finish_turn(self):
         self._turn_lock.acquire()

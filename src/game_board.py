@@ -75,7 +75,8 @@ class GameBoard():
                 self.controller.piece_info,
                 self.graphical.tile_info,
                 self.graphical.adjust_idxs,
-                self.controller.get_valid_moves)
+                self.controller.get_valid_moves,
+                self.controller.get_non_check_moves)
 
     def _make_moves_async(self):
 
@@ -83,15 +84,18 @@ class GameBoard():
             valid = False
             old_pos = None
             new_pos = None
+
             while not valid:
                 move = self.player.make_move(
                         self.controller.piece_info,
                         self.graphical.adjust_idxs,
-                        self.controller.get_valid_moves)
+                        self.controller.get_valid_moves,
+                        self.controller.get_non_check_moves)
                 if move is not None:
                     old_pos, new_pos = move
                     valid_moves = self.controller.get_valid_moves(old_pos)
-                    if new_pos in valid_moves:
+                    non_check_moves = self.controller.get_non_check_moves(old_pos, valid_moves)
+                    if new_pos in non_check_moves:
                         valid = True
                 else:
                     return
@@ -99,7 +103,6 @@ class GameBoard():
             self.controller.move_piece(old_pos, new_pos)
             next_moves = self.controller.get_valid_moves(new_pos)
             self.check = self.controller.in_check(next_moves)
-            print(self.check)
 
             if not self.headless:
                 mixer.music.stop()
