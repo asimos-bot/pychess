@@ -2,7 +2,7 @@
 import threading
 from enum import Enum
 
-from piece import PieceColor, PieceCode, MoveNotification
+from piece import PieceColor, PieceCode, Piece, MoveNotification
 from piece import piece_class_from_code
 
 
@@ -15,7 +15,7 @@ class GameBoardPlayer(Enum):
 class GameBoardController():
     def __init__(self):
         # fen code attributes
-        self._turn = GameBoardPlayer.WHITE
+        self._turn: PieceColor = GameBoardPlayer.WHITE
         self._turn_lock = threading.Lock()
         self.castling = 'KQkq'
         self.halfmoves = 0
@@ -23,6 +23,16 @@ class GameBoardController():
         self.en_passant = None
         self.winner = None
         self.pieces = []
+
+        self.pieces_by_color = {
+                PieceColor.WHITE: set(),
+                PieceColor.BLACK: set()
+                }
+
+        self.attackable_tiles_from = {
+                PieceColor.WHITE: set(),
+                PieceColor.BLACK: set()
+                }
         self.set_initial_fen()
 
     def copy(self):
@@ -42,8 +52,16 @@ class GameBoardController():
                 self.get_color_castlings(piece.color))
 
         # move piece
+        # remove piece from pieces_by_color set
+        if self.pieces[new[0]][new[1]] is not None:
+            enemy_color = self.opposite_color(piece.color)
+            self.pieces_by_color[enemy_color].remove(new)
+
         self.pieces[new[0]][new[1]] = piece
         self.pieces[old[0]][old[1]] = None
+
+        self.pieces_by_color[piece.color].remove(old)
+        self.pieces_by_color[piece.color].add(new)
 
         self.process_move_notification(piece, notification, data, new)
 
@@ -51,14 +69,15 @@ class GameBoardController():
 
     def update_pseudo_legal_moves(self):
 
-        for i, row in enumerate(self.pieces):
-            for j, piece in enumerate(row):
-                if piece is not None:
-                    piece.update_pseudo_legal_moves(
-                        (i, j),
-                        self.piece_info,
-                        self.en_passant,
-                        self.get_color_castlings(piece.color))
+        for color in PieceColor:
+            for piece_idx in self.pieces_by_color[color]:
+                piece: Piece = self.pieces[piece_idx[0]][piece_idx[1]]
+                piece.update_pseudo_legal_moves(
+                    self.piece_info,
+                    self.en_passant,
+                    self.get_color_castlings(piece.color))
+                for attack_tile in piece.get_pseudo_legal_moves():
+                    self.attackable_tiles_from[color].add(attack_tile)
 
     def process_move_notification(self, piece, notification, data, new_pos):
 
@@ -120,7 +139,32 @@ class GameBoardController():
             self.castling = "-"
 
     def get_legal_moves(self, pos: (int, int)):
-        return self.get_pseudo_legal_moves(pos)
+
+        piece_info = self.piece_info(pos)
+        if piece_info is None:
+            return set()
+        piece_type, piece_color = piece_info
+        legal_moves = set()
+        # every possible pseudo-legal move you can make from this piece
+        for move in self.get_pseudo_legal_moves(pos):
+            # create a new controller for each move
+            tmp_board: GameBoardController = self.copy()
+            # make the move in this temporary controller
+            tmp_board.move_piece(pos, move)
+            # iterate over every possible enemy move in this temporary
+            # controller, and add this move if no enemy move can kill
+            # our king
+            enemy_color = self.opposite_color(piece_color)
+            enemy_attack_tiles = tmp_board.attackable_tiles_from[enemy_color]
+            legal_move = True
+            for enemy_attack_tile in enemy_attack_tiles:
+                attack_info = tmp_board.piece_info(enemy_attack_tile)
+                if attack_info == (PieceCode.KING, piece_color):
+                    legal_move = False
+            del tmp_board
+            if legal_move:
+                legal_moves.add(move)
+        return legal_moves
 
     def get_pseudo_legal_moves(self, pos: (int, int)):
         piece = self.pieces[pos[0]][pos[1]]
@@ -178,11 +222,27 @@ class GameBoardController():
         return chr(tupl[1] + ord('a')) + str(8-int(tupl[0]))
 
     def clear_board(self):
+
         self.pieces = []
         for i in range(8):
             self.pieces.append([])
             for j in range(8):
                 self.pieces[i].append(None)
+
+        self.pieces_by_color = {
+                PieceColor.WHITE: set(),
+                PieceColor.BLACK: set()
+                }
+
+        self.attackable_tiles_from = {
+                PieceColor.BLACK: set(),
+                PieceColor.WHITE: set()
+                }
+
+    def opposite_color(self, color: PieceColor):
+        if color == PieceColor.WHITE:
+            return PieceColor.BLACK
+        return PieceColor.WHITE
 
     @property
     def fen(self):
@@ -230,11 +290,13 @@ class GameBoardController():
             j = 0
             for c in row:
                 if c.upper() in 'PNBRQK':
-                    color = PieceColor.BLACK
+                    color: PieceColor = PieceColor.BLACK
                     if c.isupper():
                         color = PieceColor.WHITE
                     piece_class = piece_class_from_code(PieceCode(c.upper()))
-                    self.pieces[i][j] = piece_class(color, (i, j))
+                    piece = piece_class(color, (i, j))
+                    self.pieces[i][j] = piece
+                    self.pieces_by_color[color].add(piece.pos)
                     j += 1
                 else:
                     j += int(c)

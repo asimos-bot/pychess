@@ -155,7 +155,6 @@ class Pawn(Piece):
 
     def update_pseudo_legal_moves(
             self,
-            pos: (int, int),
             piece_info_func,
             en_passant,
             castling):
@@ -170,7 +169,7 @@ class Pawn(Piece):
                     _set.add(pos)
 
         # forward
-        forward = (pos[0] + self.direction, pos[1])
+        forward = (self.pos[0] + self.direction, self.pos[1])
         forward_available = False
         if 0 <= forward[0] <= 7 and piece_info_func(forward) is None:
             pseudo_legal_moves.add(forward)
@@ -178,7 +177,7 @@ class Pawn(Piece):
 
         # double start check
         if self.first_move:
-            double_forward = (pos[0] + 2 * self.direction, pos[1])
+            double_forward = (self.pos[0] + 2 * self.direction, self.pos[1])
             inside_board = 0 <= double_forward[0] <= 7
             double_forward_available = piece_info_func(double_forward) is None
             if inside_board and double_forward_available and forward_available:
@@ -193,8 +192,8 @@ class Pawn(Piece):
                     pseudo_legal_moves.add(en_passant)
 
         # eat diagonals
-        diagonal_1 = (pos[0] + self.direction, pos[1] + 1)
-        diagonal_2 = (pos[0] + self.direction, pos[1] - 1)
+        diagonal_1 = (self.pos[0] + self.direction, self.pos[1] + 1)
+        diagonal_2 = (self.pos[0] + self.direction, self.pos[1] - 1)
         diagonals = (diagonal_1, diagonal_2)
 
         # check if pieces from the other color are in a frontal
@@ -216,7 +215,6 @@ class Knight(Piece):
 
     def update_pseudo_legal_moves(
             self,
-            pos: (int, int),
             piece_info_func,
             en_passant,
             castling):
@@ -231,8 +229,8 @@ class Knight(Piece):
                 (1, -2),
                 (-1, -2)]
         for direction in directions:
-            row = pos[0] + direction[0]
-            column = pos[1] + direction[1]
+            row = self.pos[0] + direction[0]
+            column = self.pos[1] + direction[1]
             if not (0 <= row <= 7 and 0 <= column <= 7):
                 continue
 
@@ -253,7 +251,6 @@ class Queen(Piece):
 
     def update_pseudo_legal_moves(
             self,
-            pos: (int, int),
             piece_info_func,
             en_passant,
             castling):
@@ -270,8 +267,8 @@ class Queen(Piece):
         distance = 1
         while len(directions) > 0:
             for direction in directions.copy():
-                row = pos[0] + direction[0] * distance
-                column = pos[1] + direction[1] * distance
+                row = self.pos[0] + direction[0] * distance
+                column = self.pos[1] + direction[1] * distance
                 if not (0 <= row <= 7 and 0 <= column <= 7):
                     directions.remove(direction)
                     continue
@@ -333,7 +330,6 @@ class King(Piece):
 
     def update_pseudo_legal_moves(
             self,
-            pos: (int, int),
             piece_info_func,
             en_passant,
             castling):
@@ -348,8 +344,8 @@ class King(Piece):
                 (-1, 1),
                 (-1, -1)]
         for direction in directions:
-            row = pos[0] + direction[0]
-            column = pos[1] + direction[1]
+            row = self.pos[0] + direction[0]
+            column = self.pos[1] + direction[1]
             if not (0 <= row <= 7 and 0 <= column <= 7):
                 continue
             piece = piece_info_func((row, column))
@@ -375,12 +371,14 @@ class King(Piece):
                 # 4. you can't castle through pieces
                 has_piece_between = False
                 rook_idx = [0, 7][direction == 1]
-                for column in range(pos[1] + direction, rook_idx, direction):
-                    if piece_info_func((pos[0], column)) is not None:
+                initial = self.pos[1] + direction
+                for column in range(initial, rook_idx, direction):
+                    if piece_info_func((self.pos[0], column)) is not None:
                         has_piece_between = True
                         break
                 if not has_piece_between:
-                    pseudo_legal_moves.add((pos[0], pos[1] + 2 * direction))
+                    pseudo_legal_moves.add(
+                            (self.pos[0], self.pos[1] + 2 * direction))
 
         self.pseudo_legal_moves = pseudo_legal_moves
 
@@ -433,7 +431,6 @@ class Rook(Piece):
 
     def update_pseudo_legal_moves(
             self,
-            pos: (int, int),
             piece_info_func,
             en_passant,
             castling):
@@ -442,8 +439,8 @@ class Rook(Piece):
         distance = 1
         while len(directions) > 0:
             for direction in directions.copy():
-                row = pos[0] + direction[0] * distance
-                column = pos[1] + direction[1] * distance
+                row = self.pos[0] + direction[0] * distance
+                column = self.pos[1] + direction[1] * distance
                 if not (0 <= row <= 7 and 0 <= column <= 7):
                     directions.remove(direction)
                     continue
@@ -466,7 +463,6 @@ class Bishop(Piece):
 
     def update_pseudo_legal_moves(
             self,
-            pos: (int, int),
             piece_info_func,
             en_passant,
             castling):
@@ -475,8 +471,8 @@ class Bishop(Piece):
         distance = 1
         while len(directions) > 0:
             for direction in directions.copy():
-                row = pos[0] + direction[0] * distance
-                column = pos[1] + direction[1] * distance
+                row = self.pos[0] + direction[0] * distance
+                column = self.pos[1] + direction[1] * distance
                 if not (0 <= row <= 7 and 0 <= column <= 7):
                     directions.remove(direction)
                     continue
