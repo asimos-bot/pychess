@@ -79,7 +79,11 @@ class GameBoardController():
                     self.en_passant,
                     self.get_color_castlings(piece.color))
                 for attack_tile in piece.get_pseudo_legal_moves():
-                    print(attack_tile, piece.color, piece.pos)
+                    piece_type, _ = self.piece_info(piece_idx)
+                    is_pawn = piece_type == PieceCode.PAWN
+                    forward_attack = attack_tile[1] == piece_idx[1]
+                    if is_pawn and forward_attack:
+                        continue
                     self.attackable_tiles_from[color].add(attack_tile)
 
     def process_move_notification(self, piece, notification, data, new_pos):
@@ -197,8 +201,7 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        # self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
-        self.fen = "2k5/7b/8/8/8/1p6/8/K7 w - - 216 108"
+        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
 
     @property
     def turn(self):
