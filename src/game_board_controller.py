@@ -15,7 +15,7 @@ class GameBoardPlayer(Enum):
 class GameBoardController():
     def __init__(self):
         # fen code attributes
-        self._turn = GameBoardPlayer.WHITE
+        self._turn: PieceColor = GameBoardPlayer.WHITE
         self._turn_lock = threading.Lock()
         self.castling = 'KQkq'
         self.halfmoves = 0
@@ -23,95 +23,17 @@ class GameBoardController():
         self.en_passant = None
         self.winner = None
         self.pieces = []
+
+        self.pieces_by_color = {
+                PieceColor.WHITE: set(),
+                PieceColor.BLACK: set()
+                }
+
+        self.attackable_tiles_from = {
+                PieceColor.WHITE: set(),
+                PieceColor.BLACK: set()
+                }
         self.set_initial_fen()
-
-    #checking if king is being attacked by an enemy piece
-    def in_check(self, next_moves):
-        for move in next_moves:
-            piece = self.pieces[move[0]][move[1]]
-            if piece is not None:
-                if piece.type == PieceCode.KING:
-                    return True
-        return False
-
-    def get_non_check_moves(self, pos):
-        pseudo_legal_moves = self.get_pseudo_legal_moves(pos)
-        piece = self.pieces[pos[0]][pos[1]]
-        enemy_moves = []
-        valid_moves_for_no_check = []
-        if piece.type != PieceCode.KING:
-            return pseudo_legal_moves
-            king_in_range_valid_moves = self.get_king_index_and_return_valid_moves(piece, pseudo_legal_moves, pos)
-            if king_in_range_valid_moves is None:
-                return pseudo_legal_moves
-            else:
-                return king_in_range_valid_moves
-        for board_row in self.pieces:
-            for enemy_piece in board_row:
-                if enemy_piece is not None:
-                    if piece.color != enemy_piece.color:
-                        if piece.type == PieceCode.KING:
-                            moves = self.get_pseudo_legal_moves(enemy_piece.pos)
-                            for move in moves:
-                                if move not in enemy_moves:
-                                    enemy_moves.append(move)
-                            
-        for move in pseudo_legal_moves:
-            if move not in enemy_moves:
-                valid_moves_for_no_check.append(move)
-
-        return valid_moves_for_no_check
-
-    def get_king_index_and_return_valid_moves(self,piece,valid_moves,old):
-        directions = [(0,1),(1,0),(0,-1),(-1,0),(1,1),(-1,-1),(-1,1),(1,-1)]
-        for direction in directions:
-            counter = 1
-            while True:
-                if (0 <= (old[0]*+direction[0]*counter) <= 7 and 0 <= (old[1]+direction[1]*counter) <= 7):
-                    coord = (old[0]*+direction[0]*counter,old[1]+direction[1]*counter)
-                    print(coord)
-                    r_piece = self.pieces[old[0]*+direction[0]*counter][old[1]+direction[1]*counter]
-                    if r_piece is not None:
-                        if r_piece.type == PieceCode.KING and r_piece.color == piece.color:
-                            return self.get_valid_moves_if_king_is_in_range(piece,direction,valid_moves,old)
-                    counter +=1
-                else:
-                    break
-
-        return None
-
-    def get_valid_moves_if_king_is_in_range(self,piece,direction,valid_moves,old):
-        enemy_possible_direction = (direction[0]*-1,direction[1]*-1)
-        possible_moves = []
-        counter = 1
-        if(enemy_possible_direction[0] == 0 or enemy_possible_direction[1] == 0):
-            while True:
-                if (0 <= (old[0]+enemy_possible_direction[0]*counter) <= 7 and 0 <= (old[1]+enemy_possible_direction[1]*counter) <= 7):
-                    r_piece = self.pieces[old[0]+enemy_possible_direction[0]*counter][old[1]+enemy_possible_direction[1]*counter]
-                    if (r_piece is not None and r_piece.color != piece.color):
-                        if(r_piece.type != PieceCode.ROOK or r_piece.type != PieceCode.QUEEN):
-                            return None
-                        elif((r_piece.type == PieceCode.ROOK or r_piece.type == PieceCode.QUEEN) and (piece.type == PieceCode.ROOK or piece.type == PieceCode.QUEEN)):
-                            possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-                            return possible_moves
-                    else:
-                        if(piece.type == PieceCode.ROOK or piece.type == PieceCode.QUEEN):
-                            possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-                    counter += 1
-        else:
-            while True:
-                if (0 <= (old[0]+enemy_possible_direction[0]*counter) <= 7 and 0 <= (old[1]+enemy_possible_direction[1]*counter) <= 7):
-                    r_piece = self.pieces[old[0]+enemy_possible_direction[0]*counter][old[1]+enemy_possible_direction[1]*counter]
-                    if (r_piece is not None and r_piece.color != piece.color):
-                        if(r_piece.type != PieceCode.BISHOP or r_piece.type != PieceCode.QUEEN):
-                            return None
-                        elif((r_piece.type == PieceCode.BISHOP or r_piece.type == PieceCode.QUEEN) and (piece.type == PieceCode.BISHOP or piece.type == PieceCode.QUEEN)):
-                            possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-                            return possible_moves
-                    else:
-                        if(piece.type == PieceCode.BISHOP or piece.type == PieceCode.QUEEN):
-                            possible_moves.append((old[0]+enemy_possible_direction[0]*counter,old[1]+enemy_possible_direction[1]*counter))
-                    counter += 1
 
     def copy(self):
         controller = GameBoardController()
@@ -119,6 +41,8 @@ class GameBoardController():
         return controller
 
     def move_piece(self, old: (int, int), new: (int, int)):
+
+        print(self.fen)
 
         # notify piece of the move, so it can update its internal state
         # and return additional information
@@ -130,8 +54,16 @@ class GameBoardController():
                 self.get_color_castlings(piece.color))
 
         # move piece
+        # remove piece from pieces_by_color set
+        if self.pieces[new[0]][new[1]] is not None:
+            enemy_color = self.opposite_color(piece.color)
+            self.pieces_by_color[enemy_color].remove(new)
+
         self.pieces[new[0]][new[1]] = piece
         self.pieces[old[0]][old[1]] = None
+
+        self.pieces_by_color[piece.color].remove(old)
+        self.pieces_by_color[piece.color].add(new)
 
         self.process_move_notification(piece, notification, data, new)
 
@@ -139,14 +71,16 @@ class GameBoardController():
 
     def update_pseudo_legal_moves(self):
 
-        for i, row in enumerate(self.pieces):
-            for j, piece in enumerate(row):
-                if piece is not None:
-                    piece.update_pseudo_legal_moves(
-                        (i, j),
-                        self.piece_info,
-                        self.en_passant,
-                        self.get_color_castlings(piece.color))
+        for color in PieceColor:
+            for piece_idx in self.pieces_by_color[color]:
+                piece = self.pieces[piece_idx[0]][piece_idx[1]]
+                piece.update_pseudo_legal_moves(
+                    self.piece_info,
+                    self.en_passant,
+                    self.get_color_castlings(piece.color))
+                for attack_tile in piece.get_pseudo_legal_moves():
+                    print(attack_tile, piece.color, piece.pos)
+                    self.attackable_tiles_from[color].add(attack_tile)
 
     def process_move_notification(self, piece, notification, data, new_pos):
 
@@ -156,6 +90,8 @@ class GameBoardController():
             self.en_passant = data
         elif notification == MoveNotification.EN_PASSANT_DONE:
             # consume captured piece
+            _, color = self.piece_info(data)
+            self.pieces_by_color[color].remove(data)
             self.pieces[data[0]][data[1]] = None
         elif notification in [
                 MoveNotification.BREAK_KING_CASTLING,
@@ -173,8 +109,11 @@ class GameBoardController():
                 MoveNotification.KING_CASTLING]:
             # revoke castling rights
             rook = self.pieces[data['old'][0]][data['old'][1]]
+            _, rook_color = self.piece_info(data['old'])
             self.pieces[data['new'][0]][data['new'][1]] = rook
             self.pieces[data['old'][0]][data['old'][1]] = None
+            self.pieces_by_color[rook_color].remove(data['old'])
+            self.pieces_by_color[rook_color].add(data['new'])
 
             self.break_castling(piece.color)
 
@@ -208,8 +147,32 @@ class GameBoardController():
             self.castling = "-"
 
     def get_legal_moves(self, pos: (int, int)):
-        # return self.get_pseudo_legal_moves(pos)
-        return self.get_non_check_moves(pos)
+
+        piece_info = self.piece_info(pos)
+        if piece_info is None:
+            return set()
+        piece_type, piece_color = piece_info
+        legal_moves = set()
+        # every possible pseudo-legal move you can make from this piece
+        for move in self.get_pseudo_legal_moves(pos):
+            # create a new controller for each move
+            tmp_board: GameBoardController = self.copy()
+            # make the move in this temporary controller
+            tmp_board.move_piece(pos, move)
+            # iterate over every possible enemy move in this temporary
+            # controller, and add this move if no enemy move can kill
+            # our king
+            enemy_color = self.opposite_color(piece_color)
+            enemy_attack_tiles = tmp_board.attackable_tiles_from[enemy_color]
+            legal_move = True
+            for enemy_attack_tile in enemy_attack_tiles:
+                attack_info = tmp_board.piece_info(enemy_attack_tile)
+                if attack_info == (PieceCode.KING, piece_color):
+                    legal_move = False
+            del tmp_board
+            if legal_move:
+                legal_moves.add(move)
+        return legal_moves
 
     def get_pseudo_legal_moves(self, pos: (int, int)):
         piece = self.pieces[pos[0]][pos[1]]
@@ -234,7 +197,8 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/8/8/8/8/8/8/RNBQKBNR w KQkq - 0 0"
+        # self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        self.fen = "2k5/7b/8/8/8/1p6/8/K7 w - - 216 108"
 
     @property
     def turn(self):
@@ -267,11 +231,27 @@ class GameBoardController():
         return chr(tupl[1] + ord('a')) + str(8-int(tupl[0]))
 
     def clear_board(self):
+
         self.pieces = []
         for i in range(8):
             self.pieces.append([])
             for j in range(8):
                 self.pieces[i].append(None)
+
+        self.pieces_by_color = {
+                PieceColor.WHITE: set(),
+                PieceColor.BLACK: set()
+                }
+
+        self.attackable_tiles_from = {
+                PieceColor.BLACK: set(),
+                PieceColor.WHITE: set()
+                }
+
+    def opposite_color(self, color: PieceColor):
+        if color == PieceColor.WHITE:
+            return PieceColor.BLACK
+        return PieceColor.WHITE
 
     @property
     def fen(self):
@@ -319,11 +299,13 @@ class GameBoardController():
             j = 0
             for c in row:
                 if c.upper() in 'PNBRQK':
-                    color = PieceColor.BLACK
+                    color: PieceColor = PieceColor.BLACK
                     if c.isupper():
                         color = PieceColor.WHITE
                     piece_class = piece_class_from_code(PieceCode(c.upper()))
-                    self.pieces[i][j] = piece_class(color, (i, j))
+                    piece = piece_class(color, (i, j))
+                    self.pieces[i][j] = piece
+                    self.pieces_by_color[color].add(piece.pos)
                     j += 1
                 else:
                     j += int(c)
