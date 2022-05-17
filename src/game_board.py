@@ -99,7 +99,6 @@ class GameBoard():
             if not self.headless:
                 mixer.music.stop()
                 mixer.music.play()
-                sleep(0.1)
             self.controller.finish_turn()
 
     def event_capture(self, event):

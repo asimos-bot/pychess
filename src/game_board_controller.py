@@ -42,6 +42,8 @@ class GameBoardController():
 
     def move_piece(self, old: (int, int), new: (int, int)):
 
+        print(self.fen)
+
         # notify piece of the move, so it can update its internal state
         # and return additional information
         piece = self.pieces[old[0]][old[1]]
@@ -87,6 +89,8 @@ class GameBoardController():
             self.en_passant = data
         elif notification == MoveNotification.EN_PASSANT_DONE:
             # consume captured piece
+            _, color = self.piece_info(data)
+            self.pieces_by_color[color].remove(data)
             self.pieces[data[0]][data[1]] = None
         elif notification in [
                 MoveNotification.BREAK_KING_CASTLING,
@@ -104,8 +108,11 @@ class GameBoardController():
                 MoveNotification.KING_CASTLING]:
             # revoke castling rights
             rook = self.pieces[data['old'][0]][data['old'][1]]
+            _, rook_color = self.piece_info(data['old'])
             self.pieces[data['new'][0]][data['new'][1]] = rook
             self.pieces[data['old'][0]][data['old'][1]] = None
+            self.pieces_by_color[rook_color].remove(data['old'])
+            self.pieces_by_color[rook_color].add(data['new'])
 
             self.break_castling(piece.color)
 
