@@ -70,7 +70,10 @@ class GameBoardController():
         self.update_pseudo_legal_moves()
 
     def update_pseudo_legal_moves(self):
-
+        self.attackable_tiles_from = {
+                PieceColor.WHITE: set(),
+                PieceColor.BLACK: set()
+                }
         for color in PieceColor:
             for piece_idx in self.pieces_by_color[color]:
                 piece = self.pieces[piece_idx[0]][piece_idx[1]]
@@ -201,7 +204,8 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        # self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        self.fen = "8/8/6r1/8/8/2R5/8/6K1 w KQkq - 0 0"
 
     @property
     def turn(self):

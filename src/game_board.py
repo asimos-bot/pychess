@@ -6,7 +6,6 @@ from player import Player
 from piece import PieceColor
 from pygame import mixer
 from pathlib import Path
-from time import sleep
 
 
 # makes a bridge between the graphical and logical part of the game board
