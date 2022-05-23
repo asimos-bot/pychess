@@ -330,6 +330,42 @@ class King(Piece):
     def type(self):
         return PieceCode.KING
 
+    def remove_queen_castling_legality(self):
+        if self.first_move:
+            for i in range(self.pos[1]-2, -1, -1):
+                coords = (self.pos[0], i)
+                if coords in self.pseudo_legal_moves:
+                    self.pseudo_legal_moves.remove(coords)
+
+    def remove_king_castling_legality(self):
+        if self.first_move:
+            for i in range(self.pos[1]+2, 8):
+                coords = (self.pos[0], i)
+                if coords in self.pseudo_legal_moves:
+                    self.pseudo_legal_moves.remove(coords)
+        return set()
+
+    def update_castling(self, piece_info_func, castling, attackable_tiles):
+        if self.pos in attackable_tiles:
+            self.remove_king_castling_legality()
+            self.remove_queen_castling_legality()
+
+        if "k" in castling:
+            king_castling_tiles = [
+                    (self.pos[0], i) for i in range(self.pos[1]-2, -1, -1)]
+            for tile in king_castling_tiles:
+                if tile in attackable_tiles:
+                    self.remove_king_castling_legality()
+                    break
+
+        if "q" in castling:
+            queen_castling_tiles = [
+                    (self.pos[0], i) for i in range(self.pos[1]+2, 8)]
+            for tile in queen_castling_tiles:
+                if tile in attackable_tiles:
+                    self.remove_queen_castling_legality()
+                    break
+
     def update_pseudo_legal_moves(
             self,
             piece_info_func,
@@ -367,10 +403,8 @@ class King(Piece):
             if MoveNotification.QUEEN_CASTLING in available_castlings:
                 directions.append(-1)
             for direction in directions:
-                # 1. you can't castle if you moved
                 # 2. you can't castle out of check
                 # 3. you can't castle through check
-                # 4. you can't castle through pieces
                 has_piece_between = False
                 rook_idx = [0, 7][direction == 1]
                 initial = self.pos[1] + direction

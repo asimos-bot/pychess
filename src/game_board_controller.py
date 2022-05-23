@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from ipaddress import collapse_addresses
 import threading
 from enum import Enum
 
@@ -43,8 +42,6 @@ class GameBoardController():
 
     def move_piece(self, old: (int, int), new: (int, int)):
 
-        print(self.fen)
-
         # notify piece of the move, so it can update its internal state
         # and return additional information
         piece = self.pieces[old[0]][old[1]]
@@ -69,37 +66,31 @@ class GameBoardController():
         self.process_move_notification(piece, notification, data, new)
 
         self.update_pseudo_legal_moves()
-    
-    def is_check_valid(self,new: (int,int)):
+
+    def is_check_valid(self, new: (int, int)):
         piece = self.pieces[new[0]][new[1]]
         moves = piece.get_pseudo_legal_moves()
         for move in moves:
             enemy_piece = self.pieces[move[0]][move[1]]
             if enemy_piece is not None:
-                if enemy_piece.type == PieceCode.KING and enemy_piece.color != piece.color:
+                is_king = enemy_piece.type == PieceCode.KING
+                is_enemy = enemy_piece.color != piece.color
+                if is_king and is_enemy:
                     return True
-        
         return False
 
-    def is_checkmate_valid(self,new: (int,int)):
+    def is_checkmate_valid(self, new: (int, int)):
         piece = self.pieces[new[0]][new[1]]
-        print(piece.color)
-        print(PieceColor.WHITE)
-        print(PieceColor.BLACK)
         if piece.color != PieceColor.WHITE:
             color = PieceColor.WHITE
         else:
             color = PieceColor.BLACK
-        king_can_move = False
-        print(self.pieces_by_color[color])
         for pos in self.pieces_by_color[color]:
             enemy_piece = self.pieces[pos[0]][pos[1]]
             if len(self.get_legal_moves(enemy_piece.pos)) >= 1:
                 return False
 
         return True
-
-
 
     def update_pseudo_legal_moves(self):
         self.attackable_tiles_from = {
@@ -120,6 +111,20 @@ class GameBoardController():
                     if is_pawn and forward_attack:
                         continue
                     self.attackable_tiles_from[color].add(attack_tile)
+
+        # get both kings and ask them gently to make sure if castling is
+        # seen as possible in this turn even though there are attackable_tiles
+        # in the way
+        for color in PieceColor:
+            for piece_idx in self.pieces_by_color[color]:
+                piece = self.pieces[piece_idx[0]][piece_idx[1]]
+                piece_type, piece_color = self.piece_info(piece_idx)
+                if piece_type == PieceCode.KING:
+                    enemy_color = self.opposite_color(color)
+                    piece.update_castling(
+                            self.piece_info,
+                            self.get_color_castlings(piece_color),
+                            self.attackable_tiles_from[enemy_color])
 
     def process_move_notification(self, piece, notification, data, new_pos):
 
@@ -236,8 +241,8 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        #self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
-        self.fen = "r3k2r/8/2B3Q1/8/8/8/8/R2K3R w KQkq - 0 0"
+        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        # self.fen = "r3k2r/8/2B3Q1/8/8/8/8/R2K3R w KQkq - 0 0"
 
     @property
     def turn(self):
