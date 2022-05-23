@@ -36,6 +36,7 @@ class GameBoard():
                 coords,
                 color,
                 bottom_color)
+        self.checkmate = False
         self.players = {
                 GameBoardPlayer.WHITE: player_white,
                 GameBoardPlayer.BLACK: player_black
@@ -94,6 +95,9 @@ class GameBoard():
                     return
 
             self.controller.move_piece(old_pos, new_pos)
+            if self.controller.is_check_valid(new_pos) == True:
+                self.checkmate = self.controller.is_checkmate_valid(new_pos)
+            print(self.checkmate)
 
             if not self.headless:
                 mixer.music.stop()
