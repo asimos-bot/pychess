@@ -104,6 +104,9 @@ class GameBoardController():
                     self.piece_info,
                     self.en_passant,
                     self.get_color_castlings(piece.color))
+                # if we are updating pseudo legal moves, legal moves
+                # should also reset
+                piece.legal_moves = None
                 for attack_tile in piece.get_pseudo_legal_moves():
                     piece_type, _ = self.piece_info(piece_idx)
                     is_pawn = piece_type == PieceCode.PAWN
@@ -196,6 +199,9 @@ class GameBoardController():
         if piece_info is None:
             return set()
         piece_type, piece_color = piece_info
+        piece = self.pieces[pos[0]][pos[1]]
+        if piece.legal_moves is not None:
+            return piece.legal_moves
         legal_moves = set()
         # every possible pseudo-legal move you can make from this piece
         for move in self.get_pseudo_legal_moves(pos):
@@ -216,6 +222,7 @@ class GameBoardController():
             del tmp_board
             if legal_move:
                 legal_moves.add(move)
+        piece.legal_moves = legal_moves
         return legal_moves
 
     def get_pseudo_legal_moves(self, pos: (int, int)):

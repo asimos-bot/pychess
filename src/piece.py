@@ -77,6 +77,7 @@ class Piece(ABC):
     def __init__(self, color: PieceColor, pos: (int, int)):
         self.color = color
         self.pos = pos
+        self.legal_moves = None
         self.pseudo_legal_moves = set()
 
     @property
