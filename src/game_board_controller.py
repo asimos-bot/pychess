@@ -141,7 +141,8 @@ class GameBoardController():
                 if(self.white_before_last_moved_piece.type == piece.type and self.white_last_old_and_new[0] == new and self.white_last_old_and_new[1] == old):
                     self.white_moved_times += 1
                 else:
-                    self.white_moved_times = 2
+                    self.white_moved_times = 1
+            print(self.white_moved_times)
             self.white_last_old_and_new = old,new
             self.white_threefold.append(new)
             if len(self.white_threefold) >= 5 and self.white_moved_times >= 5:
@@ -165,7 +166,8 @@ class GameBoardController():
                 if(self.black_before_last_moved_piece.type == piece.type and self.black_last_old_and_new[0] == new and self.black_last_old_and_new[1] == old):
                     self.black_moved_times += 1
                 else:
-                    self.black_moved_times = 2
+                    self.black_moved_times = 1
+            print(self.black_moved_times)
             self.black_last_old_and_new = old,new
             self.black_threefold.append(new)
             if len(self.black_threefold) >= 5 and self.black_moved_times >= 5:
