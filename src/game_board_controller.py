@@ -23,6 +23,8 @@ class GameBoardController():
         self.en_passant = None
         self.winner = None
         self.pieces = []
+        self.rule_50_moves_draw = 100
+        self.claim_draw = False
 
         self.pieces_by_color = {
                 PieceColor.WHITE: set(),
@@ -66,6 +68,21 @@ class GameBoardController():
         self.process_move_notification(piece, notification, data, new)
 
         self.update_pseudo_legal_moves()
+
+
+    def check_draw_conditions(self, old:(int,int),new:(int,int)):
+        piece = self.pieces[old[0]][old[1]]
+        is_piece = self.pieces[new[0]][new[1]] != None
+        is_pawn = piece.type == PieceCode.PAWN
+        if is_pawn or is_piece:
+            self.rule_50_moves_draw = 100
+            self.claim_draw = False
+            return
+        self.rule_50_moves_draw -= 1
+        if self.rule_50_moves_draw <= 0:
+            self.claim_draw = True
+
+
 
     def is_check_valid(self, new: (int, int)):
         piece = self.pieces[new[0]][new[1]]
