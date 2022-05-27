@@ -76,8 +76,8 @@ class GameBoard():
                 self.controller.get_legal_moves)
 
     def _make_moves_async(self):
-
         while self.controller.winner is None:
+            stalemate_draw = self.controller.stalemate_rule()
             valid_move = False
             old_pos = None
             new_pos = None

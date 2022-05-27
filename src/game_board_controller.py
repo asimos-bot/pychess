@@ -23,10 +23,12 @@ class GameBoardController():
         self.en_passant = None
         self.winner = None
         self.pieces = []
+
         self.rule_50_moves_draw = 100
         self.claim_draw = False
         self.threefold_draw = False
         self.insufficent_cmr_draw = False
+        self.stalemate_draw = False
         self.white_threefold = []
         self.white_last_moved_piece = None
         self.white_before_last_moved_piece = None
@@ -180,7 +182,20 @@ class GameBoardController():
                 self.threefold_draw = False
                 
 
-        print(self.threefold_draw)
+    def stalemate_rule(self):
+        if self._turn == GameBoardPlayer.WHITE:
+            positions = self.pieces_by_color[PieceColor.WHITE]
+        else:
+            positions = self.pieces_by_color[PieceColor.BLACK]
+        for position in positions:
+            valid_moves = self.get_legal_moves(position)
+            if len(valid_moves) > 0:
+                return False
+        
+        self.stalemate_draw = True
+        return True
+
+
 
     def is_check_valid(self, new: (int, int)):
 
@@ -366,7 +381,7 @@ class GameBoardController():
 
     def set_initial_fen(self):
         #self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
-        self.fen = "3k4/8/5q2/8/8/8/5Q2/3K4 w KQkq - 0 0"
+        self.fen = "3k4/8/8/8/8/8/3q4/1K6 w KQkq - 0 0"
 
     @property
     def turn(self):
