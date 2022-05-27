@@ -25,6 +25,7 @@ class GameBoardController():
         self.pieces = []
         self.rule_50_moves_draw = 100
         self.claim_draw = False
+        self.draw = False
 
         self.pieces_by_color = {
                 PieceColor.WHITE: set(),
@@ -70,7 +71,7 @@ class GameBoardController():
         self.update_pseudo_legal_moves()
 
 
-    def check_draw_conditions(self, old:(int,int),new:(int,int)):
+    def fifty_move_rule(self, old:(int,int),new:(int,int)):
         piece = self.pieces[old[0]][old[1]]
         is_piece = self.pieces[new[0]][new[1]] != None
         is_pawn = piece.type == PieceCode.PAWN
@@ -81,7 +82,38 @@ class GameBoardController():
         self.rule_50_moves_draw -= 1
         if self.rule_50_moves_draw <= 0:
             self.claim_draw = True
-
+    
+    def insufficient_checkmate_material_rule(self):
+        white_positions = self.pieces_by_color[PieceColor.WHITE]
+        black_positions = self.pieces_by_color[PieceColor.BLACK]
+        if len(white_positions) <= 2 and len(black_positions) <= 2:
+            white_pieces = []
+            black_pieces = []
+            is_white_in_dark_slots = False
+            is_black_in_dark_slots = False
+            dark_slots = [(0,0),(0,2),(0,4),(0,6),
+                          (1,1),(1,3),(1,5),(1,7),
+                          (2,0),(2,2),(2,4),(2,6),
+                          (3,1),(3,3),(3,5),(3,7),
+                          (4,0),(4,2),(4,4),(4,6),
+                          (5,1),(5,3),(5,5),(5,7),
+                          (6,0),(6,2),(6,4),(6,6),
+                          (7,1),(7,3),(7,5),(7,7)]
+            for position in white_positions:
+                white_pieces.append(self.pieces[position[0]][position[1]].type)
+                if(self.pieces[position[0]][position[1]].type == PieceCode.BISHOP and position in dark_slots):
+                    is_white_in_dark_slots = True
+            for position in black_positions:
+                black_pieces.append(self.pieces[position[0]][position[1]].type)
+                if(self.pieces[position[0]][position[1]].type == PieceCode.BISHOP and position in dark_slots):
+                    is_black_in_dark_slots = True
+            if ((PieceCode.KING in white_pieces and PieceCode.BISHOP in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1) or
+            (PieceCode.KING in black_pieces and PieceCode.BISHOP in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1) or
+            (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1) or
+            (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1) or
+            (PieceCode.KING in white_pieces and len(white_positions) == 1 and PieceCode.KING in black_pieces and len(black_positions) == 1) or
+            (is_white_in_dark_slots == is_black_in_dark_slots)):
+                self.draw = True
 
 
     def is_check_valid(self, new: (int, int)):
@@ -265,8 +297,8 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
-        # self.fen = "r3k2r/8/2B3Q1/8/8/8/8/R2K3R w KQkq - 0 0"
+        #self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        self.fen = "k6R/1R4b1/8/8/8/8/1B5r/r5K1 w KQkq - 0 0"
 
     @property
     def turn(self):

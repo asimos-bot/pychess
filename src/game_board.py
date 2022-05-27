@@ -94,10 +94,11 @@ class GameBoard():
                 else:
                     return
 
-            self.controller.check_draw_conditions(old_pos,new_pos)
+            self.controller.fifty_move_rule(old_pos,new_pos)
             self.controller.move_piece(old_pos, new_pos)
             if self.controller.is_check_valid(new_pos):
                 self.checkmate = self.controller.is_checkmate_valid(new_pos)
+            self.controller.insufficient_checkmate_material_rule()
 
             if not self.headless:
                 mixer.music.stop()
