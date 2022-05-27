@@ -25,8 +25,18 @@ class GameBoardController():
         self.pieces = []
         self.rule_50_moves_draw = 100
         self.claim_draw = False
-        self.draw = False
-
+        self.threefold_draw = False
+        self.insufficent_cmr_draw = False
+        self.white_threefold = []
+        self.white_last_moved_piece = None
+        self.white_before_last_moved_piece = None
+        self.white_moved_times = 1
+        self.black_threefold = []
+        self.black_last_moved_piece = None
+        self.black_before_last_moved_piece = None
+        self.black_moved_times = 1
+        self.black_last_old_and_new = None
+        self.white_last_old_and_new = None
         self.pieces_by_color = {
                 PieceColor.WHITE: set(),
                 PieceColor.BLACK: set()
@@ -72,6 +82,7 @@ class GameBoardController():
 
 
     def fifty_move_rule(self, old:(int,int),new:(int,int)):
+
         piece = self.pieces[old[0]][old[1]]
         is_piece = self.pieces[new[0]][new[1]] != None
         is_pawn = piece.type == PieceCode.PAWN
@@ -84,6 +95,7 @@ class GameBoardController():
             self.claim_draw = True
     
     def insufficient_checkmate_material_rule(self):
+
         white_positions = self.pieces_by_color[PieceColor.WHITE]
         black_positions = self.pieces_by_color[PieceColor.BLACK]
         if len(white_positions) <= 2 and len(black_positions) <= 2:
@@ -113,10 +125,65 @@ class GameBoardController():
             (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1) or
             (PieceCode.KING in white_pieces and len(white_positions) == 1 and PieceCode.KING in black_pieces and len(black_positions) == 1) or
             (is_white_in_dark_slots == is_black_in_dark_slots)):
-                self.draw = True
+                self.insufficent_cmr_draw = True
 
+    def threefold_repetition_rule(self,old:(int,int),new:(int,int)):
+        piece = self.pieces[new[0]][new[1]]
+        if(self._turn == GameBoardPlayer.WHITE):
+
+            self.white_before_last_moved_piece = self.white_last_moved_piece
+            self.white_last_moved_piece = piece
+            if self.white_before_last_moved_piece is None:
+                self.white_last_old_and_new = old,new
+            else:
+                if(self.white_before_last_moved_piece.type == piece.type and self.white_last_old_and_new[0] == new and self.white_last_old_and_new[1] == old):
+                    self.white_moved_times += 1
+                else:
+                    self.white_moved_times = 2
+            self.white_last_old_and_new = old,new
+            self.white_threefold.append(new)
+            if len(self.white_threefold) >= 5 and self.white_moved_times >= 5:
+                if((self.white_threefold[0] == self.white_threefold[2] and self.white_threefold[2] == self.white_threefold[4]) and 
+                (self.white_threefold[3] == self.white_threefold[1])):
+                    self.threefold_draw = True
+                    self.white_threefold.pop(0)
+                else:
+                    self.threefold_draw = False
+                    self.white_threefold.pop(0)
+            elif len(self.white_threefold) >= 5:
+                self.white_threefold.pop(0)
+                self.threefold_draw = False
+        else:
+            self.black_before_last_moved_piece = self.black_last_moved_piece
+            self.black_last_moved_piece = piece
+
+            if self.black_before_last_moved_piece is None:
+                self.black_last_old_and_new = old,new
+            else:
+                if(self.black_before_last_moved_piece.type == piece.type and self.black_last_old_and_new[0] == new and self.black_last_old_and_new[1] == old):
+                    self.black_moved_times += 1
+                else:
+                    self.black_moved_times = 2
+            self.black_last_old_and_new = old,new
+            self.black_threefold.append(new)
+            if len(self.black_threefold) >= 5 and self.black_moved_times >= 5:
+
+                if((self.black_threefold[0] == self.black_threefold[2] and self.black_threefold[2] == self.black_threefold[4]) and 
+                (self.black_threefold[3] == self.black_threefold[1])):
+                    self.threefold_draw = True
+                    self.black_threefold.pop(0)
+                else:
+                    self.threefold_draw = False
+                    self.black_threefold.pop(0)
+            elif len(self.black_threefold) >= 5:
+                self.black_threefold.pop(0)
+                self.threefold_draw = False
+                
+
+        print(self.threefold_draw)
 
     def is_check_valid(self, new: (int, int)):
+
         piece = self.pieces[new[0]][new[1]]
         moves = piece.get_pseudo_legal_moves()
         for move in moves:
@@ -129,6 +196,7 @@ class GameBoardController():
         return False
 
     def is_checkmate_valid(self, new: (int, int)):
+
         piece = self.pieces[new[0]][new[1]]
         if piece.color != PieceColor.WHITE:
             color = PieceColor.WHITE
@@ -298,7 +366,7 @@ class GameBoardController():
 
     def set_initial_fen(self):
         #self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
-        self.fen = "k6R/1R4b1/8/8/8/8/1B5r/r5K1 w KQkq - 0 0"
+        self.fen = "3k4/8/5q2/8/8/8/5Q2/3K4 w KQkq - 0 0"
 
     @property
     def turn(self):
