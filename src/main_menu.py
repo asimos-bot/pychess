@@ -6,8 +6,8 @@ from settings_menu import SettingsMenu
 
 class MainMenu:
 
-    def __init__(self, dims: (int, int), play_func):
-        self.settings = SettingsMenu(dims)
+    def __init__(self, dims: (int, int), play_func, settings: dict()):
+        self.settings = SettingsMenu(dims, settings)
 
         self.menu = pygame_menu.Menu(
                 title='Pychess',

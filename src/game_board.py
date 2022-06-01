@@ -18,8 +18,11 @@ class GameBoard():
             color: (int, int, int),
             player_black: Player,
             player_white: Player,
+            settings: dict(),
             bottom_color: PieceColor = PieceColor.WHITE,
             headless: bool = False):
+
+        self.settings = settings
 
         # load sound effects
         piece_down_sound = Path(__file__).parent.parent.joinpath("assets")
@@ -35,7 +38,8 @@ class GameBoard():
                 dims,
                 coords,
                 color,
-                bottom_color)
+                bottom_color,
+                self.settings)
         self.checkmate = False
         self.players = {
                 GameBoardPlayer.WHITE: player_white,

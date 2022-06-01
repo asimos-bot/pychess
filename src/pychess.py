@@ -4,11 +4,11 @@ import pygame.locals
 from enum import Enum
 
 import colors
-import settings
 from game_board import GameBoard
 from main_menu import MainMenu
 from pause_menu import PauseMenu
 from piece import PieceDrawer, PieceColor
+from player import Human, RandomAI
 
 
 class GameState(Enum):
@@ -23,6 +23,17 @@ class PyChess():
         pygame.init()
         # get surface where we will draw stuff to
         self.surface = pygame.display.set_mode((600, 400), pygame.RESIZABLE)
+
+        # settings
+        self.settings = {
+                'players': {
+                    PieceColor.WHITE: Human,
+                    PieceColor.BLACK: RandomAI
+                    },
+                'initial_bottom_color': PieceColor.WHITE,
+                'top_spacing_percentage': 0.2,
+                'right_spacing_percentage': 0.3
+                }
 
         # load piece images
         PieceDrawer.load_images()
@@ -76,8 +87,9 @@ class PyChess():
         if self.state == GameState.PAUSE:
             self.board.unpause()
         else:
-            player_white = settings.PLAYERS[PieceColor.WHITE](PieceColor.WHITE)
-            player_black = settings.PLAYERS[PieceColor.BLACK](PieceColor.BLACK)
+            players = self.settings['players']
+            player_white = players[PieceColor.WHITE](PieceColor.WHITE)
+            player_black = players[PieceColor.BLACK](PieceColor.BLACK)
 
             self.board = GameBoard(
                 dims=(self.x, self.y),
@@ -85,7 +97,8 @@ class PyChess():
                 color=colors.GAME_BOARD,
                 player_white=player_white,
                 player_black=player_black,
-                bottom_color=settings.BOARD_INITIAL_BOTTOM_COLOR)
+                bottom_color=self.settings['initial_bottom_color'],
+                settings=self.settings)
 
         self.state = GameState.PLAY
 
@@ -96,7 +109,10 @@ class PyChess():
         if hasattr(self, "pause_menu"):
             del self.pause_menu
         self.state = GameState.MAIN_MENU
-        self.main_menu = MainMenu((self.x, self.y), self.set_state_play)
+        self.main_menu = MainMenu(
+                (self.x, self.y),
+                self.set_state_play,
+                self.settings)
 
     def set_state_pause(self):
         self.board.pause()

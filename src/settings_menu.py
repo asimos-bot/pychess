@@ -1,5 +1,4 @@
 import pygame_menu
-import settings
 
 
 from player import RandomAI, Human
@@ -9,7 +8,8 @@ from game_board_controller import GameBoardController
 
 class SettingsMenu:
 
-    def __init__(self, dims: (int, int)):
+    def __init__(self, dims: (int, int), settings: dict()):
+        self.settings = settings
         self.menu = pygame_menu.Menu(
                 title='Settings',
                 width=dims[0],
@@ -36,19 +36,19 @@ class SettingsMenu:
                     lambda _, y: self.set_player_type(PieceColor.BLACK, y))
                 )
         self.menu.add.button(
-                title='Go Back',
+                title='Go Back to Main Menu',
                 action=pygame_menu.events.BACK
                 )
 
     def set_player_type(self, player_color, player_class):
-        settings.PLAYERS[player_color] = player_class
-        if settings.PLAYERS[PieceColor.WHITE] == Human:
-            settings.BOARD_INITIAL_BOTTOM_COLOR = PieceColor.WHITE
-        elif settings.PLAYERS[PieceColor.BLACK] == Human:
-            settings.BOARD_INITIAL_BOTTOM_COLOR = PieceColor.BLACK
+        self.settings['players'][player_color] = player_class
+        if self.settings['players'][PieceColor.WHITE] == Human:
+            self.settings['initial_bottom_color'] = PieceColor.WHITE
+        elif self.settings['players'][PieceColor.BLACK] == Human:
+            self.settings['initial_bottom_color'] = PieceColor.BLACK
         else:
             # two AIs
-            settings.BOARD_INITIAL_BOTTOM_COLOR = PieceColor.WHITE
+            self.settings['initial_bottom_color'] = PieceColor.WHITE
 
     def get_title(self):
         return self.menu.get_title()

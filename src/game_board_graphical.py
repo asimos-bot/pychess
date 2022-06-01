@@ -8,13 +8,15 @@ class GameBoardGraphical():
             dims: (int, int),
             coords: (int, int),
             color: (int, int, int),
-            bottom_color: PieceColor):
+            bottom_color: PieceColor,
+            settings: dict()):
         '''
         game board will take the dimensions and coordinates given and calculate
         appropriate ones to maintain the aspect ratio. Because of this, we have
         'self._given_coords' and 'self._coords', where the coordinates given as
         input and the ones calculated are stored, respectively
         '''
+        self.settings = settings
         self.bottom_color = bottom_color
         self._color = color
         self._given_coords = coords
@@ -62,8 +64,8 @@ class GameBoardGraphical():
 
     def _calculate_coords(self, dims, coords):
 
-        top_spacing_percentage = 0.2
-        right_spacing_percentage = 0.3
+        top_spacing_percentage = self.settings['top_spacing_percentage']
+        right_spacing_percentage = self.settings['right_spacing_percentage']
         # get lowest dimension to define sizes
         self.tile_side = min(
                 dims[0] * (1 - right_spacing_percentage),
