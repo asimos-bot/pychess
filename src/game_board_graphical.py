@@ -36,18 +36,31 @@ class GameBoardGraphical():
             idxs = (7 - idxs[0], 7 - idxs[1])
         return idxs
 
+    def is_border_tile(self, idxs: (int, int)):
+        return idxs[0] in [0, 9] or idxs[1] in [0, 9]
+
+    def global_to_board(self, idxs: (int, int)):
+        return (idxs[0]-1, idxs[1]-1)
+
+    def board_to_global(self, idxs: (int, int)):
+        return (idxs[0]+1, idxs[1]+1)
+
     def draw(self, surface, piece_info_func):
         tiles = self.adjust_orientation()
         for i, row in enumerate(tiles):
             for j, tile in enumerate(row):
                 tile.draw(surface)
-                piece_info = piece_info_func((i, j))
-                if piece_info is not None:
-                    piece_code, piece_color = piece_info
-                    PieceDrawer.draw(tile.surf, piece_code, piece_color)
+                if not self.is_border_tile((i, j)):
+                    piece_coords = self.global_to_board((i, j))
+                    piece_info = piece_info_func(piece_coords)
+                    if piece_info is not None:
+                        piece_code, piece_color = piece_info
+                        PieceDrawer.draw(tile.surf, piece_code, piece_color)
 
     def tile_info(self, idxs: (int, int)):
         i, j = idxs
+        i += 1
+        j += 1
         tile = self.tiles[i][j]
         topleft_coords = (
                 self._coords[0] + self.tile_side * j,
@@ -64,12 +77,12 @@ class GameBoardGraphical():
 
     def _calculate_coords(self, dims, coords):
 
-        top_spacing_percentage = self.settings['top_spacing_percentage']
-        right_spacing_percentage = self.settings['right_spacing_percentage']
+        top_spacing_percentage = 0  # self.settings['top_spacing_percentage']
+        right_spacing_percentage = 0  # self.settings['right_spacing_percentage']
         # get lowest dimension to define sizes
         self.tile_side = min(
                 dims[0] * (1 - right_spacing_percentage),
-                dims[1] * (1 - top_spacing_percentage))/8
+                dims[1] * (1 - top_spacing_percentage))/10
         self._dims = dims
 
         # get coordinates that fit inside space given
@@ -78,14 +91,14 @@ class GameBoardGraphical():
                 coords[1] + (dims[1] * (1 + top_spacing_percentage))/2)
 
         self._coords = (
-                middle_point[0] - 4 * self.tile_side,
-                middle_point[1] - 4 * self.tile_side)
+                middle_point[0] - 5 * self.tile_side,
+                middle_point[1] - 5 * self.tile_side)
 
     def create_blank_tiles(self):
         tiles = []
-        for i in range(8):
+        for i in range(10):
             tiles.append([])
-            for j in range(8):
+            for j in range(10):
                 tile = Tile(dims=(1, 1), coords=(0, 0), color=(0, 0, 0))
                 tiles[i].append(tile)
         return tiles
@@ -99,14 +112,16 @@ class GameBoardGraphical():
         row_idx, column_idx = idxs
         y = self.coords[1] + row_idx * self.tile_side
         x = self.coords[0] + column_idx * self.tile_side
-        color_factor = 0.5 if (row_idx+column_idx) % 2 == 0 else 1
-        current_color = (
-                self.color[0] * color_factor,
-                self.color[1] * color_factor,
-                self.color[2] * color_factor)
+        current_color = self.settings['colors']['clear_screen']
+        if not self.is_border_tile(idxs):
+            color_factor = 0.5 if (row_idx + column_idx) % 2 == 0 else 1
+            current_color = (
+                    self.color[0] * color_factor,
+                    self.color[1] * color_factor,
+                    self.color[2] * color_factor)
+        tile.color = current_color
         tile.dims = (self.tile_side, self.tile_side)
         tile.coords = (x, y)
-        tile.color = current_color
 
     @property
     def dims(self):

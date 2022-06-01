@@ -61,6 +61,7 @@ class GameBoardController():
             new: (int, int),
             promotion: PieceCode):
 
+        print(self.fen)
         # notify piece of the move, so it can update its internal state
         # and return additional information
         piece = self.pieces[old[0]][old[1]]
@@ -89,25 +90,40 @@ class GameBoardController():
 
         self.update_pseudo_legal_moves()
 
-    def promote(self, piece: Piece, promotion: PieceCode):
+    def is_promotion_valid(
+            self,
+            pos: (int, int),
+            piece_type: PieceCode,
+            piece_color: PieceColor,
+            promotion: PieceCode):
         # is promotion a valid promotion piece?
         if promotion not in [
                 PieceCode.QUEEN,
                 PieceCode.KNIGHT,
                 PieceCode.ROOK,
                 PieceCode.BISHOP]:
-            return
+            return False
         # is piece a pawn?
-        if piece.type != PieceCode.PAWN:
-            return
+        if piece_type != PieceCode.PAWN:
+            return False
         # is pawn at the last tile opposite to its color starting side?
-        white_promotion = piece.pos[0] == 7 and piece.color == PieceColor.BLACK
-        black_promotion = piece.pos[0] == 0 and piece.color == PieceColor.WHITE
+        white_promotion = pos[0] == 7 and piece_color == PieceColor.BLACK
+        black_promotion = pos[0] == 0 and piece_color == PieceColor.WHITE
         if not white_promotion and not black_promotion:
-            return
+            return False
         # if you get here, promotion is valid!
-        new_piece = piece_class_from_code(promotion)(piece.color, piece.pos)
-        self.pieces[piece.pos[0]][piece.pos[1]] = new_piece
+        return True
+
+    def promote(self, piece: Piece, promotion: PieceCode):
+        if self.is_promotion_valid(
+                piece.pos,
+                piece.type,
+                piece.color,
+                promotion):
+            new_piece = piece_class_from_code(promotion)(
+                    piece.color,
+                    piece.pos)
+            self.pieces[piece.pos[0]][piece.pos[1]] = new_piece
 
     def fifty_move_rule(self, old: (int, int), new: (int, int)):
 
@@ -406,8 +422,8 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
-        # self.fen = "3k4/8/8/8/8/8/3q4/1K6 w KQkq - 0 0"
+        # self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        self.fen = "rkb1qbnr/pP2p3/n5p1/5p1p/5P2/8/PPP3PP/RNBQKBNR w KQ h6 18 9"
 
     @property
     def turn(self):

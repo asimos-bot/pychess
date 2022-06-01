@@ -78,7 +78,8 @@ class GameBoard():
                 self.controller.piece_info,
                 self.graphical.tile_info,
                 self.graphical.adjust_idxs,
-                self.controller.get_legal_moves)
+                self.controller.get_legal_moves,
+                self.controller.is_promotion_valid)
 
     def _make_moves_async(self):
         while self.controller.winner is None:
@@ -91,7 +92,8 @@ class GameBoard():
                 move = self.player.make_move(
                         self.controller.piece_info,
                         self.graphical.adjust_idxs,
-                        self.controller.get_legal_moves)
+                        self.controller.get_legal_moves,
+                        self.controller.is_promotion_valid)
                 if move is not None:
                     old_pos, new_pos, promotion = move
                     valid_moves = self.controller.get_legal_moves(old_pos)
@@ -119,7 +121,8 @@ class GameBoard():
                 event,
                 self.controller.piece_info,
                 self.graphical.tile_info,
-                self.graphical.adjust_idxs)
+                self.graphical.adjust_idxs,
+                self.controller.is_promotion_valid)
 
     def _start_game(self):
         self._async_thread = threading.Thread(target=self._make_moves_async)

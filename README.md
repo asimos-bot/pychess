@@ -13,3 +13,7 @@ Then you just gotta run `pychess.py`:
 ```
 python3 pychess.py
 ```
+
+## Run Tests
+
+Run `python3 -m unittest` inside `src/`
