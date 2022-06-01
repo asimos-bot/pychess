@@ -77,7 +77,7 @@ class GameBoard():
 
     def _make_moves_async(self):
         while self.controller.winner is None:
-            stalemate_draw = self.controller.stalemate_rule()
+            # stalemate_draw = self.controller.stalemate_rule()
             valid_move = False
             old_pos = None
             new_pos = None
@@ -94,7 +94,7 @@ class GameBoard():
                 else:
                     return
 
-            self.controller.fifty_move_rule(old_pos,new_pos)
+            self.controller.fifty_move_rule(old_pos, new_pos)
             self.controller.move_piece(old_pos, new_pos)
             self.controller.threefold_repetition_rule(old_pos, new_pos)
             if self.controller.is_check_valid(new_pos):

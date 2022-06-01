@@ -83,7 +83,7 @@ class GameBoardController():
         self.update_pseudo_legal_moves()
 
 
-    def fifty_move_rule(self, old:(int,int),new:(int,int)):
+    def fifty_move_rule(self, old:(int, int), new:(int, int)):
 
         piece = self.pieces[old[0]][old[1]]
         is_piece = self.pieces[new[0]][new[1]] != None
@@ -95,7 +95,7 @@ class GameBoardController():
         self.rule_50_moves_draw -= 1
         if self.rule_50_moves_draw <= 0:
             self.claim_draw = True
-    
+
     def insufficient_checkmate_material_rule(self):
 
         white_positions = self.pieces_by_color[PieceColor.WHITE]
@@ -105,14 +105,14 @@ class GameBoardController():
             black_pieces = []
             is_white_in_dark_slots = False
             is_black_in_dark_slots = False
-            dark_slots = [(0,0),(0,2),(0,4),(0,6),
-                          (1,1),(1,3),(1,5),(1,7),
-                          (2,0),(2,2),(2,4),(2,6),
-                          (3,1),(3,3),(3,5),(3,7),
-                          (4,0),(4,2),(4,4),(4,6),
-                          (5,1),(5,3),(5,5),(5,7),
-                          (6,0),(6,2),(6,4),(6,6),
-                          (7,1),(7,3),(7,5),(7,7)]
+            dark_slots = [(0, 0), (0, 2), (0, 4), (0, 6),
+                          (1, 1), (1, 3), (1, 5), (1, 7),
+                          (2, 0), (2, 2), (2, 4), (2, 6),
+                          (3, 1), (3, 3), (3, 5), (3, 7),
+                          (4, 0), (4, 2), (4, 4), (4, 6),
+                          (5, 1), (5, 3), (5, 5), (5, 7),
+                          (6, 0), (6, 2), (6, 4), (6, 6),
+                          (7, 1), (7, 3), (7, 5), (7, 7)]
             for position in white_positions:
                 white_pieces.append(self.pieces[position[0]][position[1]].type)
                 if(self.pieces[position[0]][position[1]].type == PieceCode.BISHOP and position in dark_slots):
@@ -129,7 +129,7 @@ class GameBoardController():
             (is_white_in_dark_slots == is_black_in_dark_slots)):
                 self.insufficent_cmr_draw = True
 
-    def threefold_repetition_rule(self,old:(int,int),new:(int,int)):
+    def threefold_repetition_rule(self, old: (int,int), new:(int, int)):
         piece = self.pieces[new[0]][new[1]]
         if(self._turn == GameBoardPlayer.WHITE):
 
@@ -160,13 +160,13 @@ class GameBoardController():
             self.black_last_moved_piece = piece
 
             if self.black_before_last_moved_piece is None:
-                self.black_last_old_and_new = old,new
+                self.black_last_old_and_new = old, new
             else:
                 if(self.black_before_last_moved_piece.type == piece.type and self.black_last_old_and_new[0] == new and self.black_last_old_and_new[1] == old):
                     self.black_moved_times += 1
                 else:
                     self.black_moved_times = 1
-            self.black_last_old_and_new = old,new
+            self.black_last_old_and_new = old, new
             self.black_threefold.append(new)
             if len(self.black_threefold) >= 5 and self.black_moved_times >= 5:
 
@@ -180,7 +180,6 @@ class GameBoardController():
             elif len(self.black_threefold) >= 5:
                 self.black_threefold.pop(0)
                 self.threefold_draw = False
-                
 
     def stalemate_rule(self):
         if self._turn == GameBoardPlayer.WHITE:
@@ -191,11 +190,8 @@ class GameBoardController():
             valid_moves = self.get_legal_moves(position)
             if len(valid_moves) > 0:
                 return False
-        
         self.stalemate_draw = True
         return True
-
-
 
     def is_check_valid(self, new: (int, int)):
 
@@ -380,8 +376,8 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        #self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
-        self.fen = "3k4/8/8/8/8/8/3q4/1K6 w KQkq - 0 0"
+        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        # self.fen = "3k4/8/8/8/8/8/3q4/1K6 w KQkq - 0 0"
 
     @property
     def turn(self):
@@ -431,7 +427,8 @@ class GameBoardController():
                 PieceColor.WHITE: set()
                 }
 
-    def opposite_color(self, color: PieceColor):
+    @classmethod
+    def opposite_color(cls, color: PieceColor):
         if color == PieceColor.WHITE:
             return PieceColor.BLACK
         return PieceColor.WHITE
