@@ -91,7 +91,7 @@ class GameBoardController():
 
     def promote(self, piece: Piece, promotion: PieceCode):
         # is promotion a valid promotion piece?
-        if promotion.value not in [
+        if promotion not in [
                 PieceCode.QUEEN,
                 PieceCode.KNIGHT,
                 PieceCode.ROOK,
