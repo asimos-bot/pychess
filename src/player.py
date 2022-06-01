@@ -4,15 +4,15 @@ import threading
 import random
 from abc import ABC, abstractmethod
 
-import colors
 from piece import PieceColor
 
 BORDER_THICKNESS = 5
 
 
 class Player(ABC):
-    def __init__(self, color: PieceColor):
+    def __init__(self, color: PieceColor, settings: dict()):
         self.color = color
+        self.settings = settings
         self._playing = True
         self._playing_lock = threading.Lock()
 
@@ -61,6 +61,9 @@ class Player(ABC):
 
 
 class RandomAI(Player):
+    def __init__(self, color: PieceColor, settings: dict()):
+        super(RandomAI, self).__init__(color, settings)
+
     def make_move(
             self,
             piece_info_func,
@@ -99,8 +102,8 @@ class RandomAI(Player):
 
 
 class Human(Player):
-    def __init__(self, color: PieceColor):
-        super(Human, self).__init__(color)
+    def __init__(self, color: PieceColor, settings: dict()):
+        super(Human, self).__init__(color, settings)
         self._from = None
         self._to = None
 
@@ -135,7 +138,7 @@ class Human(Player):
             tile_rect, from_tile_surf = tile_info_func(tile_idxs)
             pygame.draw.rect(
                     from_tile_surf,
-                    colors.PIECE_SELECTION,
+                    self.settings['colors']['piece_selection'],
                     (0, 0, tile_rect.w, tile_rect.w),
                     BORDER_THICKNESS,
                     border_radius=10)
@@ -147,7 +150,7 @@ class Human(Player):
                 from_tile_surf = from_tile_surf
                 pygame.draw.rect(
                         from_tile_surf,
-                        colors.VALID_MOVE,
+                        self.settings['colors']['valid_move'],
                         (0, 0, tile_rect.w, tile_rect.w),
                         BORDER_THICKNESS,
                         border_radius=10

@@ -3,7 +3,6 @@ import pygame
 import pygame.locals
 from enum import Enum
 
-import colors
 from game_board import GameBoard
 from main_menu import MainMenu
 from pause_menu import PauseMenu
@@ -32,7 +31,13 @@ class PyChess():
                     },
                 'initial_bottom_color': PieceColor.WHITE,
                 'top_spacing_percentage': 0.2,
-                'right_spacing_percentage': 0.3
+                'right_spacing_percentage': 0.3,
+                'colors': {
+                    'clear_screen': (128, 128, 128),
+                    'game_board': (24, 240, 128),
+                    'piece_selection': (250, 12, 12),
+                    'valid_move': (32, 255, 32)
+                    }
                 }
 
         # load piece images
@@ -88,13 +93,17 @@ class PyChess():
             self.board.unpause()
         else:
             players = self.settings['players']
-            player_white = players[PieceColor.WHITE](PieceColor.WHITE)
-            player_black = players[PieceColor.BLACK](PieceColor.BLACK)
+            player_white = players[PieceColor.WHITE](
+                    PieceColor.WHITE,
+                    self.settings)
+            player_black = players[PieceColor.BLACK](
+                    PieceColor.BLACK,
+                    self.settings)
 
             self.board = GameBoard(
                 dims=(self.x, self.y),
                 coords=(0, 0),
-                color=colors.GAME_BOARD,
+                color=self.settings['colors']['game_board'],
                 player_white=player_white,
                 player_black=player_black,
                 bottom_color=self.settings['initial_bottom_color'],
@@ -135,7 +144,7 @@ class PyChess():
     def game_loop(self):
 
         while self.state != GameState.QUIT:
-            self.surface.fill(colors.CLEAR_SCREEN)
+            self.surface.fill(self.settings['colors']['clear_screen'])
 
             # event capture
             events = pygame.event.get()

@@ -3,7 +3,6 @@ import pygame_menu
 
 from player import RandomAI, Human
 from piece import PieceColor
-from game_board_controller import GameBoardController
 
 
 class SettingsMenu:

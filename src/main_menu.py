@@ -1,5 +1,4 @@
 import pygame_menu
-import colors
 
 from settings_menu import SettingsMenu
 
