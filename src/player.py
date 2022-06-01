@@ -13,6 +13,8 @@ BORDER_THICKNESS = 5
 class Player(ABC):
     def __init__(self, color: PieceColor):
         self.color = color
+        self._playing = True
+        self._playing_lock = threading.Lock()
 
     @abstractmethod
     def make_move(
@@ -41,13 +43,21 @@ class Player(ABC):
             adjust_idxs_func):
         pass
 
-    @abstractmethod
-    def pause(self):
-        pass
+    @property
+    def playing(self):
+        with self._playing_lock:
+            return self._playing
 
-    @abstractmethod
+    @playing.setter
+    def playing(self, value: bool):
+        with self._playing_lock:
+            self._playing = value
+
+    def pause(self):
+        self.playing = False
+
     def unpause(self):
-        pass
+        self.playing = True
 
 
 class RandomAI(Player):
@@ -56,6 +66,10 @@ class RandomAI(Player):
             piece_info_func,
             adjust_idxs_func,
             get_legal_moves_func):
+
+        if not self.playing:
+            return None
+
         legal_moves = set()
         for i in range(8):
             for j in range(8):
@@ -83,36 +97,12 @@ class RandomAI(Player):
             adjust_idxs_func):
         pass
 
-    def pause(self):
-        pass
-
-    def unpause(self):
-        pass
-
 
 class Human(Player):
     def __init__(self, color: PieceColor):
         super(Human, self).__init__(color)
         self._from = None
         self._to = None
-        self._playing = True
-        self._playing_lock = threading.Lock()
-
-    @property
-    def playing(self):
-        with self._playing_lock:
-            return self._playing
-
-    @playing.setter
-    def playing(self, value: bool):
-        with self._playing_lock:
-            self._playing = value
-
-    def pause(self):
-        self.playing = False
-
-    def unpause(self):
-        self.playing = True
 
     def make_move(
             self,
