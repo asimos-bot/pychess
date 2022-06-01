@@ -19,7 +19,7 @@ class SettingsMenu:
                 ('Random AI', RandomAI),
                 ('Human', Human)]
         self.menu.add.selector(
-                title='White Controller',
+                title='White controller',
                 items=player_options,
                 default=1,
                 style='fancy',
@@ -27,17 +27,38 @@ class SettingsMenu:
                     lambda _, y: self.set_player_type(PieceColor.WHITE, y))
                 )
         self.menu.add.selector(
-                title='Black Controller',
+                title='Black controller',
                 items=player_options,
                 default=0,
                 style='fancy',
                 onchange=(
                     lambda _, y: self.set_player_type(PieceColor.BLACK, y))
                 )
+        for k in self.settings['colors']:
+            self.add_color_picker(
+                    setting_name=k,
+                    color_setting_dict=self.settings['colors'])
         self.menu.add.button(
-                title='Go Back to Main Menu',
+                title='Go back to main menu',
                 action=pygame_menu.events.BACK
                 )
+
+    def add_color_picker(self, setting_name, color_setting_dict):
+        title = setting_name.lower().replace('_', ' ').capitalize()
+        title += ' color'
+        self.menu.add.color_input(
+                title=title,
+                color_type=pygame_menu.widgets.COLORINPUT_TYPE_RGB,
+                default=color_setting_dict[setting_name],
+                onchange=(
+                    lambda x: self.set_color(
+                        setting_name,
+                        color_setting_dict,
+                        x)))
+
+    def set_color(self, setting_name, color_setting_dict, value):
+        if -1 not in value:
+            color_setting_dict[setting_name] = value
 
     def set_player_type(self, player_color, player_class):
         self.settings['players'][player_color] = player_class
