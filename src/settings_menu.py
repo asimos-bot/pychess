@@ -18,19 +18,17 @@ class SettingsMenu:
         player_options = [
                 ('Random AI', RandomAI),
                 ('Human', Human)]
-        self.menu.add.selector(
+        self.menu.add.dropselect(
                 title='White controller',
                 items=player_options,
                 default=1,
-                style='fancy',
                 onchange=(
                     lambda _, y: self.set_player_type(PieceColor.WHITE, y))
                 )
-        self.menu.add.selector(
+        self.menu.add.dropselect(
                 title='Black controller',
                 items=player_options,
                 default=0,
-                style='fancy',
                 onchange=(
                     lambda _, y: self.set_player_type(PieceColor.BLACK, y))
                 )

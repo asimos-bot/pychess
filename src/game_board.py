@@ -40,11 +40,12 @@ class GameBoard():
                 color,
                 bottom_color,
                 self.settings)
-        self.checkmate = False
         self.players = {
                 GameBoardPlayer.WHITE: player_white,
                 GameBoardPlayer.BLACK: player_black
                 }
+
+        self.checkmate = False
         self._start_game()
 
     def pause(self):
