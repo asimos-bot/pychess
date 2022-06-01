@@ -131,8 +131,13 @@ class PyChess():
                 (self.x, self.y),
                 play_func=self.set_state_play,
                 quit_func=self.set_state_main_menu,
+                restarting_func=self.restart_game,
                 orientation_func=self.board.spin)
         self.state = GameState.PAUSE
+
+    def restart_game(self):
+        self.state = GameState.PLAY
+        self.set_state_play()
 
     def play_event_capture(self, event):
         if event.type == pygame.locals.KEYDOWN:
