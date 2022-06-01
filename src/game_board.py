@@ -86,13 +86,14 @@ class GameBoard():
             valid_move = False
             old_pos = None
             new_pos = None
+            promotion = None
             while not valid_move:
                 move = self.player.make_move(
                         self.controller.piece_info,
                         self.graphical.adjust_idxs,
                         self.controller.get_legal_moves)
                 if move is not None:
-                    old_pos, new_pos = move
+                    old_pos, new_pos, promotion = move
                     valid_moves = self.controller.get_legal_moves(old_pos)
                     if new_pos in valid_moves:
                         valid_move = True
@@ -100,7 +101,9 @@ class GameBoard():
                     return
 
             self.controller.fifty_move_rule(old_pos, new_pos)
-            self.controller.move_piece(old_pos, new_pos)
+
+            self.controller.move_piece(old_pos, new_pos, promotion)
+
             self.controller.threefold_repetition_rule(old_pos, new_pos)
             if self.controller.is_check_valid(new_pos):
                 self.checkmate = self.controller.is_checkmate_valid(new_pos)

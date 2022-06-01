@@ -4,7 +4,7 @@ import threading
 import random
 from abc import ABC, abstractmethod
 
-from piece import PieceColor
+from piece import PieceColor, PieceCode
 
 BORDER_THICKNESS = 5
 
@@ -21,7 +21,7 @@ class Player(ABC):
             self,
             piece_info_func,
             adjust_idxs_func,
-            get_legal_moves_func):
+            get_legal_moves_func) -> ((int, int), (int, int), PieceCode):
         pass
 
     @abstractmethod
@@ -81,6 +81,12 @@ class RandomAI(Player):
                     for move in get_legal_moves_func((i, j)):
                         legal_moves.add(((i, j), move))
         choosen_move = random.sample(legal_moves, 1)[0]
+        random_promotion = [
+                PieceCode.QUEEN,
+                PieceCode.KNIGHT,
+                PieceCode.BISHOP,
+                PieceCode.ROOK][random.randint(0, 3)]
+        choosen_move = (choosen_move[0], choosen_move[1], random_promotion)
         return choosen_move
 
     def draw(

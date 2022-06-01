@@ -2,7 +2,7 @@
 import threading
 from enum import Enum
 
-from piece import PieceColor, PieceCode, MoveNotification
+from piece import Piece, PieceColor, PieceCode, MoveNotification
 from piece import piece_class_from_code
 
 
@@ -55,7 +55,11 @@ class GameBoardController():
         controller.fen = self.fen
         return controller
 
-    def move_piece(self, old: (int, int), new: (int, int)):
+    def move_piece(
+            self,
+            old: (int, int),
+            new: (int, int),
+            promotion: PieceCode):
 
         # notify piece of the move, so it can update its internal state
         # and return additional information
@@ -80,13 +84,35 @@ class GameBoardController():
 
         self.process_move_notification(piece, notification, data, new)
 
+        # handle promotion
+        self.promote(piece, promotion)
+
         self.update_pseudo_legal_moves()
 
+    def promote(self, piece: Piece, promotion: PieceCode):
+        # is promotion a valid promotion piece?
+        if promotion.value not in [
+                PieceCode.QUEEN,
+                PieceCode.KNIGHT,
+                PieceCode.ROOK,
+                PieceCode.BISHOP]:
+            return
+        # is piece a pawn?
+        if piece.type != PieceCode.PAWN:
+            return
+        # is pawn at the last tile opposite to its color starting side?
+        white_promotion = piece.pos[0] == 7 and piece.color == PieceColor.BLACK
+        black_promotion = piece.pos[0] == 0 and piece.color == PieceColor.WHITE
+        if not white_promotion and not black_promotion:
+            return
+        # if you get here, promotion is valid!
+        new_piece = piece_class_from_code(promotion)(piece.color, piece.pos)
+        self.pieces[piece.pos[0]][piece.pos[1]] = new_piece
 
-    def fifty_move_rule(self, old:(int, int), new:(int, int)):
+    def fifty_move_rule(self, old: (int, int), new: (int, int)):
 
         piece = self.pieces[old[0]][old[1]]
-        is_piece = self.pieces[new[0]][new[1]] != None
+        is_piece = self.pieces[new[0]][new[1]] is not None
         is_pawn = piece.type == PieceCode.PAWN
         if is_pawn or is_piece:
             self.rule_50_moves_draw = 100
@@ -333,23 +359,27 @@ class GameBoardController():
         legal_moves = set()
         # every possible pseudo-legal move you can make from this piece
         for move in self.get_pseudo_legal_moves(pos):
-            # create a new controller for each move
-            tmp_board: GameBoardController = self.copy()
-            # make the move in this temporary controller
-            tmp_board.move_piece(pos, move)
-            # iterate over every possible enemy move in this temporary
-            # controller, and add this move if no enemy move can kill
-            # our king
-            enemy_color = self.opposite_color(piece_color)
-            enemy_attack_tiles = tmp_board.attackable_tiles_from[enemy_color]
-            legal_move = True
-            for enemy_attack_tile in enemy_attack_tiles:
-                attack_info = tmp_board.piece_info(enemy_attack_tile)
-                if attack_info == (PieceCode.KING, piece_color):
-                    legal_move = False
-            del tmp_board
-            if legal_move:
-                legal_moves.add(move)
+            for promotion in "QN":
+                if piece_type != PieceCode.PAWN and promotion == "Q":
+                    continue
+                promotion = PieceCode(promotion)
+                # create a new controller for each move
+                tmp_board: GameBoardController = self.copy()
+                # make the move in this temporary controller
+                tmp_board.move_piece(pos, move, promotion)
+                # iterate over every possible enemy move in this temporary
+                # controller, and add this move if no enemy move can kill
+                # our king
+                enemy_color = self.opposite_color(piece_color)
+                enemy_attack_tiles = tmp_board.attackable_tiles_from[enemy_color]
+                legal_move = True
+                for enemy_attack_tile in enemy_attack_tiles:
+                    attack_info = tmp_board.piece_info(enemy_attack_tile)
+                    if attack_info == (PieceCode.KING, piece_color):
+                        legal_move = False
+                del tmp_board
+                if legal_move:
+                    legal_moves.add(move)
         piece.legal_moves = legal_moves
         return legal_moves
 
