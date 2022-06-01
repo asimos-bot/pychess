@@ -16,40 +16,39 @@ class SettingsMenu:
                 height=dims[1],
                 theme=pygame_menu.themes.THEME_BLUE
                 )
-        player_options = [('Random AI', RandomAI), ('Human', Human)]
-        piece_colors = [('White', PieceColor.WHITE), ('Black', PieceColor.BLACK)]
+        player_options = [
+                ('Random AI', RandomAI),
+                ('Human', Human)]
         self.menu.add.selector(
-                title='Player 1',
+                title='White Controller',
                 items=player_options,
                 default=1,
                 style='fancy',
-                onchange=(lambda _, y: self.set_player_type(1, y))
+                onchange=(
+                    lambda _, y: self.set_player_type(PieceColor.WHITE, y))
                 )
         self.menu.add.selector(
-                title='Player 2',
+                title='Black Controller',
                 items=player_options,
                 default=0,
                 style='fancy',
-                onchange=(lambda _, y: self.set_player_type(2, y))
-                )
-        self.menu.add.selector(
-                title='Player 1 Color',
-                items=piece_colors,
-                default=0,
-                style='fancy',
-                onchange=(lambda _, y: self.set_player1_color(y))
+                onchange=(
+                    lambda _, y: self.set_player_type(PieceColor.BLACK, y))
                 )
         self.menu.add.button(
                 title='Go Back',
                 action=pygame_menu.events.BACK
                 )
 
-    def set_player_type(self, player_id, player_class):
-        settings.PLAYER_TYPES[player_id] = player_class
-
-    def set_player1_color(self, color):
-        settings.PLAYER1_COLOR = color
-        settings.PLAYER2_COLOR = GameBoardController.opposite_color(settings.PLAYER1_COLOR)
+    def set_player_type(self, player_color, player_class):
+        settings.PLAYERS[player_color] = player_class
+        if settings.PLAYERS[PieceColor.WHITE] == Human:
+            settings.BOARD_INITIAL_BOTTOM_COLOR = PieceColor.WHITE
+        elif settings.PLAYERS[PieceColor.BLACK] == Human:
+            settings.BOARD_INITIAL_BOTTOM_COLOR = PieceColor.BLACK
+        else:
+            # two AIs
+            settings.BOARD_INITIAL_BOTTOM_COLOR = PieceColor.WHITE
 
     def get_title(self):
         return self.menu.get_title()

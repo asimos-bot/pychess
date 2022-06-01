@@ -76,12 +76,16 @@ class PyChess():
         if self.state == GameState.PAUSE:
             self.board.unpause()
         else:
+            player_white = settings.PLAYERS[PieceColor.WHITE](PieceColor.WHITE)
+            player_black = settings.PLAYERS[PieceColor.BLACK](PieceColor.BLACK)
+
             self.board = GameBoard(
                 dims=(self.x, self.y),
                 coords=(0, 0),
                 color=colors.GAME_BOARD,
-                player_white=settings.PLAYER_TYPES[1](settings.PLAYER1_COLOR),
-                player_black=settings.PLAYER_TYPES[2](settings.PLAYER2_COLOR))
+                player_white=player_white,
+                player_black=player_black,
+                bottom_color=settings.BOARD_INITIAL_BOTTOM_COLOR)
 
         self.state = GameState.PLAY
 
