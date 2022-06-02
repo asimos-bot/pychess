@@ -61,7 +61,6 @@ class GameBoardGraphical():
         i, j = idxs
         if convert_to_board:
             i, j = self.board_to_global((i, j))
-        print(i, j)
         tile = self.tiles[i][j]
         topleft_coords = (
                 self._coords[0] + self.tile_side * j,
