@@ -113,13 +113,10 @@ class GameBoard():
 
             self.controller.threefold_repetition_rule(old_pos, new_pos)
             if self.controller.is_check_valid(new_pos):
-                print("okay, we have a check")
                 if self.controller.is_checkmate_valid(new_pos):
-                    print("checkmate babyyyyy! lets gooooo")
                     self.game_over_func(
-                            title="{} Wins!".format(
-                                self.player.color.name.capitalize()),
-                            message="Congratulations {}!".format(
+                            title="Match is over",
+                            message="{} Wins!".format(
                                 self.player.color.name.capitalize()
                                 )
                             )
@@ -130,7 +127,7 @@ class GameBoard():
             if self.controller.insufficent_cmr_draw:
                 self.game_over_func(
                         title="Draw",
-                        message="too many deja vus"
+                        message="not gonna happen"
                         )
                 return
 

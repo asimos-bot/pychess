@@ -31,7 +31,7 @@ class GameOverMenu:
         self.menu.close()
 
     def resize(self, new_width, new_height):
-        self.menu.resize(new_width, new_height)
+        self.menu.resize(new_width/2, new_height/2)
 
     def update(self, surface, events):
         self.menu.update(events)

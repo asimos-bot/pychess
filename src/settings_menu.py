@@ -66,7 +66,6 @@ class SettingsMenu:
             color_setting_dict[setting_name] = value
 
     def set_player_type(self, player_color, player_class):
-        print(player_color, player_class)
         self.settings['players'][player_color] = player_class
         if self.settings['players'][PieceColor.WHITE] == Human:
             self.settings['initial_bottom_color'] = PieceColor.WHITE
