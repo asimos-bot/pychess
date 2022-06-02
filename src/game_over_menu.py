@@ -2,13 +2,20 @@ import pygame_menu
 
 
 class GameOverMenu:
-    def __init__(self, dims: (int, int), quit_func, restarting_func, title, message):
+    def __init__(
+            self,
+            dims: (int, int),
+            quit_func,
+            restarting_func,
+            title,
+            message):
         self.menu = pygame_menu.Menu(
             title=title,
             width=dims[0]/2,
             height=dims[1]/2,
             theme=pygame_menu.themes.THEME_BLUE)
 
+        self.menu.add.label(title=message)
         self.menu.add.button('Restart', self.restarting)
         self.menu.add.button('Quit', self.quit)
 
@@ -20,7 +27,7 @@ class GameOverMenu:
         self.menu.close()
 
     def quit(self):
-        self.restarting_func()
+        self.quit_func()
         self.menu.close()
 
     def resize(self, new_width, new_height):

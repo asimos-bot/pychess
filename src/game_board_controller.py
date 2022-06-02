@@ -251,15 +251,10 @@ class GameBoardController():
     def is_checkmate_valid(self, new: (int, int)):
 
         piece = self.pieces[new[0]][new[1]]
-        if piece.color != PieceColor.WHITE:
-            color = PieceColor.WHITE
-        else:
-            color = PieceColor.BLACK
-        for pos in self.pieces_by_color[color]:
+        for pos in self.pieces_by_color[self.opposite_color(piece.color)]:
             enemy_piece = self.pieces[pos[0]][pos[1]]
             if len(self.get_legal_moves(enemy_piece.pos)) >= 1:
                 return False
-
         return True
 
     def update_pseudo_legal_moves(self):

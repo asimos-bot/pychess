@@ -18,17 +18,24 @@ class SettingsMenu:
         player_options = [
                 ('Random AI', RandomAI),
                 ('Human', Human)]
+        default_white = player_options.index(next(filter(
+                lambda x: x[1] == settings['players'][PieceColor.WHITE],
+                player_options)))
+        default_black = player_options.index(next(filter(
+                lambda x: x[1] == settings['players'][PieceColor.BLACK],
+                player_options)))
+
         self.menu.add.dropselect(
                 title='White controller',
                 items=player_options,
-                default=1,
+                default=default_white,
                 onchange=(
                     lambda _, y: self.set_player_type(PieceColor.WHITE, y))
                 )
         self.menu.add.dropselect(
                 title='Black controller',
                 items=player_options,
-                default=0,
+                default=default_black,
                 onchange=(
                     lambda _, y: self.set_player_type(PieceColor.BLACK, y))
                 )
@@ -59,6 +66,7 @@ class SettingsMenu:
             color_setting_dict[setting_name] = value
 
     def set_player_type(self, player_color, player_class):
+        print(player_color, player_class)
         self.settings['players'][player_color] = player_class
         if self.settings['players'][PieceColor.WHITE] == Human:
             self.settings['initial_bottom_color'] = PieceColor.WHITE
