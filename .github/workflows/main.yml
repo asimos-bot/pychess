@@ -20,9 +20,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: docker test
       - uses: actions/checkout@v3
       - uses: docker-practice/actions-setup-docker@master
-      - name: docker build
-      - run: docker build . -t pychess
-      - name: docker run tests
-      - run: docker run pychess sh -c 'python3 -m unittest'
+      - run: docker build . -t pychess && docker run pychess sh -c 'python3 -m unittest'
