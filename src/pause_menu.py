@@ -16,7 +16,7 @@ class PauseMenu():
                 theme=pygame_menu.themes.THEME_BLUE)
         self.menu.add.button('Play', self.play)
         self.menu.add.button('Spin Board', self.orientation)
-        self.menu.add.button('Restart', self.restarting_func)
+        self.menu.add.button('Restart', self.restarting)
         self.menu.add.button('Quit', self.quit)
         self.quit_func = quit_func
         self.play_func = play_func
@@ -31,7 +31,7 @@ class PauseMenu():
         self.menu.close()
         self.quit_func()
 
-    def restarting_func(self):
+    def restarting(self):
         self.restarting_func()
         self.menu.close()
 

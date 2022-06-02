@@ -39,6 +39,7 @@ class GameBoardController():
         self.black_moved_times = 1
         self.black_last_old_and_new = None
         self.white_last_old_and_new = None
+
         self.pieces_by_color = {
                 PieceColor.WHITE: set(),
                 PieceColor.BLACK: set()

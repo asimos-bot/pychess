@@ -19,9 +19,11 @@ class GameBoard():
             player_black: Player,
             player_white: Player,
             settings: dict(),
+            game_over_func,
             bottom_color: PieceColor = PieceColor.WHITE,
             headless: bool = False):
 
+        self.game_over_func = game_over_func
         self.settings = settings
 
         # load sound effects
@@ -45,7 +47,6 @@ class GameBoard():
                 GameBoardPlayer.BLACK: player_black
                 }
 
-        self.checkmate = False
         self._start_game()
 
     def pause(self):
@@ -83,7 +84,11 @@ class GameBoard():
 
     def _make_moves_async(self):
         while self.controller.winner is None:
-            # stalemate_draw = self.controller.stalemate_rule()
+            if self.controller.stalemate_rule():
+                self.game_over_func(
+                        title="Stalemate",
+                        message="Looks like that\'s a draw!")
+                return
             valid_move = False
             old_pos = None
             new_pos = None
@@ -108,8 +113,23 @@ class GameBoard():
 
             self.controller.threefold_repetition_rule(old_pos, new_pos)
             if self.controller.is_check_valid(new_pos):
-                self.checkmate = self.controller.is_checkmate_valid(new_pos)
+                if self.controller.is_checkmate_valid(new_pos):
+                    self.game_over_func(
+                            title="{} Wins!".format(
+                                self.player.color.name.capitalize()),
+                            message="Congratulations {}!".format(
+                                self.player.color.name.capitalize()
+                                )
+                            )
+
             self.controller.insufficient_checkmate_material_rule()
+
+            if self.controller.insufficent_cmr_draw:
+                self.game_over_func(
+                        title="Stalemate",
+                        message="I guess nothing will come out of this"
+                        )
+                return
 
             if not self.headless:
                 mixer.music.stop()

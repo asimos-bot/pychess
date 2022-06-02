@@ -6,6 +6,7 @@ from enum import Enum
 from game_board import GameBoard
 from main_menu import MainMenu
 from pause_menu import PauseMenu
+from game_over_menu import GameOverMenu
 from piece import PieceDrawer, PieceColor
 from player import Human, RandomAI
 
@@ -15,6 +16,7 @@ class GameState(Enum):
     PAUSE = 2
     QUIT = 3
     PLAY = 4
+    GAME_OVER = 5
 
 
 class PyChess():
@@ -57,6 +59,8 @@ class PyChess():
             self.main_menu.resize(self.x, self.y)
         if hasattr(self, "pause_menu"):
             self.pause_menu.resize(self.x, self.y)
+        if hasattr(self, "game_over_menu"):
+            self.game_over_menu.resize(self.x, self.y)
 
     def window_event_capture(self, event):
         # quit
@@ -107,7 +111,8 @@ class PyChess():
                 player_white=player_white,
                 player_black=player_black,
                 bottom_color=self.settings['initial_bottom_color'],
-                settings=self.settings)
+                settings=self.settings,
+                game_over_func=self.set_state_game_over)
 
         self.state = GameState.PLAY
 
@@ -117,6 +122,8 @@ class PyChess():
             del self.board
         if hasattr(self, "pause_menu"):
             del self.pause_menu
+        if hasattr(self, "game_over_menu"):
+            del self.game_over_menu
         self.state = GameState.MAIN_MENU
         self.main_menu = MainMenu(
                 (self.x, self.y),
@@ -134,6 +141,18 @@ class PyChess():
                 restarting_func=self.restart_game,
                 orientation_func=self.board.spin)
         self.state = GameState.PAUSE
+
+    def set_state_game_over(self, title, message):
+        if hasattr(self, "main_menu"):
+            del self.main_menu
+        self.game_over_menu = GameOverMenu(
+                (self.x, self.y),
+                quit_func=self.set_state_main_menu,
+                restarting_func=self.restart_game,
+                title=title,
+                message=message
+                )
+        self.state = GameState.GAME_OVER
 
     def restart_game(self):
         self.state = GameState.PLAY
@@ -168,6 +187,9 @@ class PyChess():
             elif self.state == GameState.PAUSE:
                 self.board.draw(self.surface)
                 self.pause_menu.update(self.surface, events)
+            elif self.state == GameState.GAME_OVER:
+                self.board.draw(self.surface)
+                self.game_over_menu.update(self.surface, events)
 
             pygame.display.update()
             pygame.time.Clock().tick(60)
