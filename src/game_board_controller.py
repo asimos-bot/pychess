@@ -422,8 +422,8 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
-        # self.fen = "rkb1qbnr/pP2p3/n5p1/5p1p/5P2/8/PPP3PP/RNBQKBNR w KQ h6 18 9"
+        # self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        self.fen = "rkb1qbnr/pP2p3/n5p1/5p1p/5P2/8/PPP3PP/RNBQKBNR w KQ h6 18 9"
 
     @property
     def turn(self):
