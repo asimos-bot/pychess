@@ -34,9 +34,9 @@ class PieceInitialMovementTest(unittest.TestCase):
                     expected_color.name.lower(),
                     expected_type.name.lower(),
                     piece_color.name.lower()))
-        valid_moves = self.controller.get_valid_moves(pos)
+        legal_moves = self.controller.get_legal_moves(pos)
         self.assertEqual(
-                valid_moves,
+                legal_moves,
                 expected_moves,
                 "illegal movement set for {} {} at {}"
                 .format(

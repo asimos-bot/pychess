@@ -38,9 +38,9 @@ class PieceFreeMovementTest(unittest.TestCase):
                     expected_color.name.lower(),
                     expected_type.name.lower(),
                     piece_color.name.lower()))
-        valid_moves = self.controller.get_valid_moves(pos)
+        legal_moves = self.controller.get_legal_moves(pos)
         self.assertEqual(
-                valid_moves,
+                legal_moves,
                 expected_moves,
                 "\n{}:\n\t".format(label) +
                 "illegal movement set for {} {} at {}:\n".format(
@@ -48,7 +48,7 @@ class PieceFreeMovementTest(unittest.TestCase):
                     piece_type.name.lower(),
                     pos) +
                 "\t\texpected: {}\n".format(expected_moves) +
-                "\t\treceived: {}\n".format(valid_moves)
+                "\t\treceived: {}\n".format(legal_moves)
                )
 
     def movement_dict_check(self, moves):
@@ -57,7 +57,7 @@ class PieceFreeMovementTest(unittest.TestCase):
             pos = move["pos"]
             piece_type = move["type"]
             piece_color = move["color"]
-            valid_moves = move["moves"]
+            legal_moves = move["moves"]
             fens = move["fens"]
             for fen in fens:
                 self.controller.fen = fen
@@ -66,7 +66,7 @@ class PieceFreeMovementTest(unittest.TestCase):
                         pos,
                         piece_type,
                         piece_color,
-                        valid_moves
+                        legal_moves
                         )
 
     def test_pawn_middle_forward(self):
