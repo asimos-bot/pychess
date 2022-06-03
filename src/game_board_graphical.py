@@ -86,13 +86,9 @@ class GameBoardGraphical():
         self._dims = dims
 
         # get coordinates that fit inside space given
-        middle_point = (
-                coords[0] + (dims[0] * (1 - right_spacing_percentage))/2,
-                coords[1] + (dims[1] * (1 + top_spacing_percentage))/2)
+        middle_point = coords[1] + (dims[1] * (1 + top_spacing_percentage))/2
 
-        self._coords = (
-                middle_point[0] - 5 * self.tile_side,
-                middle_point[1] - 5 * self.tile_side)
+        self._coords = (0, middle_point - 5 * self.tile_side)
 
     def create_blank_tiles(self):
         tiles = []

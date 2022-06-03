@@ -158,6 +158,7 @@ class PyChess():
                 (self.x, self.y),
                 quit_func=self.set_state_main_menu,
                 restarting_func=self.restart_game,
+                settings=self.settings,
                 title=title,
                 message=message
                 )

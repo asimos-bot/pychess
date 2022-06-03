@@ -117,6 +117,7 @@ class GameBoard():
         self.timer.unpause()
         while self.controller.winner is None:
             if self.controller.stalemate_rule():
+                self.timer.pause()
                 self.game_over_func(
                         title="Stalemate",
                         message="Looks like that\'s a draw!")
@@ -146,6 +147,7 @@ class GameBoard():
             self.controller.threefold_repetition_rule(old_pos, new_pos)
             if self.controller.is_check_valid(new_pos):
                 if self.controller.is_checkmate_valid(new_pos):
+                    self.timer.pause()
                     self.game_over_func(
                             title="Match is over",
                             message="{} Wins!".format(
@@ -157,6 +159,7 @@ class GameBoard():
             self.controller.insufficient_checkmate_material_rule()
 
             if self.controller.insufficent_cmr_draw:
+                self.timer.pause()
                 self.game_over_func(
                         title="Draw",
                         message="not gonna happen"

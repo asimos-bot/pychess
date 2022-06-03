@@ -84,12 +84,6 @@ class GameBoardController():
 
         self.update_pseudo_legal_moves()
 
-        # if notification in [MoveNotification.QUEEN_CASTLING, MoveNotification.KING_CASTLING]:
-        #     self.get_legal_moves(data['new'])
-
-        # bugfix rook moves after castling:
-        # self.fen = self.fen
-
     def is_promotion_valid(
             self,
             pos: (int, int),
