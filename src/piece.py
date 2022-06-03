@@ -88,11 +88,12 @@ class Piece(ABC):
     @abstractmethod
     def update_pseudo_legal_moves(
             self,
-            pos: (int, int),
             piece_info_func,
             en_passant,
             castling):
-        pass
+        # if we are updating pseudo legal moves, legal moves
+        # should also reset
+        self.legal_moves = None
 
     def get_pseudo_legal_moves(self):
         return self.pseudo_legal_moves
@@ -159,6 +160,10 @@ class Pawn(Piece):
             piece_info_func,
             en_passant,
             castling):
+        super(Pawn, self).update_pseudo_legal_moves(
+                piece_info_func,
+                en_passant,
+                castling)
         pseudo_legal_moves = set()
 
         def add_if_pseudo_legal(_set, pos):
@@ -219,6 +224,10 @@ class Knight(Piece):
             piece_info_func,
             en_passant,
             castling):
+        super(Knight, self).update_pseudo_legal_moves(
+                piece_info_func,
+                en_passant,
+                castling)
         pseudo_legal_moves = set()
         directions = [
                 (2, 1),
@@ -255,6 +264,10 @@ class Queen(Piece):
             piece_info_func,
             en_passant,
             castling):
+        super(Queen, self).update_pseudo_legal_moves(
+                piece_info_func,
+                en_passant,
+                castling)
         pseudo_legal_moves = set()
         directions = [
                 (-1, 0),
@@ -372,6 +385,10 @@ class King(Piece):
             piece_info_func,
             en_passant,
             castling):
+        super(King, self).update_pseudo_legal_moves(
+                piece_info_func,
+                en_passant,
+                castling)
         pseudo_legal_moves = set()
         directions = [
                 (-1, 0),
@@ -460,6 +477,10 @@ class Rook(Piece):
             piece_info_func,
             en_passant,
             castling):
+        super(Rook, self).update_pseudo_legal_moves(
+                piece_info_func,
+                en_passant,
+                castling)
         pseudo_legal_moves = set()
         directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
         distance = 1
@@ -492,6 +513,10 @@ class Bishop(Piece):
             piece_info_func,
             en_passant,
             castling):
+        super(Bishop, self).update_pseudo_legal_moves(
+                piece_info_func,
+                en_passant,
+                castling)
         pseudo_legal_moves = set()
         directions = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
         distance = 1

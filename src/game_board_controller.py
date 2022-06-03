@@ -84,6 +84,12 @@ class GameBoardController():
 
         self.update_pseudo_legal_moves()
 
+        # if notification in [MoveNotification.QUEEN_CASTLING, MoveNotification.KING_CASTLING]:
+        #     self.get_legal_moves(data['new'])
+
+        # bugfix rook moves after castling:
+        # self.fen = self.fen
+
     def is_promotion_valid(
             self,
             pos: (int, int),
@@ -263,9 +269,7 @@ class GameBoardController():
                     self.piece_info,
                     self.en_passant,
                     self.get_color_castlings(piece.color))
-                # if we are updating pseudo legal moves, legal moves
-                # should also reset
-                piece.legal_moves = None
+
                 for attack_tile in piece.get_pseudo_legal_moves():
                     piece_type, _ = self.piece_info(piece_idx)
                     is_pawn = piece_type == PieceCode.PAWN
@@ -322,6 +326,8 @@ class GameBoardController():
             self.pieces_by_color[rook_color].add(data['new'])
 
             self.break_castling(piece.color)
+
+            self.pieces[data['new'][0]][data['new'][1]].pos = data['new']
 
         elif notification == MoveNotification.SIMPLE_CAPTURE:
             self.break_partial_castling(data, new_pos)
@@ -385,6 +391,7 @@ class GameBoardController():
                 del tmp_board
                 if legal_move:
                     legal_moves.add(move)
+
         piece.legal_moves = legal_moves
         return legal_moves
 
@@ -412,7 +419,6 @@ class GameBoardController():
 
     def set_initial_fen(self):
         self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
-        # self.fen = "rkb1qbnr/pP2p3/n5p1/5p1p/5P2/8/PPP3PP/RNBQKBNR w KQ h6 18 9"
 
     @property
     def turn(self):
