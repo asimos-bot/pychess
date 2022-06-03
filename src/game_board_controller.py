@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
 import threading
-from enum import Enum
 
 from piece import Piece, PieceColor, PieceCode, MoveNotification
 from piece import piece_class_from_code
-
-
-class GameBoardPlayer(Enum):
-    WHITE = 'w'
-    BLACK = 'b'
 
 
 # controls the logic and board state using the FEN code
 class GameBoardController():
     def __init__(self):
         # fen code attributes
-        self._turn: PieceColor = GameBoardPlayer.WHITE
+        self._turn: PieceColor = PieceColor.WHITE
         self._turn_lock = threading.Lock()
         self.castling = 'KQkq'
         self.halfmoves = 0
@@ -173,7 +167,7 @@ class GameBoardController():
 
     def threefold_repetition_rule(self, old: (int,int), new:(int, int)):
         piece = self.pieces[new[0]][new[1]]
-        if(self._turn == GameBoardPlayer.WHITE):
+        if(self._turn == PieceColor.WHITE):
 
             self.white_before_last_moved_piece = self.white_last_moved_piece
             self.white_last_moved_piece = piece
@@ -224,7 +218,7 @@ class GameBoardController():
                 self.threefold_draw = False
 
     def stalemate_rule(self):
-        if self._turn == GameBoardPlayer.WHITE:
+        if self._turn == PieceColor.WHITE:
             positions = self.pieces_by_color[PieceColor.WHITE]
         else:
             positions = self.pieces_by_color[PieceColor.BLACK]
@@ -401,11 +395,11 @@ class GameBoardController():
 
     def finish_turn(self):
         self._turn_lock.acquire()
-        if self._turn == GameBoardPlayer.WHITE:
-            self._turn = GameBoardPlayer.BLACK
+        if self._turn == PieceColor.WHITE:
+            self._turn = PieceColor.BLACK
         else:
             self.fullmoves += 1
-            self._turn = GameBoardPlayer.WHITE
+            self._turn = PieceColor.WHITE
         self._turn_lock.release()
         self.halfmoves += 1
 
@@ -426,7 +420,7 @@ class GameBoardController():
             return self._turn
 
     @turn.setter
-    def turn(self, t: GameBoardPlayer):
+    def turn(self, t: PieceColor):
         with self._turn_lock:
             self._turn = t
 
@@ -543,7 +537,7 @@ class GameBoardController():
         if len(attrs) != 5:
             raise Exception("Invalid number of attributes:", attrs)
 
-        self.turn = GameBoardPlayer(attrs[0])
+        self.turn = PieceColor(attrs[0])
         self.castling = attrs[1]
         self.en_passant = self.convert_to_tuple(attrs[2])
         self.halfmoves = int(attrs[3])

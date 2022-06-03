@@ -1,6 +1,6 @@
 import threading
 
-from game_board_controller import GameBoardController, GameBoardPlayer
+from game_board_controller import GameBoardController
 from game_board_graphical import GameBoardGraphical
 from game_board_timer import GameBoardTimer
 from player import Player
@@ -48,17 +48,31 @@ class GameBoard():
                 dims,
                 coords,
                 bottom_color,
-                self.settings
+                self.settings,
+                out_of_time_func=self.out_of_time
                 )
 
         self.players = {
-                GameBoardPlayer.WHITE: player_white,
-                GameBoardPlayer.BLACK: player_black
+                PieceColor.WHITE: player_white,
+                PieceColor.BLACK: player_black
                 }
 
         self._start_game()
 
-    def pause(self):
+    def out_of_time(self):
+        self.pause(from_timer=True)
+        winner_color = self.controller.opposite_color(
+                self.player.color)
+        self.game_over_func(
+                title="Out of time",
+                message="{} Wins!".format(
+                    winner_color.name.capitalize()
+                    )
+                )
+
+    def pause(self, from_timer=False):
+        if not from_timer:
+            self.timer.pause()
         for player in self.players.values():
             player.pause()
         self._async_thread.join()
@@ -100,6 +114,7 @@ class GameBoard():
                 self.controller.is_promotion_valid)
 
     def _make_moves_async(self):
+        self.timer.unpause()
         while self.controller.winner is None:
             if self.controller.stalemate_rule():
                 self.game_over_func(
@@ -151,7 +166,11 @@ class GameBoard():
             if not self.headless:
                 mixer.music.stop()
                 mixer.music.play()
-            self.controller.finish_turn()
+            self.finish_turn()
+
+    def finish_turn(self):
+        self.controller.finish_turn()
+        self.timer.current_player = self.controller.turn
 
     def resize(self, x, y):
         self.graphical.dims = (x, y)

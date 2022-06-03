@@ -39,7 +39,8 @@ class PyChess():
                     'game_board': (24, 240, 128),
                     'piece_selection': (250, 12, 12),
                     'valid_move': (32, 255, 32)
-                    }
+                    },
+                'timer': 10 * 60  # seconds
                 }
 
         # load piece images

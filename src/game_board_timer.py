@@ -1,4 +1,6 @@
 import pygame
+import threading
+import time
 
 
 from piece import PieceColor
@@ -11,23 +13,51 @@ class GameBoardTimer:
             dims: (int, int),
             coords: (int, int),
             bottom_color: PieceColor,
-            settings: dict):
+            settings: dict,
+            out_of_time_func):
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
-        self.bottom_color = bottom_color
+        self._bottom_color = bottom_color
         self.settings = settings
         self._given_coords = coords
         self.tiles: dict = self.create_blank_tiles()
         self.update_graphical_attributes(dims, coords)
 
         self.time_left = {
-                PieceColor.BLACK: 10,
-                PieceColor.WHITE: 10
+                PieceColor.BLACK: settings['timer'] * 1000,
+                PieceColor.WHITE: settings['timer'] * 1000
                 }
+        self.out_of_time_func = out_of_time_func
+        self.current_player = PieceColor.WHITE
+        self.last_num_ticks = 0
+        self.paused = True
+        self.thread = threading.Thread(target=self.run)
+
+    def unpause(self):
+        self.last_num_ticks = pygame.time.get_ticks()
+        self.thread = threading.Thread(target=self.run)
+        self.thread.start()
+
+    def pause(self):
+        self.paused = True
+        self.thread.join()
+
+    def run(self):
+        self.paused = False
+        self.last_num_ticks = pygame.time.get_ticks()
+        while not self.paused:
+            now = pygame.time.get_ticks()
+            diff = now - self.last_num_ticks
+            self.time_left[self.current_player] -= diff
+            if self.time_left[self.current_player] < 0:
+                self.out_of_time_func()
+                return
+            self.last_num_ticks = now
+            time.sleep(0.1)
 
     def create_blank_tiles(self):
         return {
-                PieceColor.BLACK: Tile(color=(255, 255, 255)),
-                PieceColor.WHITE: Tile(color=(0, 0, 0))
+                PieceColor.WHITE: Tile(color=(255, 255, 255)),
+                PieceColor.BLACK: Tile(color=(0, 0, 0))
                 }
 
     def update_graphical_attributes(
@@ -40,12 +70,12 @@ class GameBoardTimer:
 
     def draw(self, surface):
         for k in self.time_left:
-
-            color = [(255, 255, 255), (0, 0, 0)][k == PieceColor.BLACK]
+            color = [(255, 255, 255), (0, 0, 0)][k != PieceColor.BLACK]
             text_surface = self.font.render(
                     str(self.time_left[k]),
                     False,
                     color)
+            self.tiles[k].draw(surface)
             surf = self.tiles[k].surf
             surf.blit(text_surface, (0, 0))
             surface.blit(surf, self.tiles[k].coords)
@@ -71,11 +101,20 @@ class GameBoardTimer:
 
     def update_tiles(self):
         for k in self.tiles:
-            row = [1, 8][k != self.bottom_color]
+            row = [1, 8][k == self.bottom_color]
             self.tiles[k].dims = (self.tile_side * 3, self.tile_side * 1)
             self.tiles[k].coords = (
                     self.coords[0] + self.tile_side,
                     self.coords[1] + row * self.tile_side)
+
+    @property
+    def bottom_color(self):
+        return self._bottom_color
+
+    @bottom_color.setter
+    def bottom_color(self, color: PieceColor):
+        self._bottom_color = color
+        self.update_tiles()
 
     @property
     def dims(self):
