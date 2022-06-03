@@ -39,6 +39,11 @@ class SettingsMenu:
                 onchange=(
                     lambda _, y: self.set_player_type(PieceColor.BLACK, y))
                 )
+        self.menu.add.text_input(
+                'Individual time in minutes:',
+                default=settings['timer'],
+                input_type=pygame_menu.locals.INPUT_INT,
+                onchange=self.set_timer)
 
         for k in self.settings['colors']:
             self.add_color_picker(
@@ -48,6 +53,9 @@ class SettingsMenu:
                 title='Go back to main menu',
                 action=pygame_menu.events.BACK
                 )
+
+    def set_timer(self, time):
+        self.settings['timer'] = int(time) * 60
 
     def add_color_picker(self, setting_name, color_setting_dict):
         title = setting_name.lower().replace('_', ' ').capitalize()
