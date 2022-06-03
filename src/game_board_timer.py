@@ -71,8 +71,12 @@ class GameBoardTimer:
     def draw(self, surface):
         for k in self.time_left:
             color = [(255, 255, 255), (0, 0, 0)][k != PieceColor.BLACK]
+            time_left = self.time_left[k]
+            seconds = time_left//1000
+            minutes = seconds//60
+            seconds = seconds % 60
             text_surface = self.font.render(
-                    str(self.time_left[k]),
+                    "{0:02d}:{1:02d}".format(minutes, seconds),
                     False,
                     color)
             self.tiles[k].draw(surface)

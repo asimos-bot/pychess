@@ -39,6 +39,7 @@ class SettingsMenu:
                 onchange=(
                     lambda _, y: self.set_player_type(PieceColor.BLACK, y))
                 )
+
         for k in self.settings['colors']:
             self.add_color_picker(
                     setting_name=k,
