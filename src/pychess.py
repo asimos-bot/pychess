@@ -40,7 +40,7 @@ class PyChess():
                     'piece_selection': (250, 12, 12),
                     'valid_move': (32, 255, 32)
                     },
-                'timer': 60  # seconds
+                'timer': 10 * 60  # seconds
                 }
 
         # load piece images

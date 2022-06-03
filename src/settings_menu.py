@@ -41,7 +41,7 @@ class SettingsMenu:
                 )
         self.menu.add.text_input(
                 'Individual time in minutes:',
-                default=settings['timer'],
+                default=settings['timer']//60,
                 input_type=pygame_menu.locals.INPUT_INT,
                 onchange=self.set_timer)
 
