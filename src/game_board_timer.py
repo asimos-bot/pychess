@@ -41,13 +41,14 @@ class GameBoardTimer:
     def draw(self, surface):
         for k in self.time_left:
 
+            color = [(255, 255, 255), (0, 0, 0)][k == PieceColor.BLACK]
             text_surface = self.font.render(
                     str(self.time_left[k]),
                     False,
-                    (255, 255, 255))
+                    color)
             surf = self.tiles[k].surf
             surf.blit(text_surface, (0, 0))
-            surface.blit(surf, self.coords)
+            surface.blit(surf, self.tiles[k].coords)
 
     def _calculate_coords(self, dims, coords):
 
@@ -70,9 +71,11 @@ class GameBoardTimer:
 
     def update_tiles(self):
         for k in self.tiles:
-            row = [1, 8][k == self.bottom_color]
-            self.tiles[k].dims = (self.tile_side * 4, self.tile_side * 2)
-            self.tiles[k].coords = (row * self.tile_side, self.tile_side)
+            row = [1, 8][k != self.bottom_color]
+            self.tiles[k].dims = (self.tile_side * 3, self.tile_side * 1)
+            self.tiles[k].coords = (
+                    self.coords[0] + self.tile_side,
+                    self.coords[1] + row * self.tile_side)
 
     @property
     def dims(self):
