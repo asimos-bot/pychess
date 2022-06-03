@@ -59,8 +59,12 @@ class PyChess():
         if hasattr(self, "main_menu"):
             self.main_menu.resize(self.x, self.y)
         if hasattr(self, "pause_menu"):
-            self.pause_menu.resize(self.x, self.y)
+            coords = self.board.graphical.coords
+            total_side = self.board.graphical.tile_side * 10
+
+            self.pause_menu.resize(coords, (total_side, total_side))
         if hasattr(self, "game_over_menu"):
+
             self.game_over_menu.resize(self.x, self.y)
 
     def window_event_capture(self, event):
@@ -135,8 +139,12 @@ class PyChess():
         self.board.pause()
         if hasattr(self, "main_menu"):
             del self.main_menu
+        coords = self.board.graphical.coords
+        total_side = self.board.graphical.tile_side * 10
+
         self.pause_menu = PauseMenu(
-                (self.x, self.y),
+                coords,
+                (total_side, total_side),
                 play_func=self.set_state_play,
                 quit_func=self.set_state_main_menu,
                 restarting_func=self.restart_game,

@@ -4,6 +4,7 @@ import pygame_menu
 class PauseMenu():
     def __init__(
             self,
+            pos: (int, int),
             dims: (int, int),
             play_func,
             quit_func,
@@ -11,8 +12,8 @@ class PauseMenu():
             orientation_func):
         self.menu = pygame_menu.Menu(
                 title='PyChess',
-                width=dims[0]/2,
-                height=dims[1]/2,
+                width=dims[0],
+                height=dims[1],
                 theme=pygame_menu.themes.THEME_BLUE)
         self.menu.add.button('Play', self.play)
         self.menu.add.button('Spin Board', self.orientation)
@@ -22,6 +23,8 @@ class PauseMenu():
         self.play_func = play_func
         self.restarting_func = restarting_func
         self.orientation_func = orientation_func
+
+        self.resize(pos, dims)
 
     def play(self):
         self.menu.close()
@@ -38,8 +41,9 @@ class PauseMenu():
     def orientation(self):
         self.orientation_func()
 
-    def resize(self, new_width, new_height):
-        self.menu.resize(new_width/2, new_height/2)
+    def resize(self, coords, size):
+        self.menu.resize(size[0], size[1])
+        self.menu.set_absolute_position(coords[0], coords[1])
 
     def update(self, surface, events):
         self.menu.update(events)
