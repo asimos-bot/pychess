@@ -54,7 +54,7 @@ class PyChess():
         # get current window dimensions
         self.x, self.y = self.surface.get_size()
         if hasattr(self, "board"):
-            self.board.graphical.dims = (self.x, self.y)
+            self.board.resize(self.x, self.y)
         if hasattr(self, "main_menu"):
             self.main_menu.resize(self.x, self.y)
         if hasattr(self, "pause_menu"):

@@ -2,6 +2,7 @@ import threading
 
 from game_board_controller import GameBoardController, GameBoardPlayer
 from game_board_graphical import GameBoardGraphical
+from game_board_timer import GameBoardTimer
 from player import Player
 from piece import PieceColor
 from pygame import mixer
@@ -42,6 +43,14 @@ class GameBoard():
                 color,
                 bottom_color,
                 self.settings)
+
+        self.timer: GameBoardTimer = GameBoardTimer(
+                dims,
+                coords,
+                bottom_color,
+                self.settings
+                )
+
         self.players = {
                 GameBoardPlayer.WHITE: player_white,
                 GameBoardPlayer.BLACK: player_black
@@ -67,12 +76,20 @@ class GameBoard():
         else:
             self.graphical.bottom_color = PieceColor.WHITE
 
+        if self.timer.bottom_color == PieceColor.WHITE:
+            self.timer.bottom_color = PieceColor.BLACK
+        else:
+            self.timer.bottom_color = PieceColor.WHITE
+
     def draw(self, surface):
         if self.headless:
             return
         self.graphical.draw(
                 surface,
                 self.controller.piece_info)
+        self.timer.draw(
+                surface
+                )
         # draw player control feedback
         self.player.draw(
                 surface,
@@ -135,6 +152,10 @@ class GameBoard():
                 mixer.music.stop()
                 mixer.music.play()
             self.controller.finish_turn()
+
+    def resize(self, x, y):
+        self.graphical.dims = (x, y)
+        self.timer.dims = (x, y)
 
     def event_capture(self, event):
         self.player.event_capture(

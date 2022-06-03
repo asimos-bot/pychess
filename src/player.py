@@ -259,4 +259,7 @@ class Human(Player):
                 if global_idxs == pos:
                     self.wait_promotion = False
                     self.choosen_promotion = piece_type
+            if self.wait_promotion and idxs != self._to:
+                self._to = None
+                self.wait_promotion = False
         self.op_lock.release()
