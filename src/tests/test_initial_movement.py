@@ -6,6 +6,7 @@ from piece import PieceCode, PieceColor
 class PieceInitialMovementTest(unittest.TestCase):
     def setUp(self):
         self.controller = GameBoardController()
+        self.controller.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
 
     def movement_check(
             self,

@@ -38,6 +38,8 @@ python3 -m unittest
 
 #### With Docker
 
+On X11 host:
+
 ```
 docker build . -t pychess && docker run pychess sh -c 'python3 -m unittest'
 ```
