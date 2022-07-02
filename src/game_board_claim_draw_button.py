@@ -22,10 +22,7 @@ class GameBoardClaimDrawButton:
         self.update_graphical_attributes(dims, coords)
 
     def create_blank_tiles(self):
-        if self.active:
-            return Tile(color=(0, 0, 0))
-        else:
-            return Tile(color=self.settings['colors']['clear_screen'])
+        return Tile(color=(0, 0, 0))
 
     def update_graphical_attributes(
             self,
@@ -37,9 +34,9 @@ class GameBoardClaimDrawButton:
         self.font = pygame.font.SysFont('Comic Sans MS', max(int(self.tile_side/1.3), 1))
 
     def draw(self, surface):
-        color = (255, 255, 255)
         if not self.active:
-            color = self.settings['colors']['clear_screen']
+            return
+        color = (255, 255, 255)
         text_surface = self.font.render(
                 "Claim Draw",
                 False,

@@ -20,6 +20,11 @@ class GameBoardAskForDrawButtons:
         self.update_graphical_attributes(dims, coords)
         self.draw_agreed_func = draw_agreed_func
 
+        self.agreed = {
+                PieceColor.WHITE: False,
+                PieceColor.BLACK: False
+                }
+
     def create_blank_tiles(self):
         return {
                 PieceColor.WHITE: Tile(color=(255, 255, 255)),
@@ -37,6 +42,8 @@ class GameBoardAskForDrawButtons:
 
     def draw(self, surface):
         for k in self.tiles:
+            if self.agreed[k]:
+                continue
             color = [(255, 255, 255), (0, 0, 0)][k != PieceColor.BLACK]
 
             text_surface = self.font.render(
@@ -79,10 +86,13 @@ class GameBoardAskForDrawButtons:
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             for k in self.tiles:
+                if self.agreed[k]:
+                    continue
                 tile_rect = self.tiles[k].surf.get_rect(topleft=self.tiles[k].coords)
                 if tile_rect.collidepoint(mouse_pos):
-                    self.claim_draw_func()
-                    return
+                    self.agreed[k] = True
+                    if self.agreed[PieceColor.WHITE] and self.agreed[PieceColor.BLACK]:
+                        self.draw_agreed_func()
 
     @property
     def bottom_color(self):
