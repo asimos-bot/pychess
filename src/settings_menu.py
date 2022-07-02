@@ -1,7 +1,8 @@
 import pygame_menu
 
 
-from player import RandomAI, Human
+from player import Human
+from ai import RandomAI, MinMaxAI
 from piece import PieceColor
 
 
@@ -17,7 +18,8 @@ class SettingsMenu:
                 )
         player_options = [
                 ('Random AI', RandomAI),
-                ('Human', Human)]
+                ('Human', Human),
+                ('Min Max AI', MinMaxAI)]
         default_white = player_options.index(next(filter(
                 lambda x: x[1] == settings['players'][PieceColor.WHITE],
                 player_options)))

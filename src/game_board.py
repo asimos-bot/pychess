@@ -131,7 +131,8 @@ class GameBoard():
                         self.controller.piece_info,
                         self.graphical.adjust_idxs,
                         self.controller.get_legal_moves,
-                        self.controller.is_promotion_valid)
+                        self.controller.is_promotion_valid,
+                        self.controller.fen)
                 if move is not None:
                     old_pos, new_pos, promotion = move
                     valid_moves = self.controller.get_legal_moves(old_pos)

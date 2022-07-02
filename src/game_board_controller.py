@@ -352,7 +352,7 @@ class GameBoardController():
         if self.castling == "":
             self.castling = "-"
 
-    def get_legal_moves(self, pos: (int, int)):
+    def get_legal_moves(self, pos: (int, int)) -> {(int, int)}:
 
         piece_info = self.piece_info(pos)
         if piece_info is None:
@@ -365,13 +365,21 @@ class GameBoardController():
         # every possible pseudo-legal move you can make from this piece
         for move in self.get_pseudo_legal_moves(pos):
             for promotion in "QN":
-                if piece_type != PieceCode.PAWN and promotion == "Q":
-                    continue
+                # check if we should skip the first promotion
+                if promotion == "Q":
+                    # if this piece is not a pawn, not reason to iterate twice
+                    if piece_type != PieceCode.PAWN:
+                        continue
+                    # if this piece is a pawn, not reason to go over promotion
+                    # if not reaching edge of board
+                    if piece_type == PieceCode.PAWN and ((move[1] != 7 and piece_color == PieceColor.WHITE) or (move[1] != 0 and piece_color == PieceColor.BLACK)):
+                        continue
                 promotion = PieceCode(promotion)
                 # create a new controller for each move
                 tmp_board: GameBoardController = self.copy()
                 # make the move in this temporary controller
                 tmp_board.move_piece(pos, move, promotion)
+                tmp_board.finish_turn()
                 # iterate over every possible enemy move in this temporary
                 # controller, and add this move if no enemy move can kill
                 # our king
