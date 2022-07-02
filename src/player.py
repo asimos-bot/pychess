@@ -1,7 +1,6 @@
 import pygame
 import time
 import threading
-import random
 from abc import ABC, abstractmethod
 
 from piece import PieceColor, PieceCode, PieceDrawer
@@ -22,7 +21,8 @@ class Player(ABC):
             piece_info_func,
             adjust_idxs_func,
             get_legal_moves_func,
-            is_promotion_valid_func) -> ((int, int), (int, int), PieceCode):
+            is_promotion_valid_func,
+            fen_code) -> ((int, int), (int, int), PieceCode):
         pass
 
     @abstractmethod
@@ -63,56 +63,6 @@ class Player(ABC):
         self.playing = True
 
 
-class RandomAI(Player):
-    def __init__(self, color: PieceColor, settings: dict()):
-        super(RandomAI, self).__init__(color, settings)
-
-    def make_move(
-            self,
-            piece_info_func,
-            adjust_idxs_func,
-            get_legal_moves_func,
-            is_promotion_valid_func):
-
-        if not self.playing:
-            return None
-
-        legal_moves = set()
-        for i in range(8):
-            for j in range(8):
-                piece_info = piece_info_func((i, j))
-                if piece_info is not None and piece_info[1] == self.color:
-                    for move in get_legal_moves_func((i, j)):
-                        legal_moves.add(((i, j), move))
-        choosen_move = random.sample(legal_moves, 1)[0]
-        random_promotion = [
-                PieceCode.QUEEN,
-                PieceCode.KNIGHT,
-                PieceCode.BISHOP,
-                PieceCode.ROOK][random.randint(0, 3)]
-        choosen_move = (choosen_move[0], choosen_move[1], random_promotion)
-        return choosen_move
-
-    def draw(
-            self,
-            surface,
-            piece_info_func,
-            tile_info_func,
-            adjust_idxs_func,
-            get_legal_moves_func,
-            is_promotion_valid_func):
-        pass
-
-    def event_capture(
-            self,
-            event,
-            piece_info_func,
-            tile_info_func,
-            adjust_idxs_func,
-            is_promotion_valid_func):
-        pass
-
-
 class Human(Player):
     def __init__(self, color: PieceColor, settings: dict()):
         super(Human, self).__init__(color, settings)
@@ -127,7 +77,8 @@ class Human(Player):
             piece_info_func,
             adjust_idxs_func,
             get_legal_moves_func,
-            is_promotion_valid_func):
+            is_promotion_valid_func,
+            fen_code):
         # wait until the move is done
         while (self._to is None or self.wait_promotion) and self.playing:
             time.sleep(0.1)

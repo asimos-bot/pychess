@@ -8,7 +8,8 @@ from main_menu import MainMenu
 from pause_menu import PauseMenu
 from game_over_menu import GameOverMenu
 from piece import PieceDrawer, PieceColor
-from player import Human, RandomAI
+from player import Human
+from ai import MinMaxAI
 
 
 class GameState(Enum):
@@ -29,7 +30,7 @@ class PyChess():
         self.settings = {
                 'players': {
                     PieceColor.WHITE: Human,
-                    PieceColor.BLACK: RandomAI
+                    PieceColor.BLACK: MinMaxAI
                     },
                 'initial_bottom_color': PieceColor.WHITE,
                 'top_spacing_percentage': 0.2,
