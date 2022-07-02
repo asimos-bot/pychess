@@ -67,6 +67,7 @@ class GameBoardTimer:
 
         self._calculate_coords(dims, coords)
         self.update_tiles()
+        self.font = pygame.font.SysFont('Comic Sans MS', max(int(self.tile_side), 1))
 
     def draw(self, surface):
         for k in self.time_left:

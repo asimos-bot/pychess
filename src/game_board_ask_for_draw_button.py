@@ -4,25 +4,33 @@ from piece import PieceColor
 from tile import Tile
 
 
-class GameBoardClaimDrawButton:
+class GameBoardAskForDrawButtons:
     def __init__(
             self,
             dims: (int, int),
             coords: (int, int),
             bottom_color: PieceColor,
             settings: dict,
-            claim_draw_func):
+            draw_agreed_func):
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
-        self.active = False
         self._bottom_color = bottom_color
         self.settings = settings
         self._given_coords = coords
-        self.claim_draw_func = claim_draw_func
-        self.tile: dict = self.create_blank_tiles()
+        self.tiles: dict = self.create_blank_tiles()
         self.update_graphical_attributes(dims, coords)
+        self.draw_agreed_func = draw_agreed_func
+        self.active = False
+
+        self.agreed = {
+                PieceColor.WHITE: False,
+                PieceColor.BLACK: False
+                }
 
     def create_blank_tiles(self):
-        return Tile(color=(0, 0, 0))
+        return {
+                PieceColor.WHITE: Tile(color=(255, 255, 255)),
+                PieceColor.BLACK: Tile(color=(0, 0, 0))
+                }
 
     def update_graphical_attributes(
             self,
@@ -31,20 +39,24 @@ class GameBoardClaimDrawButton:
 
         self._calculate_coords(dims, coords)
         self.update_tiles()
-        self.font = pygame.font.SysFont('Comic Sans MS', max(int(self.tile_side/1.3), 1))
+        self.font = pygame.font.SysFont('Comic Sans MS', max(int(self.tile_side/1.6), 1))
 
     def draw(self, surface):
         if not self.active:
             return
-        color = (255, 255, 255)
-        text_surface = self.font.render(
-                "Claim Draw",
-                False,
-                color)
-        self.tile.draw(surface)
-        surf = self.tile.surf
-        surf.blit(text_surface, (0, 0))
-        surface.blit(surf, self.tile.coords)
+        for k in self.tiles:
+            if self.agreed[k]:
+                continue
+            color = [(255, 255, 255), (0, 0, 0)][k != PieceColor.BLACK]
+
+            text_surface = self.font.render(
+                    "Request Draw",
+                    False,
+                    color)
+            self.tiles[k].draw(surface)
+            surf = self.tiles[k].surf
+            surf.blit(text_surface, (0, 0))
+            surface.blit(surf, self.tiles[k].coords)
 
     def _calculate_coords(self, dims, coords):
 
@@ -66,20 +78,26 @@ class GameBoardClaimDrawButton:
                 middle_point[1] - 5 * self.tile_side)
 
     def update_tiles(self):
-        row = 4.5
-        self.tile.dims = (self.tile_side * 3, self.tile_side * 1)
-        self.tile.coords = (
-                self.coords[0] + self.tile_side,
-                self.coords[1] + row * self.tile_side)
+        for k in self.tiles:
+            row = [2.5, 6.5][k == self.bottom_color]
+            self.tiles[k].dims = (self.tile_side * 3, self.tile_side * 1)
+            self.tiles[k].coords = (
+                    self.coords[0] + self.tile_side,
+                    self.coords[1] + row * self.tile_side)
 
     def event_capture(self, event):
-        if self.active:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                tile_rect = self.tile.surf.get_rect(topleft=self.tile.coords)
+        if not self.active:
+            return
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            for k in self.tiles:
+                if self.agreed[k]:
+                    continue
+                tile_rect = self.tiles[k].surf.get_rect(topleft=self.tiles[k].coords)
                 if tile_rect.collidepoint(mouse_pos):
-                    self.claim_draw_func()
-                    return
+                    self.agreed[k] = True
+                    if self.agreed[PieceColor.WHITE] and self.agreed[PieceColor.BLACK]:
+                        self.draw_agreed_func()
 
     @property
     def bottom_color(self):
