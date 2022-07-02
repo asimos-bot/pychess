@@ -19,6 +19,7 @@ class GameBoardAskForDrawButtons:
         self.tiles: dict = self.create_blank_tiles()
         self.update_graphical_attributes(dims, coords)
         self.draw_agreed_func = draw_agreed_func
+        self.active = False
 
         self.agreed = {
                 PieceColor.WHITE: False,
@@ -41,6 +42,8 @@ class GameBoardAskForDrawButtons:
         self.font = pygame.font.SysFont('Comic Sans MS', max(int(self.tile_side/1.6), 1))
 
     def draw(self, surface):
+        if not self.active:
+            return
         for k in self.tiles:
             if self.agreed[k]:
                 continue
@@ -83,6 +86,8 @@ class GameBoardAskForDrawButtons:
                     self.coords[1] + row * self.tile_side)
 
     def event_capture(self, event):
+        if not self.active:
+            return
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             for k in self.tiles:

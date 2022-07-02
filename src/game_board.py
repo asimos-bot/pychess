@@ -5,7 +5,7 @@ from game_board_graphical import GameBoardGraphical
 from game_board_timer import GameBoardTimer
 from game_board_claim_draw_button import GameBoardClaimDrawButton
 from game_board_ask_for_draw_button import GameBoardAskForDrawButtons
-from player import Player
+from player import Player, Human
 from piece import PieceColor
 from pygame import mixer
 from pathlib import Path
@@ -72,6 +72,9 @@ class GameBoard():
                 PieceColor.WHITE: player_white,
                 PieceColor.BLACK: player_black
                 }
+        # if both players are humans, draw can be requested
+        if isinstance(self.players[PieceColor.BLACK], Human) and isinstance(self.players[PieceColor.WHITE], Human):
+            self.ask_for_draw_buttons.active = True
 
         self._start_game()
 
