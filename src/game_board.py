@@ -3,6 +3,7 @@ import threading
 from game_board_controller import GameBoardController
 from game_board_graphical import GameBoardGraphical
 from game_board_timer import GameBoardTimer
+from game_board_claim_draw_button import GameBoardClaimDrawButton
 from player import Player
 from piece import PieceColor
 from pygame import mixer
@@ -52,6 +53,13 @@ class GameBoard():
                 out_of_time_func=self.out_of_time
                 )
 
+        self.claim_draw_buttons = GameBoardClaimDrawButton(
+                    dims,
+                    coords,
+                    bottom_color,
+                    self.settings,
+                    claim_draw_func=self.claim_draw
+                    )
         self.players = {
                 PieceColor.WHITE: player_white,
                 PieceColor.BLACK: player_black
@@ -69,6 +77,12 @@ class GameBoard():
                     winner_color.name.capitalize()
                     )
                 )
+
+    def claim_draw(self):
+        self.pause(from_timer=False)
+        self.game_over_func(
+                title="Draw Claimed",
+                message="more than 50 moves were made")
 
     def pause(self, from_timer=False):
         if not from_timer:
@@ -104,6 +118,7 @@ class GameBoard():
         self.timer.draw(
                 surface
                 )
+        self.claim_draw_buttons.draw(surface)
         # draw player control feedback
         self.player.draw(
                 surface,
@@ -170,6 +185,8 @@ class GameBoard():
             if not self.headless:
                 mixer.music.stop()
                 mixer.music.play()
+                if self.controller.claim_draw:
+                    self.claim_draw_buttons.active = True
             self.finish_turn()
 
     def finish_turn(self):
@@ -179,6 +196,7 @@ class GameBoard():
     def resize(self, x, y):
         self.graphical.dims = (x, y)
         self.timer.dims = (x, y)
+        self.claim_draw_buttons.dims = (x, y)
 
     def event_capture(self, event):
         self.player.event_capture(
@@ -187,6 +205,7 @@ class GameBoard():
                 self.graphical.tile_info,
                 self.graphical.adjust_idxs,
                 self.controller.is_promotion_valid)
+        self.claim_draw_buttons.event_capture(event)
 
     def _start_game(self):
         self._async_thread = threading.Thread(target=self._make_moves_async)

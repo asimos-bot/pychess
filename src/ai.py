@@ -3,37 +3,21 @@ from piece import PieceColor, PieceCode
 from game_board_controller import GameBoardController
 
 import random
+from abc import abstractmethod
 
 
 class AI(Player):
     def __init__(self, color: PieceColor, settings: dict()):
         super(AI, self).__init__(color, settings)
 
+    @abstractmethod
     def make_move(
             self,
             piece_info_func,
             adjust_idxs_func,
             get_legal_moves_func,
             is_promotion_valid_func):
-
-        if not self.playing:
-            return None
-
-        legal_moves = set()
-        for i in range(8):
-            for j in range(8):
-                piece_info = piece_info_func((i, j))
-                if piece_info is not None and piece_info[1] == self.color:
-                    for move in get_legal_moves_func((i, j)):
-                        legal_moves.add(((i, j), move))
-        choosen_move = random.sample(legal_moves, 1)[0]
-        random_promotion = [
-                PieceCode.QUEEN,
-                PieceCode.KNIGHT,
-                PieceCode.BISHOP,
-                PieceCode.ROOK][random.randint(0, 3)]
-        choosen_move = (choosen_move[0], choosen_move[1], random_promotion)
-        return choosen_move
+        pass
 
     def draw(
             self,
