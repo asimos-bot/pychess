@@ -124,7 +124,7 @@ class MinMaxAI(AI):
             is_promotion_valid_func,
             fen_code) -> ((int, int), (int, int), PieceCode):
 
-        return self.minimax(fen_code, 1, None, True)[0]
+        return self.minimax(fen_code, 15, float('inf'), float('-inf'), None, True)[0]
 
     def get_child_states(self, fen, parent_is_max):
 
@@ -158,6 +158,8 @@ class MinMaxAI(AI):
             self,
             fen,
             depth,
+            alpha,
+            beta,
             move,
             is_max) -> (((int, int), (int, int), str), float):
         if depth == 0:
@@ -166,14 +168,21 @@ class MinMaxAI(AI):
         if is_max:
             max_score = (None, float('-inf'))
             for child_move, child_fen in self.get_child_states(fen, is_max):
-                score = self.minimax(child_fen, depth - 1, child_move, False)
+                score = self.minimax(child_fen, depth - 1, alpha, beta, child_move, False)
                 if max_score[1] < score[1]:
                     max_score = (child_move, score[1])
+                # alpha-beta
+                alpha = max(alpha, score[1])
+                if beta <= alpha:
+                    break
             return max_score
         else:
             min_score = (None, float('inf'))
             for child_move, child_fen in self.get_child_states(fen, is_max):
-                score = self.minimax(child_fen, depth - 1, child_move, True)
+                score = self.minimax(child_fen, depth - 1, alpha, beta, child_move, True)
                 if score[1] < min_score[1]:
                     min_score = (child_move, score[1])
+                beta = min(beta, score[1])
+                if beta <= alpha:
+                    break
             return min_score
