@@ -1,58 +1,24 @@
 import pygame
-import threading
-import time
-
 
 from piece import PieceColor
 from tile import Tile
 
 
-class GameBoardTimer:
+class GameBoardAskForDrawButtons:
     def __init__(
             self,
             dims: (int, int),
             coords: (int, int),
             bottom_color: PieceColor,
             settings: dict,
-            out_of_time_func):
+            draw_agreed_func):
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
         self._bottom_color = bottom_color
         self.settings = settings
         self._given_coords = coords
         self.tiles: dict = self.create_blank_tiles()
         self.update_graphical_attributes(dims, coords)
-
-        self.time_left = {
-                PieceColor.BLACK: settings['timer'] * 1000,
-                PieceColor.WHITE: settings['timer'] * 1000
-                }
-        self.out_of_time_func = out_of_time_func
-        self.current_player = PieceColor.WHITE
-        self.last_num_ticks = 0
-        self.paused = True
-        self.thread = threading.Thread(target=self.run)
-
-    def unpause(self):
-        self.last_num_ticks = pygame.time.get_ticks()
-        self.thread = threading.Thread(target=self.run)
-        self.thread.start()
-
-    def pause(self):
-        self.paused = True
-        self.thread.join()
-
-    def run(self):
-        self.paused = False
-        self.last_num_ticks = pygame.time.get_ticks()
-        while not self.paused:
-            now = pygame.time.get_ticks()
-            diff = now - self.last_num_ticks
-            self.time_left[self.current_player] -= diff
-            if self.time_left[self.current_player] < 0:
-                self.out_of_time_func()
-                return
-            self.last_num_ticks = now
-            time.sleep(0.1)
+        self.draw_agreed_func = draw_agreed_func
 
     def create_blank_tiles(self):
         return {
@@ -67,17 +33,14 @@ class GameBoardTimer:
 
         self._calculate_coords(dims, coords)
         self.update_tiles()
-        self.font = pygame.font.SysFont('Comic Sans MS', max(int(self.tile_side), 1))
+        self.font = pygame.font.SysFont('Comic Sans MS', max(int(self.tile_side/1.6), 1))
 
     def draw(self, surface):
-        for k in self.time_left:
+        for k in self.tiles:
             color = [(255, 255, 255), (0, 0, 0)][k != PieceColor.BLACK]
-            time_left = self.time_left[k]
-            seconds = time_left//1000
-            minutes = seconds//60
-            seconds = seconds % 60
+
             text_surface = self.font.render(
-                    "{0:02d}:{1:02d}".format(minutes, seconds),
+                    "Request Draw",
                     False,
                     color)
             self.tiles[k].draw(surface)
@@ -106,11 +69,20 @@ class GameBoardTimer:
 
     def update_tiles(self):
         for k in self.tiles:
-            row = [1, 8][k == self.bottom_color]
+            row = [2.5, 6.5][k == self.bottom_color]
             self.tiles[k].dims = (self.tile_side * 3, self.tile_side * 1)
             self.tiles[k].coords = (
                     self.coords[0] + self.tile_side,
                     self.coords[1] + row * self.tile_side)
+
+    def event_capture(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            for k in self.tiles:
+                tile_rect = self.tiles[k].surf.get_rect(topleft=self.tiles[k].coords)
+                if tile_rect.collidepoint(mouse_pos):
+                    self.claim_draw_func()
+                    return
 
     @property
     def bottom_color(self):

@@ -12,8 +12,8 @@ class GameBoardClaimDrawButton:
             bottom_color: PieceColor,
             settings: dict,
             claim_draw_func):
-        self.active = False
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
+        self.active = False
         self._bottom_color = bottom_color
         self.settings = settings
         self._given_coords = coords
@@ -34,6 +34,7 @@ class GameBoardClaimDrawButton:
 
         self._calculate_coords(dims, coords)
         self.update_tiles()
+        self.font = pygame.font.SysFont('Comic Sans MS', max(int(self.tile_side/1.3), 1))
 
     def draw(self, surface):
         color = (255, 255, 255)
@@ -77,11 +78,9 @@ class GameBoardClaimDrawButton:
     def event_capture(self, event):
         if self.active:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print("is in the button?")
                 mouse_pos = pygame.mouse.get_pos()
                 tile_rect = self.tile.surf.get_rect(topleft=self.tile.coords)
                 if tile_rect.collidepoint(mouse_pos):
-                    print("hit")
                     self.claim_draw_func()
                     return
 
