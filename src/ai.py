@@ -92,17 +92,17 @@ class MinMaxAI(AI):
 
     def piece_score(self, piece_type: PieceCode):
         if piece_type == PieceCode.PAWN:
-            return 4
+            return 100
         elif piece_type == PieceCode.KNIGHT:
-            return 7
+            return 320
         elif piece_type == PieceCode.BISHOP:
-            return 9
+            return 330
         elif piece_type == PieceCode.ROOK:
-            return 10
-        elif piece_type == PieceCode.KING:
-            return 10e4
+            return 500
         elif piece_type == PieceCode.QUEEN:
-            return 25
+            return 900
+        elif piece_type == PieceCode.KING:
+            return 20000
 
     def board_state_score(
             self,
@@ -115,16 +115,6 @@ class MinMaxAI(AI):
         for my_piece in self.controller.pieces_by_color[self.color]:
             score += self.piece_score(self.controller.piece_info(my_piece)[0])
         return score
-
-    def make_move(
-            self,
-            piece_info_func,
-            adjust_idxs_func,
-            get_legal_moves_func,
-            is_promotion_valid_func,
-            fen_code) -> ((int, int), (int, int), PieceCode):
-
-        return self.minimax(fen_code, 15, float('inf'), float('-inf'), None, True)[0]
 
     def get_child_states(self, fen, parent_is_max):
 
@@ -154,6 +144,18 @@ class MinMaxAI(AI):
                     copy.finish_turn()
                     yield ((piece_pos, move, promotion), copy.fen)
 
+    def make_move(
+            self,
+            piece_info_func,
+            adjust_idxs_func,
+            get_legal_moves_func,
+            is_promotion_valid_func,
+            fen_code) -> ((int, int), (int, int), PieceCode):
+
+        result = self.minimax(fen_code, 3, float('-inf'), float('inf'), None, True)
+        set_of_solutions = result[0]
+        return random.sample(set_of_solutions, k=1)[0]
+
     def minimax(
             self,
             fen,
@@ -162,15 +164,20 @@ class MinMaxAI(AI):
             beta,
             move,
             is_max) -> (((int, int), (int, int), str), float):
+
         if depth == 0:
-            return (move, self.board_state_score(fen))
+            return ({move}, self.board_state_score(fen))
 
         if is_max:
             max_score = (None, float('-inf'))
             for child_move, child_fen in self.get_child_states(fen, is_max):
                 score = self.minimax(child_fen, depth - 1, alpha, beta, child_move, False)
                 if max_score[1] < score[1]:
-                    max_score = (child_move, score[1])
+                    max_score = ({child_move}, score[1])
+                elif max_score[1] == score[1]:
+                    set_of_solutions = max_score[0]
+                    set_of_solutions.add(child_move)
+                    max_score = (set_of_solutions, score[1])
                 # alpha-beta
                 alpha = max(alpha, score[1])
                 if beta <= alpha:
@@ -181,7 +188,12 @@ class MinMaxAI(AI):
             for child_move, child_fen in self.get_child_states(fen, is_max):
                 score = self.minimax(child_fen, depth - 1, alpha, beta, child_move, True)
                 if score[1] < min_score[1]:
-                    min_score = (child_move, score[1])
+                    min_score = ({child_move}, score[1])
+                elif min_score[1] == score[1]:
+                    set_of_solutions = min_score[0]
+                    set_of_solutions.add(child_move)
+                    min_score = (set_of_solutions, score[1])
+                # alpha-beta
                 beta = min(beta, score[1])
                 if beta <= alpha:
                     break
