@@ -46,13 +46,14 @@ class GameBoard():
                 bottom_color,
                 self.settings)
 
-        self.timer: GameBoardTimer = GameBoardTimer(
-                dims,
-                coords,
-                bottom_color,
-                self.settings,
-                out_of_time_func=self.out_of_time
-                )
+        if self.settings['timer']:
+            self.timer: GameBoardTimer = GameBoardTimer(
+                    dims,
+                    coords,
+                    bottom_color,
+                    self.settings,
+                    out_of_time_func=self.out_of_time
+                    )
 
         self.claim_draw_button = GameBoardClaimDrawButton(
                 dims,
@@ -103,8 +104,9 @@ class GameBoard():
                 )
 
     def pause(self, from_timer=False):
-        if not from_timer:
-            self.timer.pause()
+        if self.settings['timer']:
+            if not from_timer:
+                self.timer.pause()
         for player in self.players.values():
             player.pause()
         self._async_thread.join()
@@ -122,10 +124,11 @@ class GameBoard():
         else:
             self.graphical.bottom_color = PieceColor.WHITE
 
-        if self.timer.bottom_color == PieceColor.WHITE:
-            self.timer.bottom_color = PieceColor.BLACK
-        else:
-            self.timer.bottom_color = PieceColor.WHITE
+        if self.settings['timer']:
+            if self.timer.bottom_color == PieceColor.WHITE:
+                self.timer.bottom_color = PieceColor.BLACK
+            else:
+                self.timer.bottom_color = PieceColor.WHITE
 
     def draw(self, surface):
         if self.headless:
@@ -133,9 +136,10 @@ class GameBoard():
         self.graphical.draw(
                 surface,
                 self.controller.piece_info)
-        self.timer.draw(
-                surface
-                )
+        if self.settings['timer']:
+            self.timer.draw(
+                    surface
+                    )
         self.claim_draw_button.draw(surface)
         self.ask_for_draw_buttons.draw(surface)
         # draw player control feedback
@@ -148,10 +152,12 @@ class GameBoard():
                 self.controller.is_promotion_valid)
 
     def _make_moves_async(self):
-        self.timer.unpause()
+        if self.settings['timer']:
+            self.timer.unpause()
         while self.controller.winner is None:
             if self.controller.stalemate_rule():
-                self.timer.pause()
+                if self.settings['timer']:
+                    self.timer.pause()
                 self.game_over_func(
                         title="Stalemate",
                         message="Looks like that\'s a draw!")
@@ -182,7 +188,8 @@ class GameBoard():
             self.controller.threefold_repetition_rule(old_pos, new_pos)
             if self.controller.is_check_valid(new_pos):
                 if self.controller.is_checkmate_valid(new_pos):
-                    self.timer.pause()
+                    if self.settings['timer']:
+                        self.timer.pause()
                     self.game_over_func(
                             title="Match is over",
                             message="{} Wins!".format(
@@ -194,7 +201,8 @@ class GameBoard():
             self.controller.insufficient_checkmate_material_rule()
 
             if self.controller.insufficent_cmr_draw:
-                self.timer.pause()
+                if self.settings['timer']:
+                    self.timer.pause()
                 self.game_over_func(
                         title="Draw",
                         message="not gonna happen"
@@ -210,13 +218,15 @@ class GameBoard():
 
     def finish_turn(self):
         self.controller.finish_turn()
-        self.timer.current_player = self.controller.turn
+        if self.settings['timer']:
+            self.timer.current_player = self.controller.turn
 
     def resize(self, x, y):
         self.graphical.dims = (x, y)
-        self.timer.dims = (x, y)
-        self.claim_draw_button.dims = (x, y)
         self.ask_for_draw_buttons.dims = (x, y)
+        self.claim_draw_button.dims = (x, y)
+        if self.settings['timer']:
+            self.timer.dims = (x, y)
 
     def event_capture(self, event):
         self.player.event_capture(
