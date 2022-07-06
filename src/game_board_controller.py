@@ -141,7 +141,8 @@ class GameBoardController():
         (len(white_positions) == 3 and len(black_positions) == 1) or
         (len(white_positions) == 1 and len(black_positions) == 3) or
         (len(white_positions) == 2 and len(black_positions) == 1) or
-        (len(white_positions) == 1 and len(black_positions) == 2)):
+        (len(white_positions) == 1 and len(black_positions) == 2)
+        (len(white_positions) == 1 and len(black_positions) == 1)):
             white_pieces = []
             black_pieces = []
             is_white_in_dark_slots = False
