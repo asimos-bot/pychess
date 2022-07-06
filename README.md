@@ -26,6 +26,12 @@ Then you just gotta run `pychess.py`:
 python3 pychess.py
 ```
 
+#### Build and Run executable (with pyinstaller)
+
+```
+pyinstaller -y --onefile src/pychess.py --paths src --collect-submodules src --add-data ./assets:./assets && ./dist/pychess
+```
+
 ## Run Tests
 
 #### Host Machine

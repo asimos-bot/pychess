@@ -11,7 +11,6 @@ from piece import PieceDrawer, PieceColor
 from player import Human
 from ai import MinMaxAI
 
-
 class GameState(Enum):
     MAIN_MENU = 1
     PAUSE = 2

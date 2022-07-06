@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
 
+from utils import resource_path, ASSETS_FOLDER
+
 
 class PieceColor(Enum):
     WHITE = 'w'
@@ -34,7 +36,8 @@ class PieceDrawer:
 
     @classmethod
     def load_images(cls):
-        assets_folder = Path(__file__).parent.parent.joinpath("assets")
+        # assets_folder = Path(__file__).parent.parent.joinpath("assets")
+        assets_folder = ASSETS_FOLDER
         imgs = dict()
         for color in PieceColor:
             imgs[color] = dict()
@@ -44,7 +47,7 @@ class PieceDrawer:
                 filename += piece_code.name.lower()
                 filename += ".png"
                 filepath = assets_folder.joinpath(filename)
-                img = pygame.image.load(filepath).convert_alpha()
+                img = pygame.image.load(resource_path(filepath)).convert_alpha()
                 imgs[color][piece_code] = {
                         'filepath': filepath,
                         'img': img

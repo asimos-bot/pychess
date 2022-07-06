@@ -8,7 +8,8 @@ from game_board_ask_for_draw_button import GameBoardAskForDrawButtons
 from player import Player, Human
 from piece import PieceColor
 from pygame import mixer
-from pathlib import Path
+
+from utils import resource_path, ASSETS_FOLDER
 
 
 # makes a bridge between the graphical and logical part of the game board
@@ -30,11 +31,10 @@ class GameBoard():
         self.settings = settings
 
         # load sound effects
-        piece_down_sound = Path(__file__).parent.parent.joinpath("assets")
-        piece_down_sound = piece_down_sound.joinpath("piece_down.wav")
+        piece_down_sound = ASSETS_FOLDER.joinpath("piece_down.wav")
         if not headless:
             mixer.init()
-            mixer.music.load(piece_down_sound)
+            mixer.music.load(resource_path(piece_down_sound))
             mixer.music.set_volume(0.7)
 
         self.headless = headless
@@ -119,16 +119,12 @@ class GameBoard():
         self._async_thread.start()
 
     def spin(self):
-        if self.graphical.bottom_color == PieceColor.WHITE:
-            self.graphical.bottom_color = PieceColor.BLACK
-        else:
-            self.graphical.bottom_color = PieceColor.WHITE
 
         if self.settings['timer']:
-            if self.timer.bottom_color == PieceColor.WHITE:
-                self.timer.bottom_color = PieceColor.BLACK
-            else:
-                self.timer.bottom_color = PieceColor.WHITE
+            self.timer.bottom_color = self.controller.opposite_color(self.timer.bottom_color)
+
+        self.graphical.bottom_color = self.controller.opposite_color(self.graphical.bottom_color)
+        self.ask_for_draw_buttons.bottom_color = self.controller.opposite_color(self.ask_for_draw_buttons.bottom_color)
 
     def draw(self, surface):
         if self.headless:
@@ -214,6 +210,8 @@ class GameBoard():
                 mixer.music.play()
                 if self.controller.claim_draw:
                     self.claim_draw_button.active = True
+                else:
+                    self.claim_draw_button.active = False
             self.finish_turn()
 
     def finish_turn(self):
