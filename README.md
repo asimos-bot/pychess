@@ -32,6 +32,12 @@ python3 pychess.py
 pyinstaller -y --onefile src/pychess.py --paths src --collect-submodules src --add-data ./assets:./assets && ./dist/pychess
 ```
 
+or
+
+```
+pyinstaller pychess.spec
+```
+
 ## Run Tests
 
 #### Host Machine
