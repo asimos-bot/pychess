@@ -170,8 +170,8 @@ class GameBoardController():
             (PieceCode.KING in black_pieces and PieceCode.BISHOP in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(black_positions) == 2) or
             (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and len(white_positions) == 2) or
             (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(black_positions) == 2) or
-            (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and len(black_knight_count) == 2) or
-            (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(white_knight_count) == 2) or
+            (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and len(white_knight_count) == 2) or
+            (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(black_knight_count) == 2) or
             (PieceCode.KING in white_pieces and len(white_positions) == 1 and PieceCode.KING in black_pieces and len(black_positions) == 1) or
             (is_white_in_dark_slots == is_black_in_dark_slots and PieceCode.BISHOP in black_pieces and PieceCode.BISHOP in white_pieces and len(white_positions) == 2 and len(black_positions) == 2)):
                 self.insufficent_cmr_draw = True
@@ -431,7 +431,7 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/pppppppp/8/8/4Q3/8/PPPPPPPP/RNB1KBNR w KQkq - 0 0"
+        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
 
     @property
     def turn(self):
