@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from memory_profiler import profile
 import pygame
 import pygame.locals
 from enum import Enum
@@ -175,6 +176,7 @@ class PyChess():
 
         self.board.event_capture(event)
 
+    @profile
     def game_loop(self):
 
         while self.state != GameState.QUIT:
