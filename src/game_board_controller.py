@@ -133,10 +133,15 @@ class GameBoardController():
             self.claim_draw = True
 
     def insufficient_checkmate_material_rule(self):
-
         white_positions = self.pieces_by_color[PieceColor.WHITE]
         black_positions = self.pieces_by_color[PieceColor.BLACK]
-        if len(white_positions) <= 2 and len(black_positions) <= 2:
+        black_knight_count = 0
+        white_knight_count = 0
+        if ((len(white_positions) == 2 and len(black_positions) == 2) or 
+        (len(white_positions) == 3 and len(black_positions) == 1) or
+        (len(white_positions) == 1 and len(black_positions) == 3) or
+        (len(white_positions) == 2 and len(black_positions) == 1) or
+        (len(white_positions) == 1 and len(black_positions) == 2)):
             white_pieces = []
             black_pieces = []
             is_white_in_dark_slots = False
@@ -151,18 +156,24 @@ class GameBoardController():
                           (7, 1), (7, 3), (7, 5), (7, 7)]
             for position in white_positions:
                 white_pieces.append(self.pieces[position[0]][position[1]].type)
+                if(self.pieces[position[0]][position[1]].type == PieceCode.KNIGHT):
+                    white_knight_count += 1
                 if(self.pieces[position[0]][position[1]].type == PieceCode.BISHOP and position in dark_slots):
                     is_white_in_dark_slots = True
             for position in black_positions:
                 black_pieces.append(self.pieces[position[0]][position[1]].type)
+                if(self.pieces[position[0]][position[1]].type == PieceCode.KNIGHT):
+                    black_knight_count += 1
                 if(self.pieces[position[0]][position[1]].type == PieceCode.BISHOP and position in dark_slots):
                     is_black_in_dark_slots = True
-            if ((PieceCode.KING in white_pieces and PieceCode.BISHOP in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1) or
-            (PieceCode.KING in black_pieces and PieceCode.BISHOP in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1) or
-            (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1) or
-            (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1) or
+            if ((PieceCode.KING in white_pieces and PieceCode.BISHOP in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and len(white_positions) == 2) or
+            (PieceCode.KING in black_pieces and PieceCode.BISHOP in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(black_positions) == 2) or
+            (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and len(white_positions) == 2) or
+            (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(black_positions) == 2) or
+            (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and len(black_knight_count) == 2) or
+            (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(white_knight_count) == 2) or
             (PieceCode.KING in white_pieces and len(white_positions) == 1 and PieceCode.KING in black_pieces and len(black_positions) == 1) or
-            (is_white_in_dark_slots == is_black_in_dark_slots)):
+            (is_white_in_dark_slots == is_black_in_dark_slots and PieceCode.BISHOP in black_pieces and PieceCode.BISHOP in white_pieces and len(white_positions) == 2 and len(black_positions) == 2)):
                 self.insufficent_cmr_draw = True
 
     def threefold_repetition_rule(self, old: (int,int), new:(int, int)):
@@ -420,7 +431,7 @@ class GameBoardController():
             return None
 
     def set_initial_fen(self):
-        self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+        self.fen = "rnbqkbnr/pppppppp/8/8/4Q3/8/PPPPPPPP/RNB1KBNR w KQkq - 0 0"
 
     @property
     def turn(self):
