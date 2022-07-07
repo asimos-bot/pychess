@@ -3,6 +3,7 @@ from piece import PieceColor, PieceCode
 from game_board_controller import GameBoardController
 
 import random
+import time
 from abc import abstractmethod
 
 
@@ -137,6 +138,9 @@ class MinMaxAI(AI):
             fen_code) -> ((int, int), (int, int), PieceCode):
 
         result = self.minimax(fen_code, 3, float('-inf'), float('inf'), None, True)
+        if not self.playing:
+            return None
+
         set_of_solutions = result[0]
         return random.sample(set_of_solutions, k=1)[0]
 
@@ -149,13 +153,17 @@ class MinMaxAI(AI):
             move,
             is_max) -> (((int, int), (int, int), str), float):
 
-        if depth == 0:
+        if depth == 0 or not self.playing:
             return ({move}, self.board_state_score(fen))
 
         if is_max:
             max_score = (None, float('-inf'))
             for child_move, child_fen in self.get_child_states(fen, is_max):
+                if not self.playing:
+                    return None
                 score = self.minimax(child_fen, depth - 1, alpha, beta, child_move, False)
+                if not self.playing:
+                    return score
                 if max_score[1] < score[1]:
                     max_score = ({child_move}, score[1])
                 # alpha-beta
@@ -166,7 +174,11 @@ class MinMaxAI(AI):
         else:
             min_score = (None, float('inf'))
             for child_move, child_fen in self.get_child_states(fen, is_max):
+                if not self.playing:
+                    return None
                 score = self.minimax(child_fen, depth - 1, alpha, beta, child_move, True)
+                if not self.playing:
+                    return score
                 if score[1] < min_score[1]:
                     min_score = ({child_move}, score[1])
                 # alpha-beta

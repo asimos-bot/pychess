@@ -31,7 +31,7 @@ class GameBoardClaimDrawButton:
 
         self._calculate_coords(dims, coords)
         self.update_tiles()
-        self.font = pygame.font.SysFont('Comic Sans MS', max(int(self.tile_side/1.3), 1))
+        self.font = pygame.font.SysFont('Comic Sans MS', max(int(self.tile_side/2.2), 1))
 
     def draw(self, surface):
         if not self.active:

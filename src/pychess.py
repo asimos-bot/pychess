@@ -176,7 +176,7 @@ class PyChess():
 
         self.board.event_capture(event)
 
-    @profile
+    #@profile
     def game_loop(self):
 
         while self.state != GameState.QUIT:
