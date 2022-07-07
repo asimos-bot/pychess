@@ -158,10 +158,6 @@ class MinMaxAI(AI):
                 score = self.minimax(child_fen, depth - 1, alpha, beta, child_move, False)
                 if max_score[1] < score[1]:
                     max_score = ({child_move}, score[1])
-                elif max_score[1] == score[1]:
-                    set_of_solutions = max_score[0]
-                    set_of_solutions.add(child_move)
-                    max_score = (set_of_solutions, score[1])
                 # alpha-beta
                 alpha = max(alpha, score[1])
                 if beta <= alpha:
@@ -173,10 +169,6 @@ class MinMaxAI(AI):
                 score = self.minimax(child_fen, depth - 1, alpha, beta, child_move, True)
                 if score[1] < min_score[1]:
                     min_score = ({child_move}, score[1])
-                elif min_score[1] == score[1]:
-                    set_of_solutions = min_score[0]
-                    set_of_solutions.add(child_move)
-                    min_score = (set_of_solutions, score[1])
                 # alpha-beta
                 beta = min(beta, score[1])
                 if beta <= alpha:
