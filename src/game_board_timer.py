@@ -106,7 +106,7 @@ class GameBoardTimer:
 
     def update_tiles(self):
         for k in self.tiles:
-            row = [1, 8][k == self.bottom_color]
+            row = [1.5, 8.5][k == self.bottom_color]
             self.tiles[k].dims = (self.tile_side * 3, self.tile_side * 1)
             self.tiles[k].coords = (
                     self.coords[0] + self.tile_side,
