@@ -35,14 +35,14 @@ class GameBoardController():
         self.white_last_old_and_new = None
 
         self.pieces_by_color = {
-                PieceColor.WHITE: set(),
-                PieceColor.BLACK: set()
-                }
+            PieceColor.WHITE: set(),
+            PieceColor.BLACK: set()
+        }
 
         self.attackable_tiles_from = {
-                PieceColor.WHITE: set(),
-                PieceColor.BLACK: set()
-                }
+            PieceColor.WHITE: set(),
+            PieceColor.BLACK: set()
+        }
         self.set_initial_fen()
 
     def copy(self):
@@ -60,10 +60,10 @@ class GameBoardController():
         # and return additional information
         piece = self.pieces[old[0]][old[1]]
         notification, data = piece.notify_move(
-                new,
-                self.piece_info,
-                self.en_passant,
-                self.get_color_castlings(piece.color))
+            new,
+            self.piece_info,
+            self.en_passant,
+            self.get_color_castlings(piece.color))
 
         # move piece
         # remove piece from pieces_by_color set
@@ -115,8 +115,8 @@ class GameBoardController():
                 piece.color,
                 promotion):
             new_piece = piece_class_from_code(promotion)(
-                    piece.color,
-                    piece.pos)
+                piece.color,
+                piece.pos)
             self.pieces[piece.pos[0]][piece.pos[1]] = new_piece
 
     def fifty_move_rule(self, old: (int, int), new: (int, int)):
@@ -137,12 +137,12 @@ class GameBoardController():
         black_positions = self.pieces_by_color[PieceColor.BLACK]
         black_knight_count = 0
         white_knight_count = 0
-        if ((len(white_positions) == 2 and len(black_positions) == 2) or 
-        (len(white_positions) == 3 and len(black_positions) == 1) or
-        (len(white_positions) == 1 and len(black_positions) == 3) or
-        (len(white_positions) == 2 and len(black_positions) == 1) or
-        (len(white_positions) == 1 and len(black_positions) == 2) or
-        (len(white_positions) == 1 and len(black_positions) == 1)):
+        if ((len(white_positions) == 2 and len(black_positions) == 2) or
+            (len(white_positions) == 3 and len(black_positions) == 1) or
+            (len(white_positions) == 1 and len(black_positions) == 3) or
+            (len(white_positions) == 2 and len(black_positions) == 1) or
+            (len(white_positions) == 1 and len(black_positions) == 2) or
+                (len(white_positions) == 1 and len(black_positions) == 1)):
             white_pieces = []
             black_pieces = []
             is_white_in_dark_slots = False
@@ -168,33 +168,33 @@ class GameBoardController():
                 if(self.pieces[position[0]][position[1]].type == PieceCode.BISHOP and position in dark_slots):
                     is_black_in_dark_slots = True
             if ((PieceCode.KING in white_pieces and PieceCode.BISHOP in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and len(white_positions) == 2) or
-            (PieceCode.KING in black_pieces and PieceCode.BISHOP in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(black_positions) == 2) or
-            (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and len(white_positions) == 2) or
-            (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(black_positions) == 2) or
-            (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and white_knight_count == 2) or
-            (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and black_knight_count == 2) or
-            (PieceCode.KING in white_pieces and len(white_positions) == 1 and PieceCode.KING in black_pieces and len(black_positions) == 1) or
-            (is_white_in_dark_slots == is_black_in_dark_slots and PieceCode.BISHOP in black_pieces and PieceCode.BISHOP in white_pieces and len(white_positions) == 2 and len(black_positions) == 2)):
+                (PieceCode.KING in black_pieces and PieceCode.BISHOP in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(black_positions) == 2) or
+                (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and len(white_positions) == 2) or
+                (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and len(black_positions) == 2) or
+                (PieceCode.KING in white_pieces and PieceCode.KNIGHT in white_pieces and PieceCode.KING in black_pieces and len(black_positions) == 1 and white_knight_count == 2) or
+                (PieceCode.KING in black_pieces and PieceCode.KNIGHT in black_pieces and PieceCode.KING in white_pieces and len(white_positions) == 1 and black_knight_count == 2) or
+                (PieceCode.KING in white_pieces and len(white_positions) == 1 and PieceCode.KING in black_pieces and len(black_positions) == 1) or
+                    (is_white_in_dark_slots == is_black_in_dark_slots and PieceCode.BISHOP in black_pieces and PieceCode.BISHOP in white_pieces and len(white_positions) == 2 and len(black_positions) == 2)):
                 self.insufficent_cmr_draw = True
 
-    def threefold_repetition_rule(self, old: (int,int), new:(int, int)):
+    def threefold_repetition_rule(self, old: (int, int), new: (int, int)):
         piece = self.pieces[new[0]][new[1]]
         if(self._turn == PieceColor.WHITE):
 
             self.white_before_last_moved_piece = self.white_last_moved_piece
             self.white_last_moved_piece = piece
             if self.white_before_last_moved_piece is None:
-                self.white_last_old_and_new = old,new
+                self.white_last_old_and_new = old, new
             else:
                 if(self.white_before_last_moved_piece.type == piece.type and self.white_last_old_and_new[0] == new and self.white_last_old_and_new[1] == old):
                     self.white_moved_times += 1
                 else:
                     self.white_moved_times = 1
-            self.white_last_old_and_new = old,new
+            self.white_last_old_and_new = old, new
             self.white_threefold.append(new)
             if len(self.white_threefold) >= 5 and self.white_moved_times >= 5:
-                if((self.white_threefold[0] == self.white_threefold[2] and self.white_threefold[2] == self.white_threefold[4]) and 
-                (self.white_threefold[3] == self.white_threefold[1])):
+                if((self.white_threefold[0] == self.white_threefold[2] and self.white_threefold[2] == self.white_threefold[4]) and
+                   (self.white_threefold[3] == self.white_threefold[1])):
                     self.threefold_draw = True
                     self.white_threefold.pop(0)
                 else:
@@ -218,8 +218,8 @@ class GameBoardController():
             self.black_threefold.append(new)
             if len(self.black_threefold) >= 5 and self.black_moved_times >= 5:
 
-                if((self.black_threefold[0] == self.black_threefold[2] and self.black_threefold[2] == self.black_threefold[4]) and 
-                (self.black_threefold[3] == self.black_threefold[1])):
+                if((self.black_threefold[0] == self.black_threefold[2] and self.black_threefold[2] == self.black_threefold[4]) and
+                   (self.black_threefold[3] == self.black_threefold[1])):
                     self.threefold_draw = True
                     self.black_threefold.pop(0)
                 else:
@@ -265,9 +265,9 @@ class GameBoardController():
 
     def update_pseudo_legal_moves(self):
         self.attackable_tiles_from = {
-                PieceColor.WHITE: set(),
-                PieceColor.BLACK: set()
-                }
+            PieceColor.WHITE: set(),
+            PieceColor.BLACK: set()
+        }
         for color in PieceColor:
             for piece_idx in self.pieces_by_color[color]:
                 piece = self.pieces[piece_idx[0]][piece_idx[1]]
@@ -294,9 +294,9 @@ class GameBoardController():
                 if piece_type == PieceCode.KING:
                     enemy_color = self.opposite_color(color)
                     piece.update_castling(
-                            self.piece_info,
-                            self.get_color_castlings(piece_color),
-                            self.attackable_tiles_from[enemy_color])
+                        self.piece_info,
+                        self.get_color_castlings(piece_color),
+                        self.attackable_tiles_from[enemy_color])
 
     def process_move_notification(self, piece, notification, data, new_pos):
 
@@ -473,14 +473,14 @@ class GameBoardController():
                 self.pieces[i].append(None)
 
         self.pieces_by_color = {
-                PieceColor.WHITE: set(),
-                PieceColor.BLACK: set()
-                }
+            PieceColor.WHITE: set(),
+            PieceColor.BLACK: set()
+        }
 
         self.attackable_tiles_from = {
-                PieceColor.BLACK: set(),
-                PieceColor.WHITE: set()
-                }
+            PieceColor.BLACK: set(),
+            PieceColor.WHITE: set()
+        }
 
     @classmethod
     def opposite_color(cls, color: PieceColor):
@@ -546,10 +546,10 @@ class GameBoardController():
                     j += int(c)
             if j != 8:
                 raise Exception(
-                        "Invalid number of pieces for row",
-                        i,
-                        ":",
-                        row)
+                    "Invalid number of pieces for row",
+                    i,
+                    ":",
+                    row)
 
         # game attributes (turn, castling, en passant)
         attrs = attrs.split(' ')

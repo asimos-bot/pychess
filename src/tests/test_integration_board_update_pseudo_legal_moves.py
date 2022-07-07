@@ -8,7 +8,7 @@ from piece import PieceCode
 class IntegrationBoardUpdatePseudoLegalMovesTest(unittest.TestCase):
     def get_piece(_, pos):
         if pos[0] == 7 and (pos[1] == 0 or pos[1] == 7):
-            return PieceCode.ROOK, None
+            return PieceCode.ROOK, PieceColor.BLACK
         else:
             return None
 
