@@ -5,6 +5,7 @@ from game_board_graphical import GameBoardGraphical
 from game_board_timer import GameBoardTimer
 from game_board_claim_draw_button import GameBoardClaimDrawButton
 from game_board_ask_for_draw_button import GameBoardAskForDrawButtons
+from game_board_quit_button import GameBoardQuitButton
 from player import Player, Human
 from piece import PieceColor
 from pygame import mixer
@@ -69,13 +70,20 @@ class GameBoard():
                 self.settings,
                 draw_agreed_func=self.ask_for_draw_done
                 )
+        self.quit_button = GameBoardQuitButton(
+                dims,
+                coords,
+                self.settings,
+                quit_func=self.quit_func)
         self.players = {
                 PieceColor.WHITE: player_white,
                 PieceColor.BLACK: player_black
                 }
         # if both players are humans, draw can be requested
+        self.both_are_human = False
         if isinstance(self.players[PieceColor.BLACK], Human) and isinstance(self.players[PieceColor.WHITE], Human):
             self.ask_for_draw_buttons.active = True
+            self.both_are_human = True
 
         self._start_game()
 
@@ -95,6 +103,17 @@ class GameBoard():
         self.game_over_func(
                 title="Draw Claimed",
                 message="more than 50 moves were made")
+
+    def quit_func(self):
+        self.pause(from_timer=False)
+        loser = self.player.color
+        if not self.both_are_human:
+            loser = [PieceColor.BLACK, PieceColor.WHITE][isinstance(self.players[PieceColor.WHITE], Human)]
+        winner = self.controller.opposite_color(loser)
+        self.game_over_func(
+                title="{} Wins!".format(winner.name.capitalize()),
+                message="{} gave up!".format(loser.name.capitalize())
+                )
 
     def ask_for_draw_done(self):
         self.pause(from_timer=False)
@@ -138,6 +157,7 @@ class GameBoard():
                     )
         self.claim_draw_button.draw(surface)
         self.ask_for_draw_buttons.draw(surface)
+        self.quit_button.draw(surface)
         # draw player control feedback
         self.player.draw(
                 surface,
@@ -224,6 +244,7 @@ class GameBoard():
         self.graphical.dims = (x, y)
         self.ask_for_draw_buttons.dims = (x, y)
         self.claim_draw_button.dims = (x, y)
+        self.quit_button.dims = (x, y)
         if self.settings['timer']:
             self.timer.dims = (x, y)
 
@@ -236,6 +257,7 @@ class GameBoard():
                 self.controller.is_promotion_valid)
         self.claim_draw_button.event_capture(event)
         self.ask_for_draw_buttons.event_capture(event)
+        self.quit_button.event_capture(event)
 
     def _start_game(self):
         self._async_thread = threading.Thread(target=self._make_moves_async)
