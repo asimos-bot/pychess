@@ -3,14 +3,14 @@ import pygame
 from tile import Tile
 
 
-class GameBoardQuitButton:
+class GameBoardPauseButton:
     def __init__(
             self,
             dims: (int, int),
             coords: (int, int),
             settings: dict,
-            quit_func):
-        self.quit_func = quit_func
+            pause_func):
+        self.pause_func = pause_func
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
         self.settings = settings
         self._given_coords = coords
@@ -32,7 +32,7 @@ class GameBoardQuitButton:
     def draw(self, surface):
         color = (255, 255, 255)
         text_surface = self.font.render(
-                "Give up",
+                "Pause",
                 False,
                 color)
         self.tile.draw(surface)
@@ -60,7 +60,7 @@ class GameBoardQuitButton:
                 middle_point[1] - 5 * self.tile_side)
 
     def update_tiles(self):
-        row = 0.1
+        row = 1.2
         self.tile.dims = (self.tile_side * 3, self.tile_side * 1)
         self.tile.coords = (
                 self.coords[0] + self.tile_side,
@@ -71,7 +71,7 @@ class GameBoardQuitButton:
             mouse_pos = pygame.mouse.get_pos()
             tile_rect = self.tile.surf.get_rect(topleft=self.tile.coords)
             if tile_rect.collidepoint(mouse_pos):
-                self.quit_func()
+                self.pause_func()
                 return
 
     @property
