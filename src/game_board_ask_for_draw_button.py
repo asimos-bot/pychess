@@ -91,7 +91,7 @@ class GameBoardAskForDrawButtons:
 
     def update_tiles(self):
         for k in self.tiles:
-            row = [3, 7][k == self.bottom_color]
+            row = [3.4, 5.6][k == self.bottom_color]
             self.tiles[k].dims = (self.tile_side * 3, self.tile_side * 1)
             self.tiles[k].coords = (
                     self.coords[0] + self.tile_side,

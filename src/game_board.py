@@ -6,6 +6,7 @@ from game_board_timer import GameBoardTimer
 from game_board_claim_draw_button import GameBoardClaimDrawButton
 from game_board_ask_for_draw_button import GameBoardAskForDrawButtons
 from game_board_quit_button import GameBoardQuitButton
+from game_board_pause_button import GameBoardPauseButton
 from player import Player, Human
 from piece import PieceColor
 from pygame import mixer
@@ -25,10 +26,12 @@ class GameBoard():
             player_white: Player,
             settings: dict(),
             game_over_func,
+            pause_func,
             bottom_color: PieceColor = PieceColor.WHITE,
             headless: bool = False):
 
         self.game_over_func = game_over_func
+        self.pause_func = pause_func
         self.settings = settings
 
         # load sound effects
@@ -75,6 +78,12 @@ class GameBoard():
                 coords,
                 self.settings,
                 quit_func=self.quit_func)
+        self.pause_button = GameBoardPauseButton(
+                dims,
+                coords,
+                self.settings,
+                pause_func=self.pause_func
+                )
         self.players = {
                 PieceColor.WHITE: player_white,
                 PieceColor.BLACK: player_black
@@ -158,6 +167,7 @@ class GameBoard():
         self.claim_draw_button.draw(surface)
         self.ask_for_draw_buttons.draw(surface)
         self.quit_button.draw(surface)
+        self.pause_button.draw(surface)
         # draw player control feedback
         self.player.draw(
                 surface,
@@ -246,6 +256,7 @@ class GameBoard():
         self.ask_for_draw_buttons.dims = (x, y)
         self.claim_draw_button.dims = (x, y)
         self.quit_button.dims = (x, y)
+        self.pause_button.dims = (x, y)
         if self.settings['timer']:
             self.timer.dims = (x, y)
 
@@ -259,6 +270,7 @@ class GameBoard():
         self.claim_draw_button.event_capture(event)
         self.ask_for_draw_buttons.event_capture(event)
         self.quit_button.event_capture(event)
+        self.pause_button.event_capture(event)
 
     def _start_game(self):
         self._async_thread = threading.Thread(target=self._make_moves_async)

@@ -30,7 +30,7 @@ class PyChess():
         self.settings = {
                 'players': {
                     PieceColor.WHITE: Human,
-                    PieceColor.BLACK: MinMaxAI
+                    PieceColor.BLACK: Human
                     },
                 'initial_bottom_color': PieceColor.WHITE,
                 'top_spacing_percentage': 0.2,
@@ -118,7 +118,8 @@ class PyChess():
                 player_black=player_black,
                 bottom_color=self.settings['initial_bottom_color'],
                 settings=self.settings,
-                game_over_func=self.set_state_game_over)
+                game_over_func=self.set_state_game_over,
+                pause_func=self.set_state_pause)
 
         self.state = GameState.PLAY
 
