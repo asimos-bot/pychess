@@ -20,11 +20,23 @@ class GameBoardAskForDrawButtons:
         self.update_graphical_attributes(dims, coords)
         self.draw_agreed_func = draw_agreed_func
         self.active = False
+        self.first_asker_color = None
+        self.turn = PieceColor.WHITE
 
         self.agreed = {
                 PieceColor.WHITE: False,
                 PieceColor.BLACK: False
                 }
+
+    def finish_turn(self):
+        if self.turn == PieceColor.WHITE:
+            self.turn = PieceColor.BLACK
+        else:
+            self.turn = PieceColor.WHITE
+        if self.turn is not None and self.turn == self.first_asker_color:
+            self.first_asker_color = None
+            self.agreed[PieceColor.WHITE] = False
+            self.agreed[PieceColor.BLACK] = False
 
     def create_blank_tiles(self):
         return {
@@ -93,11 +105,15 @@ class GameBoardAskForDrawButtons:
             for k in self.tiles:
                 if self.agreed[k]:
                     continue
+                if k != self.turn:
+                    continue
                 tile_rect = self.tiles[k].surf.get_rect(topleft=self.tiles[k].coords)
                 if tile_rect.collidepoint(mouse_pos):
                     self.agreed[k] = True
                     if self.agreed[PieceColor.WHITE] and self.agreed[PieceColor.BLACK]:
                         self.draw_agreed_func()
+                    else:
+                        self.first_asker_color = k
 
     @property
     def bottom_color(self):

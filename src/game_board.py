@@ -237,6 +237,7 @@ class GameBoard():
 
     def finish_turn(self):
         self.controller.finish_turn()
+        self.ask_for_draw_buttons.finish_turn()
         if self.settings['timer']:
             self.timer.current_player = self.controller.turn
 
