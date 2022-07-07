@@ -212,6 +212,7 @@ class GameBoard():
                     self.claim_draw_button.active = True
                 else:
                     self.claim_draw_button.active = False
+
             self.finish_turn()
 
     def finish_turn(self):
