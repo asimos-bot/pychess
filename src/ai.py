@@ -142,7 +142,7 @@ class MinMaxAI(AI):
             return None
 
         set_of_solutions = result[0]
-        return random.sample(set_of_solutions, k=1)[0]
+        return random.sample(sorted(set_of_solutions), k=1)[0]
 
     def minimax(
             self,
