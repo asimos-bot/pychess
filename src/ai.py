@@ -60,7 +60,7 @@ class RandomAI(AI):
                 if piece_info is not None and piece_info[1] == self.color:
                     for move in get_legal_moves_func((i, j)):
                         legal_moves.add(((i, j), move))
-        choosen_move = random.sample(legal_moves, 1)[0]
+        choosen_move = random.sample(sorted(legal_moves), 1)[0]
         random_promotion = [
                 PieceCode.QUEEN,
                 PieceCode.KNIGHT,
